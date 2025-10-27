@@ -55,7 +55,7 @@
 }
 
 /* Form styles */
-form {
+.login-form form {
   width: 100%;
   max-width: 400px;
   display: flex;
@@ -88,6 +88,7 @@ form {
   font-size: 16px;
   box-sizing: border-box;
   height: 45px; /* Adjust height to match padding and icon */
+  color: #323232;
 }
 
 .icon-input::placeholder {
@@ -96,7 +97,7 @@ form {
 
 .icon-input:focus {
   outline: none;
-  box-shadow: 0 0 8px -2px rgba(255, 111, 97, 0.8);
+  box-shadow: 0 0 8px -2px rgba(172, 172, 172, 0.481);
 }
 
 .password-toggle-icon {
