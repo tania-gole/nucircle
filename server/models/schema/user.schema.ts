@@ -15,9 +15,19 @@ const userSchema: Schema = new Schema(
       type: String,
       unique: true,
       immutable: true,
+      required: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
     },
     password: {
       type: String,
+      required: true,
     },
     dateJoined: {
       type: Date,
