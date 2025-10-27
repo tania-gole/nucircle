@@ -10,6 +10,8 @@ import { createUser, loginUser } from '../services/userService';
  *
  * @param authType - Specifies the authentication type ('login' or 'signup').
  * @returns {Object} An object containing:
+ *   - firstName: The current value of the first name input (for signup).
+ *   - lastName: The current value of the last name input (for signup).
  *   - username: The current value of the username input.
  *   - password: The current value of the password input.
  *   - passwordConfirmation: The current value of the password confirmation input (for signup).
@@ -20,6 +22,8 @@ import { createUser, loginUser } from '../services/userService';
  *   - togglePasswordVisibility: Function to toggle password visibility.
  */
 const useAuth = (authType: 'login' | 'signup') => {
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
@@ -43,16 +47,25 @@ const useAuth = (authType: 'login' | 'signup') => {
    */
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement>,
-    field: 'username' | 'password' | 'confirmPassword',
+    field: 'firstName' | 'lastName' | 'username' | 'password' | 'confirmPassword',
   ) => {
     const fieldText = e.target.value.trim();
-
-    if (field === 'username') {
-      setUsername(fieldText);
-    } else if (field === 'password') {
-      setPassword(fieldText);
-    } else if (field === 'confirmPassword') {
-      setPasswordConfirmation(fieldText);
+    switch (field) {
+      case 'firstName':
+        setFirstName(fieldText);
+        break;
+      case 'lastName':
+        setLastName(fieldText);
+        break;
+      case 'username':
+        setUsername(fieldText);
+        break;
+      case 'password':
+        setPassword(fieldText);
+        break;
+      case 'confirmPassword':
+        setPasswordConfirmation(fieldText);
+        break;
     }
   };
 
@@ -63,16 +76,33 @@ const useAuth = (authType: 'login' | 'signup') => {
    * @returns {boolean} True if inputs are valid, false otherwise.
    */
   const validateInputs = (): boolean => {
-    if (username === '' || password === '') {
-      setErr('Please enter a username and password');
-      return false;
+    if (authType === 'signup') {
+      if (firstName === '' || lastName === '' || username === '' || password === '' || passwordConfirmation === '') {
+        setErr('Please fill in all fields');
+        return false;
+      }
+      if (!username.endsWith('@northeastern.edu')) {
+        setErr('Please use a valid Northeastern email');
+        return false;
+      }
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(password)) {
+        setErr('Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character');
+        return false;
+      }
+
+      if (password !== passwordConfirmation) {
+        setErr('Passwords do not match');
+        return false;
+      }
+    } else if (authType === 'login') {
+      if (!username || !password) {
+        setErr('Please enter both username and password');
+        return false;
+      }
     }
 
-    if (authType === 'signup' && password !== passwordConfirmation) {
-      setErr('Passwords do not match');
-      return false;
-    }
-
+    setErr('');
     return true;
   };
 
@@ -93,13 +123,12 @@ const useAuth = (authType: 'login' | 'signup') => {
 
     try {
       if (authType === 'signup') {
-        user = await createUser({ username, password });
+        user = await createUser({ firstName, lastName, username, password });
       } else if (authType === 'login') {
         user = await loginUser({ username, password });
       } else {
         throw new Error('Invalid auth type');
       }
-
       setUser(user);
       navigate('/home');
     } catch (error) {
@@ -108,6 +137,8 @@ const useAuth = (authType: 'login' | 'signup') => {
   };
 
   return {
+    firstName,
+    lastName,
     username,
     password,
     passwordConfirmation,

@@ -26,6 +26,8 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
     const safeUser: SafeDatabaseUser = {
       _id: result._id,
       username: result.username,
+      firstName: result.firstName,
+      lastName: result.lastName,
       dateJoined: result.dateJoined,
       biography: result.biography,
     };

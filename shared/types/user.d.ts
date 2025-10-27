@@ -9,6 +9,8 @@ import { ObjectId } from 'mongodb';
 export interface UserCredentials {
   username: string;
   password: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 /**
@@ -45,6 +47,8 @@ export interface UserRequest extends Request {
   body: {
     username: string;
     password: string;
+    firstName: string;
+    lastName: string;
     biography?: string;
   };
 }

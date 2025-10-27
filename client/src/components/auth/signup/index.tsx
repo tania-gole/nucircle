@@ -8,6 +8,8 @@ import useAuth from '../../../hooks/useAuth';
  */
 const Signup = () => {
   const {
+    firstName,
+    lastName,
     username,
     password,
     passwordConfirmation,
@@ -20,24 +22,44 @@ const Signup = () => {
 
   return (
     <div className='container'>
-      <h2>Sign up for FakeStackOverflow!</h2>
+      <h2>NUCircle</h2>
+      <h2>Create your account</h2>
+      <p>Join our community of Northeastern students</p>
       <form onSubmit={handleSubmit}>
-        <h4>Please enter your username.</h4>
+        <h4>First Name</h4>
+        <input
+          type='text'
+          value={firstName}
+          onChange={event => handleInputChange(event, 'firstName')}
+          placeholder='Enter your first name'
+          required
+          className='input-text'
+        />
+        <h4>Last Name</h4>
+        <input
+          type='text'
+          value={lastName}
+          onChange={event => handleInputChange(event, 'lastName')}
+          placeholder='Enter your last name'
+          required
+          className='input-text'
+        />
+        <h4>Northeastern email</h4>
         <input
           type='text'
           value={username}
           onChange={event => handleInputChange(event, 'username')}
-          placeholder='Enter your username'
+          placeholder='example@northeastern.edu'
           required
           className='input-text'
           id='username-input'
         />
-        <h4>Please enter your password.</h4>
+        <h4>Password</h4>
         <input
           type={showPassword ? 'text' : 'password'}
           value={password}
           onChange={event => handleInputChange(event, 'password')}
-          placeholder='Enter your password'
+          placeholder='Create a password'
           required
           className='input-text'
           id='password-input'
@@ -65,7 +87,7 @@ const Signup = () => {
       </form>
       {err && <p className='error-message'>{err}</p>}
       <Link to='/' className='login-link'>
-        Have an account? Login here.
+        Already have an account? Login here
       </Link>
     </div>
   );
