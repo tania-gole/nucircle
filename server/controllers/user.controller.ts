@@ -1,8 +1,10 @@
 import express, { Request, Response, Router } from 'express';
 import {
+  SignupRequest,
+  LoginRequest,
   UserRequest,
   User,
-  UserCredentials,
+  UserLogin,
   UserByUsernameRequest,
   FakeSOSocket,
   UpdateBiographyRequest,
@@ -25,7 +27,7 @@ const userController = (socket: FakeSOSocket) => {
    * @param res The response, either returning the created user or an error.
    * @returns A promise resolving to void.
    */
-  const createUser = async (req: UserRequest, res: Response): Promise<void> => {
+  const createUser = async (req: SignupRequest, res: Response): Promise<void> => {
     const requestUser = req.body;
 
     const user: User = {
@@ -57,9 +59,9 @@ const userController = (socket: FakeSOSocket) => {
    * @param res The response, either returning the user or an error.
    * @returns A promise resolving to void.
    */
-  const userLogin = async (req: UserRequest, res: Response): Promise<void> => {
+  const userLogin = async (req: LoginRequest, res: Response): Promise<void> => {
     try {
-      const loginCredentials: UserCredentials = {
+      const loginCredentials: UserLogin = {
         username: req.body.username,
         password: req.body.password,
       };

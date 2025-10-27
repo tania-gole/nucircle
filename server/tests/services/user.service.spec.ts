@@ -8,7 +8,7 @@ import {
   saveUser,
   updateUser,
 } from '../../services/user.service';
-import { SafeDatabaseUser, User, UserCredentials } from '../../types/types';
+import { SafeDatabaseUser, User, UserLogin } from '../../types/types';
 import { user, safeUser } from '../mockData.models';
 
 describe('User model', () => {
@@ -150,7 +150,7 @@ describe('loginUser', () => {
       return query;
     });
 
-    const credentials: UserCredentials = {
+    const credentials: UserLogin = {
       username: user.username,
       password: user.password,
     };
@@ -164,7 +164,7 @@ describe('loginUser', () => {
   it('should return the user if the password fails', async () => {
     jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
 
-    const credentials: UserCredentials = {
+    const credentials: UserLogin = {
       username: user.username,
       password: 'wrongPassword',
     };
@@ -177,7 +177,7 @@ describe('loginUser', () => {
   it('should return the user is not found', async () => {
     jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
 
-    const credentials: UserCredentials = {
+    const credentials: UserLogin = {
       username: 'wrongUsername',
       password: user.password,
     };
@@ -192,7 +192,7 @@ describe('loginUser', () => {
       select: jest.fn().mockResolvedValue(null),
     } as unknown as Query<SafeDatabaseUser, typeof UserModel>);
 
-    const credentials: UserCredentials = {
+    const credentials: UserLogin = {
       username: user.username,
       password: user.password,
     };
@@ -260,6 +260,8 @@ describe('updateUser', () => {
   const safeUpdatedUser: SafeDatabaseUser = {
     _id: new mongoose.Types.ObjectId(),
     username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
     dateJoined: user.dateJoined,
   };
 
