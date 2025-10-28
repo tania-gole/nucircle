@@ -73,10 +73,10 @@
 
 .error-message {
   color: red;
-  font-size: 0.85rem;
+  font-size: 14px;
   margin-left: 10px; /* Adds space between the button and the error message */
   background-color: #ffe6e6; /* Light red background for better visibility */
-  padding: 5px 10px;
+  padding: 8px 10px;
   border: 1px solid #ffcccc;
   border-radius: 4px;
   display: inline-block; /* Prevents it from stretching unnecessarily */

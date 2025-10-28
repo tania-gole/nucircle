@@ -3,7 +3,7 @@ import {
   DatabaseUser,
   SafeDatabaseUser,
   User,
-  UserCredentials,
+  UserLogin,
   UserResponse,
   UsersResponse,
 } from '../types/types';
@@ -81,10 +81,10 @@ export const getUsersList = async (): Promise<UsersResponse> => {
 /**
  * Authenticates a user by verifying their username and password.
  *
- * @param {UserCredentials} loginCredentials - An object containing the username and password.
+ * @param {loginCredentials} loginCredentials - An object containing the username and password.
  * @returns {Promise<UserResponse>} - Resolves with the authenticated user object (without the password) or an error message.
  */
-export const loginUser = async (loginCredentials: UserCredentials): Promise<UserResponse> => {
+export const loginUser = async (loginCredentials: UserLogin): Promise<UserResponse> => {
   const { username, password } = loginCredentials;
 
   try {

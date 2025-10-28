@@ -6,11 +6,17 @@ import { ObjectId } from 'mongodb';
  * - `username`: The unique username of the user.
  * - `password`: The user's password.
  */
-export interface UserCredentials {
+
+export interface UserLogin {
   username: string;
   password: string;
-  firstName?: string;
-  lastName?: string;
+}
+
+export interface UserSignup {
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
 }
 
 /**
@@ -20,7 +26,7 @@ export interface UserCredentials {
  * - `dateJoined`: The date when the user registered.
  * - `biography`: A short description or bio of the user (optional).
  */
-export interface User extends UserCredentials {
+export interface User extends UserSignup {
   dateJoined: Date;
   biography?: string;
 }
@@ -43,12 +49,29 @@ export interface DatabaseUser extends User {
  * - `password`: The password submitted in the request (body).
  * - `biography`: Optional field for biography information (body).
  */
-export interface UserRequest extends Request {
+export interface SignupRequest extends Request {
   body: {
     username: string;
     password: string;
     firstName: string;
     lastName: string;
+    biography?: string;
+  };
+}
+
+export interface LoginRequest extends Request {
+  body: {
+    username: string;
+    password: string;
+  };
+}
+
+export interface UserRequest extends Request {
+  body: {
+    username: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
     biography?: string;
   };
 }
