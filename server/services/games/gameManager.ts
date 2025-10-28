@@ -1,4 +1,5 @@
 import NimModel from '../../models/nim.model';
+import GameModel from '../../models/games.model';
 import {
   BaseMove,
   GameInstance,
@@ -9,6 +10,7 @@ import {
 } from '../../types/types';
 import Game from './game';
 import NimGame from './nim';
+import TriviaGame from './trivia';
 
 /**
  * Manages the lifecycle of games, including creation, joining, and leaving games.
@@ -39,6 +41,12 @@ class GameManager {
       case 'Nim': {
         const newGame = new NimGame();
         await NimModel.create(newGame.toModel());
+
+        return newGame;
+      }
+      case 'Trivia': {
+        const newGame = new TriviaGame();
+        await GameModel.create(newGame.toModel());
 
         return newGame;
       }
@@ -102,7 +110,7 @@ class GameManager {
         throw new Error('Game requested does not exist.');
       }
 
-      gameToJoin.join(playerID);
+      await gameToJoin.join(playerID);
       await gameToJoin.saveGameState();
 
       return gameToJoin.toModel();

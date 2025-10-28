@@ -22,6 +22,7 @@ const useAllGamesPage = () => {
 
   const fetchGames = async () => {
     try {
+      setError(null); // Clear any previous errors
       const games = await getGames(undefined, undefined);
       setAvailableGames(games);
     } catch (getGamesError) {
@@ -31,6 +32,7 @@ const useAllGamesPage = () => {
 
   const handleCreateGame = async (gameType: GameType) => {
     try {
+      setError(null); // Clear any previous errors
       await createGame(gameType);
       await fetchGames(); // Refresh the list after creating a game
     } catch (createGameError) {

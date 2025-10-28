@@ -4,7 +4,7 @@ import { Request } from 'express';
  * Type representing the possible game types as a literal.
  * This is derived from the GAME_TYPES constant.
  */
-export type GameType = 'Nim';
+export type GameType = 'Nim' | 'Trivia';
 
 /**
  * Type representing the unique identifier for a game instance.
@@ -13,15 +13,15 @@ export type GameInstanceID = string;
 
 /**
  * Type representing the possible statuses of a game.
- * - `IN_PROGRESS`: The game is ongoing.
- * - `WAITING_TO_START`: The game is waiting for players to join or ready up.
- * - `OVER`: The game has finished.
+ * IN_PROGRESS: The game is ongoing.
+ * WAITING_TO_START: The game is waiting for players to join or ready up.
+ * OVER: The game has finished.
  */
 export type GameStatus = 'IN_PROGRESS' | 'WAITING_TO_START' | 'OVER';
 
 /**
  * Interface representing the state of a game, which includes:
- * - `status`: The current status of the game.
+ * status: The current status of the game.
  */
 export interface GameState {
   status: GameStatus;
@@ -29,10 +29,10 @@ export interface GameState {
 
 /**
  * Interface representing a game instance, which contains:
- * - `state`: The current state of the game, defined by `GameState`.
- * - `gameID`: The unique identifier for the game instance.
- * - `players`: An array of player IDs participating in the game.
- * - `gameType`: The type of game (e.g., 'Nim').
+ * state: The current state of the game, defined by GameState.
+ * gameID: The unique identifier for the game instance.
+ * players: An array of player IDs participating in the game.
+ * gameType: The type of game (e.g., 'Nim').
  */
 export interface GameInstance<T extends GameState> {
   state: T;
@@ -42,8 +42,8 @@ export interface GameInstance<T extends GameState> {
 }
 
 /**
- * Interface extending `GameState` to represent a game state that has winners.
- * - `winners`: An optional array of player IDs who have won the game.
+ * Interface extending GameState to represent a game state that has winners.
+ * winners: An optional array of player IDs who have won the game.
  */
 export interface WinnableGameState extends GameState {
   winners?: ReadonlyArray<string>;
@@ -51,9 +51,9 @@ export interface WinnableGameState extends GameState {
 
 /**
  * Interface representing a move in the game, which contains:
- * - `playerID`: The ID of the player making the move.
- * - `gameID`: The ID of the game where the move is being made.
- * - `move`: The actual move made by the player, which can vary depending on the game type.
+ * playerID: The ID of the player making the move.
+ * gameID: The ID of the game where the move is being made.
+ * move: The actual move made by the player, which can vary depending on the game type.
  */
 export interface GameMove<MoveType> {
   playerID: string;
@@ -68,7 +68,7 @@ export type BaseMove = object;
 
 /**
  * Interface representing a move in a Nim game.
- * - `numObjects`: The number of objects the player wants to remove from the game.
+ *  numObjects: The number of objects the player wants to remove from the game.
  */
 export interface NimMove extends BaseMove {
   numObjects: number;
@@ -76,10 +76,10 @@ export interface NimMove extends BaseMove {
 
 /**
  * Interface representing the state of a Nim game, which includes:
- * - `moves`: A list of moves made in the game.
- * - `player1`: The ID of the first player.
- * - `player2`: The ID of the second player.
- * - `remainingObjects`: The number of objects remaining in the game.
+ * moves: A list of moves made in the game.
+ * player1: The ID of the first player.
+ * player2: The ID of the second player.
+ * remainingObjects: The number of objects remaining in the game.
  */
 export interface NimGameState extends WinnableGameState {
   moves: ReadonlyArray<NimMove>;
@@ -89,8 +89,47 @@ export interface NimGameState extends WinnableGameState {
 }
 
 /**
+ * Interface representing a trivia question in the game
+ */
+export interface TriviaQuestion {
+  questionId: string;
+  question: string;
+  options: string[];
+}
+
+/**
+ * Interface representing an answer to a trivia question
+ */
+export interface TriviaAnswer extends BaseMove {
+  questionId: string;
+  answerIndex: number;
+}
+
+/**
+ * Interface representing the state of a Trivia game, which includes:
+ * player1: The ID of the first player
+ * player2: The ID of the second player
+ * currentQuestionIndex: The current question being displayed
+ * questions: The list of questions for this game session
+ * player1Answers: Array of player 1's answer indices
+ * player2Answers: Array of player 2's answer indices
+ * player1Score: Player 1's current score
+ * player2Score: Player 2's current score
+ */
+export interface TriviaGameState extends WinnableGameState {
+  player1?: string;
+  player2?: string;
+  currentQuestionIndex: number;
+  questions: ReadonlyArray<TriviaQuestion>;
+  player1Answers: ReadonlyArray<number>;
+  player2Answers: ReadonlyArray<number>;
+  player1Score: number;
+  player2Score: number;
+}
+
+/**
  * Interface extending the request body when creating a game, which contains:
- * - `gameType`: The type of game to be created (e.g., 'Nim').
+ * gameType: The type of game to be created (e.g., 'Nim').
  */
 export interface CreateGameRequest extends Request {
   body: {
@@ -101,8 +140,8 @@ export interface CreateGameRequest extends Request {
 /**
  * Interface extending the request query parameters when retrieving games,
  * which contains:
- * - `gameType`: The type of game.
- * - `status`: The status of the game (e.g., 'IN_PROGRESS', 'WAITING_TO_START').
+ * gameType: The type of game.
+ * status: The status of the game (e.g., 'IN_PROGRESS', 'WAITING_TO_START').
  */
 export interface GetGamesRequest extends Request {
   query: {
@@ -114,8 +153,8 @@ export interface GetGamesRequest extends Request {
 /**
  * Interface extending the request body when performing a game-related action,
  * which contains:
- * - `gameID`: The ID of the game being interacted with.
- * - `playerID`: The ID of the player performing the action (e.g., making a move).
+ * gameID: The ID of the game being interacted with.
+ * playerID: The ID of the player performing the action (e.g., making a move).
  */
 export interface GameRequest extends Request {
   body: {
@@ -126,8 +165,8 @@ export interface GameRequest extends Request {
 
 /**
  * Interface for querying games based on game type and status.
- * - `gameType`: The type of game to query (e.g., 'Nim').
- * - `state.status`: The status of the game (e.g., 'IN_PROGRESS').
+ * gameType: The type of game to query (e.g., 'Nim').
+ * state.status: The status of the game (e.g., 'IN_PROGRESS').
  */
 export interface FindGameQuery {
   'gameType'?: GameType;

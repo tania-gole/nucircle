@@ -3,12 +3,12 @@ import { Schema } from 'mongoose';
 /**
  * Mongoose schema for the Game collection.
  *
- * This schema defines the structure of a game document in the database.
+ * This schema defines the structure of a game document in the database
  * Each game includes the following fields:
- * - `gameID`: A unique identifier for the game.
- * - `players`: A list of usernames of the players involved in the game.
- * - `state`: The current state of the game, represented as an object.
- * - `gameType`: The type of the game (e.g., 'Nim').
+ * - gameID: A unique identifier for the game
+ * - players: A list of usernames of the players involved in the game
+ * - state: The current state of the game, represented as an object
+ * - gameType: The type of the game (Nim or Trivia)
  */
 const gameSchema: Schema = new Schema(
   {
@@ -26,7 +26,7 @@ const gameSchema: Schema = new Schema(
     },
     gameType: {
       type: String,
-      enum: ['Nim'],
+      enum: ['Nim', 'Trivia'],
       required: true,
     },
   },

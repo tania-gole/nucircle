@@ -1,5 +1,6 @@
 import { AnswerImport, CollectionImport, QuestionImport } from '../types/populate';
 import { User, Comment, Tag, Message, Community } from '../types/types';
+import { TriviaQuestionDocument } from '../models/triviaQuestion.model';
 
 /**
  * Maps collections to their dependencies to ensure proper reference resolution.
@@ -11,6 +12,7 @@ export const collectionDependencies = {
   user: [],
   message: [],
   comment: [],
+  triviaQuestion: [],
   answer: ['comment'],
   question: ['tag', 'comment', 'answer', 'community'],
   community: [],
@@ -28,4 +30,5 @@ export type CollectionDocTypes = {
   message: Message;
   community: Community;
   collection: CollectionImport;
+  triviaQuestion: TriviaQuestionDocument;
 };
