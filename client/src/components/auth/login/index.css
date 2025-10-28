@@ -121,11 +121,11 @@
 }
 
 .login-button:hover {
-  background-color: #ff4444ef;
+  background-color: #e55a5a;
 }
 
 .login-button:active {
-  background-color: #c72f2f;
+  background-color: #cc4d4d;
 }
 
 /* Signup link styles */
