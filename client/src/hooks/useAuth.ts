@@ -77,7 +77,13 @@ const useAuth = (authType: 'login' | 'signup') => {
    */
   const validateInputs = (): boolean => {
     if (authType === 'signup') {
-      if (firstName === '' || lastName === '' || username === '' || password === '' || passwordConfirmation === '') {
+      if (
+        firstName === '' ||
+        lastName === '' ||
+        username === '' ||
+        password === '' ||
+        passwordConfirmation === ''
+      ) {
         setErr('Please fill in all fields');
         return false;
       }
@@ -87,7 +93,9 @@ const useAuth = (authType: 'login' | 'signup') => {
       }
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       if (!passwordRegex.test(password)) {
-        setErr('Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character');
+        setErr(
+          'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character',
+        );
         return false;
       }
 
