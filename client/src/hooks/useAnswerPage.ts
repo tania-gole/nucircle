@@ -73,7 +73,9 @@ const useAnswerPage = () => {
      */
     const fetchData = async () => {
       try {
+        console.log('Fetching question ID:', questionID);
         const res = await getQuestionById(questionID, user.username);
+        
         setQuestion(res || null);
       } catch (error) {
         // eslint-disable-next-line no-console
