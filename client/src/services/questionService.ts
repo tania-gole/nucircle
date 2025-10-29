@@ -33,10 +33,7 @@ const getQuestionById = async (
   qid: string,
   username: string,
 ): Promise<PopulatedDatabaseQuestion> => {
-  const encodedUsername = encodeURIComponent(username);
-  const res = await api.get(
-    `${QUESTION_API_URL}/getQuestionById/${qid}?username=${encodedUsername}`,
-  );
+  const res = await api.get(`${QUESTION_API_URL}/getQuestionById/${qid}?username=${username}`);
   if (res.status !== 200) {
     throw new Error('Error when fetching question by id');
   }
