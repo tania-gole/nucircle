@@ -91,13 +91,6 @@ const useAuth = (authType: 'login' | 'signup') => {
         setErr('Please use a valid Northeastern email');
         return false;
       }
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(password)) {
-        setErr(
-          'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character',
-        );
-        return false;
-      }
 
       if (password !== passwordConfirmation) {
         setErr('Passwords do not match');

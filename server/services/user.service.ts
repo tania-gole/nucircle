@@ -16,6 +16,13 @@ import {
  */
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
+    // Password security reqs: 8+ chars, upper, lower, number, special
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!regex.test(user.password)) {
+      throw Error(
+        'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character',
+      );
+    }
     const result: DatabaseUser = await UserModel.create(user);
 
     if (!result) {
