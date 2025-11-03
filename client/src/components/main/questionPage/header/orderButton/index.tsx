@@ -8,9 +8,11 @@ import { orderTypeDisplayName } from '../../../../../types/constants';
  * name - The text to be displayed on the button.
  * setQuestionOrder - A function that sets the order of questions based on the message.
  */
+
 interface OrderButtonProps {
   orderType: OrderType;
   setQuestionOrder: (order: OrderType) => void;
+  isSelected: boolean;
 }
 
 /**
@@ -21,12 +23,10 @@ interface OrderButtonProps {
  * @param orderType - The label for the button and the value passed to setQuestionOrder function.
  * @param setQuestionOrder - Callback function to set the order of questions based on the input message.
  */
-const OrderButton = ({ orderType, setQuestionOrder }: OrderButtonProps) => (
+const OrderButton = ({ orderType, setQuestionOrder, isSelected }: OrderButtonProps) => (
   <button
-    className='btn'
-    onClick={() => {
-      setQuestionOrder(orderType);
-    }}>
+    className={`order-btn ${isSelected ? 'selected' : ''}`}
+    onClick={() => setQuestionOrder(orderType)}>
     {orderTypeDisplayName[orderType]}
   </button>
 );
