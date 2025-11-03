@@ -15,6 +15,7 @@ interface QuestionHeaderProps {
   titleText: string;
   qcnt: number;
   setQuestionOrder: (order: OrderType) => void;
+  currentOrder: OrderType;
 }
 
 /**
@@ -26,22 +27,25 @@ interface QuestionHeaderProps {
  * @param qcnt - The number of questions displayed in the header.
  * @param setQuestionOrder - Function to set the order of questions based on input message.
  */
-const QuestionHeader = ({ titleText, qcnt, setQuestionOrder }: QuestionHeaderProps) => (
-  <div>
-    <div className='space_between right_padding'>
+const QuestionHeader = ({ titleText, qcnt, setQuestionOrder, currentOrder }: QuestionHeaderProps) => (
+  <div className='questions_header'>
+    <div className='header-top-q'>
       <div className='bold_title'>{titleText}</div>
       <AskQuestionButton />
     </div>
-    <div className='space_between right_padding'>
-      <div id='question_count'>{qcnt} questions</div>
-      <div className='btns'>
+    <div className='header-bottom-q'>
+      <div className='order_btns'>
         {Object.keys(orderTypeDisplayName).map(order => (
           <OrderButton
             key={order}
             orderType={order as OrderType}
             setQuestionOrder={setQuestionOrder}
+            isSelected={currentOrder === order}
           />
         ))}
+      </div>
+      <div className='question-count'>
+        <span className='count-number'>{qcnt}</span> Questions
       </div>
     </div>
   </div>
