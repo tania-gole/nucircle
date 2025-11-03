@@ -7,6 +7,7 @@ import {
   UserResponse,
   UsersResponse,
 } from '../types/types';
+import bcryptjs from 'bcryptjs';
 
 /**
  * Saves a new user to the database.
@@ -16,7 +17,18 @@ import {
  */
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
-    const result: DatabaseUser = await UserModel.create(user);
+    // Password security reqs: 8+ chars, upper, lower, number, special
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!regex.test(user.password)) {
+      throw Error(
+        'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character',
+      );
+    }
+    // Hash password
+    const result: DatabaseUser = await UserModel.create({
+      ...user,
+      password: bcryptjs.hashSync(user.password, 10),
+    });
 
     if (!result) {
       throw Error('Failed to create user');
@@ -88,15 +100,17 @@ export const loginUser = async (loginCredentials: UserLogin): Promise<UserRespon
   const { username, password } = loginCredentials;
 
   try {
-    const user: SafeDatabaseUser | null = await UserModel.findOne({ username, password }).select(
-      '-password',
-    );
-
+    const user: DatabaseUser | null = await UserModel.findOne({ username });
     if (!user) {
       throw Error('Authentication failed');
     }
 
-    return user;
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      throw Error('Authentication failed');
+    }
+
+    return user as UserResponse;
   } catch (error) {
     return { error: `Error occurred when authenticating user: ${error}` };
   }
