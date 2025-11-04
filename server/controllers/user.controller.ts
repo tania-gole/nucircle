@@ -17,6 +17,7 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
+import { generateToken } from '../utils/jwt.util';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -72,7 +73,8 @@ const userController = (socket: FakeSOSocket) => {
         throw Error(user.error);
       }
 
-      res.status(200).json(user);
+      const token = generateToken({ userId: user._id.toString(), username: user.username });
+      res.status(200).json({ user, token });
     } catch (error) {
       res.status(500).send('Login failed');
     }

@@ -60,7 +60,8 @@ const createUser = async (user: UserSignup): Promise<SafeDatabaseUser> => {
 const loginUser = async (user: UserLogin): Promise<SafeDatabaseUser> => {
   try {
     const res = await api.post(`${USER_API_URL}/login`, user);
-    return res.data;
+    // console.log('Token:', res.data.token);
+    return res.data.user;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(`Error while logging in: ${error.response.data}`);
