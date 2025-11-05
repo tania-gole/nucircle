@@ -115,10 +115,24 @@ class NimGame extends Game<NimGameState, NimMove> {
     } else if (this.state.player2 === undefined) {
       this.state = { ...this.state, player2: playerID };
     }
+    // Removed auto-start logic - game will start when Start Game button is pressed
+  }
 
-    if (this.state.player1 !== undefined && this.state.player2 !== undefined) {
-      this.state = { ...this.state, status: 'IN_PROGRESS' };
+  /**
+   * Starts the game. Can be started with 1 or 2 players.
+   * @throws Will throw an error if the game cannot be started.
+   */
+  public startGame(): void {
+    if (this.state.status !== 'WAITING_TO_START') {
+      throw new Error('Game is not waiting to start');
     }
+
+    if (this.state.player1 === undefined) {
+      throw new Error('Cannot start game: no players in game');
+    }
+
+    // Start the game
+    this.state = { ...this.state, status: 'IN_PROGRESS' };
   }
 
   /**

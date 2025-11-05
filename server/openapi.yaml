@@ -505,6 +505,34 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorResponse'
 
+  /games/start:
+    post:
+      tags:
+        - Games
+      summary: Start a game.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gameID
+              properties:
+                gameID:
+                  type: string
+      responses:
+        '200':
+          description: Game successfully started. Returns the updated game state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PopulatedGame'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
   /games/leave:
     post:
       tags:
@@ -523,6 +551,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PopulatedGame'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /games/delete:
+    post:
+      tags:
+        - Games
+      summary: Delete a game.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gameID
+              properties:
+                gameID:
+                  type: string
+      responses:
+        '200':
+          description: Game successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
         '400':
           $ref: '#/components/responses/ValidationError'
         '500':
@@ -1260,7 +1319,7 @@ components:
       type: string
       enum: # Based on known game types like 'Nim'
         - Nim
-        - TBD_OtherGame
+        - Trivia
       description: The type of game to create.
 
     GameStatus:
@@ -1287,7 +1346,6 @@ components:
       properties:
         gameID:
           type: string
-          format: object-id
         playerID:
           type: string
 

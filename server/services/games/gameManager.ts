@@ -40,14 +40,22 @@ class GameManager {
     switch (gameType) {
       case 'Nim': {
         const newGame = new NimGame();
-        await NimModel.create(newGame.toModel());
-
+        try {
+          await NimModel.create(newGame.toModel());
+        } catch (error) {
+          console.error('Error creating Nim game in database:', error);
+          throw error;
+        }
         return newGame;
       }
       case 'Trivia': {
         const newGame = new TriviaGame();
-        await GameModel.create(newGame.toModel());
-
+        try {
+          await GameModel.create(newGame.toModel());
+        } catch (error) {
+          console.error('Error creating Trivia game in database:', error);
+          throw error;
+        }
         return newGame;
       }
       default: {
@@ -69,6 +77,10 @@ class GameManager {
   }
 
   /**
+   * TRIVIA FEATURE: GameManager - Game Creation
+   * Central manager that creates game instances and stores them in memory.
+   * Also saves to MongoDB database for persistence across server restarts.
+   * 
    * Creates and adds a new game to the manager games map.
    * @param gameType The type of the game to add.
    * @returns The game ID or an error message.
@@ -80,7 +92,9 @@ class GameManager {
 
       return newGame.id;
     } catch (error) {
-      return { error: (error as Error).message };
+      console.error('Error in addGame:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { error: errorMessage };
     }
   }
 
@@ -94,6 +108,54 @@ class GameManager {
   }
 
   /**
+   * Loads a game from the database and restores it to a Game instance.
+   * @param gameID The ID of the game to load.
+   * @returns The restored game instance or undefined if not found.
+   */
+  private async _loadGameFromDatabase(gameID: GameInstanceID): Promise<Game<GameState, BaseMove> | undefined> {
+    try {
+      const gameData = await GameModel.findOne({ gameID }).lean();
+
+      if (!gameData) {
+        console.log(`Game ${gameID} not found in database`);
+        return undefined;
+      }
+
+      console.log(`Loading game ${gameID} from database, type: ${gameData.gameType}, status: ${gameData.state?.status}`);
+
+      // Recreate the game instance based on game type
+      let game: Game<GameState, BaseMove>;
+      if (gameData.gameType === 'Nim') {
+        const nimGame = new NimGame();
+        // Override the ID and restore state
+        Object.defineProperty(nimGame, 'id', { value: gameID, writable: false });
+        (nimGame as any)._state = gameData.state;
+        (nimGame as any)._players = gameData.players || [];
+        game = nimGame;
+      } else if (gameData.gameType === 'Trivia') {
+        const triviaGame = new TriviaGame();
+        // Override the ID and restore state
+        Object.defineProperty(triviaGame, 'id', { value: gameID, writable: false });
+        (triviaGame as any)._state = gameData.state;
+        (triviaGame as any)._players = gameData.players || [];
+        game = triviaGame;
+      } else {
+        console.error(`Unknown game type: ${gameData.gameType}`);
+        return undefined;
+      }
+
+      // Add to in-memory map
+      this._games.set(gameID, game);
+
+      console.log(`Game ${gameID} loaded successfully, status: ${game.state.status}`);
+      return game;
+    } catch (error) {
+      console.error('Error loading game from database:', error);
+      return undefined;
+    }
+  }
+
+  /**
    * Joins an existing game.
    * @param gameID The ID of the game to join.
    * @param playerID The ID of the player joining the game.
@@ -104,16 +166,76 @@ class GameManager {
     playerID: string,
   ): Promise<GameInstance<GameState> | { error: string }> {
     try {
-      const gameToJoin = this.getGame(gameID);
+      let gameToJoin = this.getGame(gameID);
+
+      // If game not in memory, try loading from database
+      if (gameToJoin === undefined) {
+        gameToJoin = await this._loadGameFromDatabase(gameID);
+      }
 
       if (gameToJoin === undefined) {
         throw new Error('Game requested does not exist.');
       }
 
+      const stateBefore = gameToJoin.state as any;
+      console.log(`Before join - Status: ${gameToJoin.state.status}, Players: ${stateBefore.player1 || 'none'}, ${stateBefore.player2 || 'none'}`);
+      
       await gameToJoin.join(playerID);
+      
+      const stateAfter = gameToJoin.state as any;
+      console.log(`After join - Status: ${gameToJoin.state.status}, Players: ${stateAfter.player1 || 'none'}, ${stateAfter.player2 || 'none'}`);
+      console.log(`_players array: ${JSON.stringify((gameToJoin as any)._players)}`);
+      
       await gameToJoin.saveGameState();
+      
+      const model = gameToJoin.toModel();
+      console.log(`Returning model - Status: ${model.state.status}, Players array: ${JSON.stringify(model.players)}`);
+      
+      return model;
+    } catch (error) {
+      return { error: (error as Error).message };
+    }
+  }
 
-      return gameToJoin.toModel();
+  /**
+   * TRIVIA FEATURE: GameManager - Starting Game
+   * Calls the game-specific startGame() method which:
+   * - For Trivia: fetches 10 random questions from the database
+   * - Changes the status from WAITING_TO_START to IN_PROGRESS
+   * 
+   * Starts a game.
+   * @param gameID The ID of the game to start.
+   * @returns The updated game instance or an error message.
+   */
+  public async startGame(
+    gameID: GameInstanceID,
+  ): Promise<GameInstance<GameState> | { error: string }> {
+    try {
+      let gameToStart = this.getGame(gameID);
+
+      // If game not in memory, try loading from database
+      if (gameToStart === undefined) {
+        gameToStart = await this._loadGameFromDatabase(gameID);
+      }
+
+      if (gameToStart === undefined) {
+        throw new Error('Game requested does not exist.');
+      }
+
+      // Type guard to check if the game has a startGame method
+      if ('startGame' in gameToStart && typeof (gameToStart as any).startGame === 'function') {
+        const startResult = (gameToStart as any).startGame();
+        // Handle both sync and async startGame methods
+        if (startResult instanceof Promise) {
+          await startResult;
+        }
+      } else {
+        throw new Error('Game type does not support starting');
+      }
+
+      await gameToStart.saveGameState();
+
+      return gameToStart.toModel();
     } catch (error) {
       return { error: (error as Error).message };
     }
@@ -130,7 +252,12 @@ class GameManager {
     playerID: string,
   ): Promise<GameInstance<GameState> | { error: string }> {
     try {
-      const gameToLeave = this.getGame(gameID);
+      let gameToLeave = this.getGame(gameID);
+
+      // If game not in memory, try loading from database
+      if (gameToLeave === undefined) {
+        gameToLeave = await this._loadGameFromDatabase(gameID);
+      }
 
       if (gameToLeave === undefined) {
         throw new Error('Game requested does not exist.');

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createGame, getGames } from '../services/gamesService';
+import { createGame, getGames, deleteGame } from '../services/gamesService';
 import { GameInstance, GameState, GameType } from '../types/types';
 
 /**
@@ -36,12 +36,24 @@ const useAllGamesPage = () => {
       await createGame(gameType);
       await fetchGames(); // Refresh the list after creating a game
     } catch (createGameError) {
-      setError('Error creating game');
+      const errorMessage = createGameError instanceof Error ? createGameError.message : 'Error creating game';
+      setError(errorMessage);
+      console.error('Error creating game:', createGameError);
     }
   };
 
   const handleJoin = (gameID: string) => {
     navigate(`/games/${gameID}`);
+  };
+
+  const handleDeleteGame = async (gameID: string) => {
+    try {
+      setError(null);
+      await deleteGame(gameID);
+      await fetchGames(); // Refresh the list after deleting a game
+    } catch (deleteGameError) {
+      setError('Error deleting game');
+    }
   };
 
   useEffect(() => {
@@ -60,6 +72,7 @@ const useAllGamesPage = () => {
   return {
     availableGames,
     handleJoin,
+    handleDeleteGame,
     fetchGames,
     isModalOpen,
     handleToggleModal,

@@ -3,6 +3,13 @@ import useUserContext from './useUserContext';
 import { GameInstance, TriviaGameState, GameMove, TriviaAnswer } from '../types/types';
 
 /**
+ * TRIVIA FEATURE: Client - Trivia Game UI Logic
+ * This hook manages the trivia game UI state, as it:
+ * - Tracks which answer option the user selected
+ * - Checks if the current player has already answered the current question
+ * - When the user clicks "Submit Answer", it emits the 'makeMove' socket event with answer
+ * - Server processes answer and emits gameUpdate, which updates gameInstance
+ * 
  * Custom hook to manage the state and logic for the Trivia game page that includes submitting answers and tracking player responses
  * @param gameInstance The current instance of the Trivia game
  * @returns An object containing:
@@ -29,6 +36,14 @@ const useTriviaGamePage = (gameInstance: GameInstance<TriviaGameState>) => {
     }
   };
 
+  /**
+   * TRIVIA FEATURE: Submitting Answer
+   * When user clicks "Submit Answer", this creates a GameMove object with:
+   * - playerID: current user's username
+   * - gameID: current game ID
+   * - move: { questionId, answerIndex }
+   * Then emits the 'makeMove' socket event to server, which processes it via the playMove handler
+   */
   const handleSubmitAnswer = () => {
     if (selectedAnswer === null || hasAnswered) return;
 

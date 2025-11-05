@@ -3,9 +3,17 @@ import { GameInstance, TriviaGameState } from '../../../../types/types';
 import useTriviaGamePage from '../../../../hooks/useTriviaGamePage';
 
 /**
+ * TRIVIA FEATURE: Client - Trivia Game UI Component
+ * This component renders the trivia game interface, which:
+ * - Shows the player scores and current question progress
+ * - Displays the current question with 4 multiple choice options
+ * - Renders the "Submit Answer" button, which should be disabled if the question was already answered
+ * - Shows a "Waiting for other player" message when the other player has answered
+ * - Displays a game over screen with the ultimate winner when all 10 questions have been answered
+ * 
  * Component to display the Trivia game page
  * @param gameInstance The current instance of the Trivia game that has player details, questions, and scores
- * @returns A React component that shows:
+ * @returns A React component that contains:
  * - Current game status and player information
  * - Current question with multiple choice options
  * - Score tracking for both players
@@ -47,6 +55,17 @@ const TriviaGamePage = ({ gameInstance }: { gameInstance: GameInstance<TriviaGam
           <p className='player-score'>Score: {gameInstance.state.player2Score}</p>
         </div>
       </div>
+
+      {gameInstance.state.status === 'WAITING_TO_START' && (
+        <div className='trivia-waiting-section'>
+          <h3>Waiting for players...</h3>
+          <p>
+            {gameInstance.state.player1 && gameInstance.state.player2
+              ? 'Both players have joined! Game will start shortly...'
+              : `Waiting for ${gameInstance.state.player1 ? 'Player 2' : 'Player 1'} to join...`}
+          </p>
+        </div>
+      )}
 
       {gameInstance.state.status === 'IN_PROGRESS' && currentQuestion && (
         <div className='trivia-question-section'>

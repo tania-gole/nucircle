@@ -94,10 +94,12 @@ abstract class Game<StateType extends GameState, MoveType> {
    * @returns The game model representation.
    */
   public toModel(): GameInstance<StateType> {
+    // Deep clone and ensure arrays are regular arrays (not ReadonlyArray) for MongoDB
+    const serializedState = JSON.parse(JSON.stringify(this._state));
     return {
-      state: this._state,
+      state: serializedState,
       gameID: this.id,
-      players: this._players,
+      players: [...this._players],
       gameType: this._gameType,
     };
   }

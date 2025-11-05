@@ -8,10 +8,10 @@ import {
 } from '../types/types';
 import findGames from '../services/game.service';
 import GameManager from '../services/games/gameManager';
+import GameModel from '../models/games.model';
 
 /**
- * Express controller for handling game-related requests,
- * including creating, joining, leaving games, and fetching games.
+ * Express controller for handling game-related requests, including creating, joining, leaving games, and fetching games.
  * @param socket The socket instance used for emitting game updates and errors.
  * @returns An Express router with endpoints for game actions.
  */
@@ -19,6 +19,10 @@ const gameController = (socket: FakeSOSocket) => {
   const router = express.Router();
 
   /**
+   * TRIVIA FEATURE: Part 1 - Game Creation
+   * When a user clicks "Create Trivia Quiz", this endpoint creates a new game instance.
+   * The game starts in the WAITING_TO_START status with no players or questions yet.
+   * 
    * Creates a new game based on the provided game type and responds with the created game or an error message.
    * @param req The request object containing the game type.
    * @param res The response object to send the result.
@@ -35,11 +39,18 @@ const gameController = (socket: FakeSOSocket) => {
 
       res.status(200).json(newGame);
     } catch (error) {
-      res.status(500).send(`Error when creating game: ${(error as Error).message}`);
+      console.error('Error creating game:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      res.status(500).send(`Error when creating game: ${errorMessage}`);
     }
   };
 
   /**
+   * TRIVIA FEATURE: Part 2 - Player Joining
+   * When a user clicks "Join Game", this endpoint adds them to the game.
+   * Updates the game state with player1 or player2 & adds them to the players array.
+   * Emits a socket event to notify all players in the game room of the update.
+   * 
    * Joins a game with the specified game ID and player ID, and emits the updated game state.
    * @param req The request object containing the game ID and player ID.
    * @param res The response object to send the result.
@@ -54,7 +65,7 @@ const gameController = (socket: FakeSOSocket) => {
         throw new Error(game.error);
       }
 
-      socket.to(gameID).emit('gameUpdate', { gameInstance: game });
+      socket.in(gameID).emit('gameUpdate', { gameInstance: game });
       res.status(200).json(game);
     } catch (error) {
       res.status(500).send(`Error when joining game: ${(error as Error).message}`);
@@ -76,7 +87,7 @@ const gameController = (socket: FakeSOSocket) => {
         throw new Error(game.error);
       }
 
-      socket.to(gameID).emit('gameUpdate', { gameInstance: game });
+      socket.in(gameID).emit('gameUpdate', { gameInstance: game });
       res.status(200).json(game);
     } catch (error) {
       res.status(500).send(`Error when leaving game: ${(error as Error).message}`);
@@ -101,6 +112,65 @@ const gameController = (socket: FakeSOSocket) => {
   };
 
   /**
+   * TRIVIA FEATURE: Part 3 - Starting the Game
+   * When a user clicks "Start Game", this endpoint:
+   * 1. Calls GameManager.startGame() which calls TriviaGame.startGame()
+   * 2. has TriviaGame fetch 10 random questions from the database
+   * 3. Changes the game status from WAITING_TO_START to IN_PROGRESS
+   * 4. Emits a socket event to notify all players that the game has begun
+   * 
+   * Starts a game with the specified game ID.
+   * @param req The request object containing the game ID.
+   * @param res The response object to send the result.
+   */
+  const startGame = async (req: GameRequest, res: Response) => {
+    try {
+      const { gameID } = req.body;
+
+      const game = await GameManager.getInstance().startGame(gameID);
+
+      if ('error' in game) {
+        throw new Error(game.error);
+      }
+
+      socket.in(gameID).emit('gameUpdate', { gameInstance: game });
+      res.status(200).json(game);
+    } catch (error) {
+      res.status(500).send(`Error when starting game: ${(error as Error).message}`);
+    }
+  };
+
+  /**
+   * Deletes a game with the specified game ID.
+   * @param req The request object containing the game ID.
+   * @param res The response object to send the result.
+   */
+  const deleteGame = async (req: GameRequest, res: Response) => {
+    try {
+      const { gameID } = req.body;
+
+      // Remove from GameManager if it exists
+      GameManager.getInstance().removeGame(gameID);
+
+      // Also remove from database (this will work even if game wasn't in GameManager)
+      await GameModel.findOneAndDelete({ gameID });
+
+      res.status(200).json({ message: 'Game deleted successfully' });
+    } catch (error) {
+      res.status(500).send(`Error when deleting game: ${(error as Error).message}`);
+    }
+  };
+
+  /**
+   * TRIVIA FEATURE: Part 4 - Answering Questions
+   * When a player submits an answer, this socket handler:
+   * 1. Validates the answer (checks if the player in game, the question matches, & it's not already answered)
+   * 2. Records the answer in the player1Answers or player2Answers array
+   * 3. Checks if the answer is correct and updates their score
+   * 4. If both players answered, moves to the next question
+   * 5. If all 10 questions answered, ends the game and determines the winner
+   * 6. Emits a gameUpdate event to all players in the game room
+   * 
    * Handles a game move by applying the move to the game state, emitting updates to all players, and saving the state.
    * @param gameMove The payload containing the game ID and move details.
    * @throws Error if applying the move or saving the game state fails.
@@ -116,7 +186,7 @@ const gameController = (socket: FakeSOSocket) => {
       }
 
       game.applyMove(move);
-      socket.to(gameID).emit('gameUpdate', { gameInstance: game.toModel() });
+      socket.in(gameID).emit('gameUpdate', { gameInstance: game.toModel() });
 
       await game.saveGameState();
 
@@ -146,7 +216,9 @@ const gameController = (socket: FakeSOSocket) => {
   // Register routes
   router.post('/create', createGame);
   router.post('/join', joinGame);
+  router.post('/start', startGame);
   router.post('/leave', leaveGame);
+  router.post('/delete', deleteGame);
   router.get('/games', getGames);
 
   return router;

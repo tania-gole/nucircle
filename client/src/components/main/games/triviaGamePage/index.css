@@ -3,10 +3,10 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: white;
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  color: white;
+  box-shadow: 0 4px 15px rgba(72, 72, 72, 0.1);
+  color: #484848;
 }
 
 /* Game Header */
@@ -18,16 +18,18 @@
 .trivia-game-header h2 {
   font-size: 32px;
   margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: #484848;
+  font-weight: bold;
 }
 
 .trivia-progress {
   font-size: 18px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #FFF4F4;
+  color: #484848;
   padding: 8px 20px;
   border-radius: 20px;
   display: inline-block;
-  backdrop-filter: blur(10px);
+  font-weight: 500;
 }
 
 /* Players Section */
@@ -40,51 +42,51 @@
 }
 
 .trivia-player-card {
-  background: rgba(255, 255, 255, 0.15);
+  background: #FFF4F4;
   padding: 20px;
   border-radius: 12px;
   text-align: center;
   flex: 1;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid transparent;
 }
 
 .trivia-player-card h3 {
   margin: 0 0 10px 0;
   font-size: 16px;
-  opacity: 0.8;
+  color: #484848;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-weight: 600;
 }
 
 .player-name {
   font-size: 20px;
   font-weight: bold;
   margin: 10px 0;
+  color: #484848;
 }
 
 .player-score {
   font-size: 24px;
   font-weight: bold;
-  color: #ffd700;
+  color: #FF6B6B;
   margin: 5px 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .trivia-vs {
   font-size: 24px;
   font-weight: bold;
-  color: #ffd700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: #FF6B6B;
 }
 
 /* Question Section */
 .trivia-question-section {
-  background: rgba(255, 255, 255, 0.95);
+  background: white;
   padding: 30px;
   border-radius: 12px;
-  color: #333;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  color: #484848;
+  box-shadow: 0 2px 8px rgba(72, 72, 72, 0.1);
+  border: 1px solid #FFF4F4;
 }
 
 .trivia-question {
@@ -94,8 +96,9 @@
 .trivia-question h3 {
   font-size: 22px;
   line-height: 1.5;
-  color: #2c3e50;
+  color: #484848;
   margin: 0;
+  font-weight: 600;
 }
 
 /* Options */
@@ -111,26 +114,27 @@
   align-items: center;
   padding: 15px 20px;
   background: white;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border: 2px solid #FFF4F4;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 16px;
   text-align: left;
+  color: #484848;
 }
 
 .trivia-option:hover:not(.disabled) {
-  border-color: #667eea;
-  background: #f8f9ff;
+  border-color: #FF6B6B;
+  background: #FFF4F4;
   transform: translateX(5px);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
 }
 
 .trivia-option.selected {
-  border-color: #667eea;
-  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  border-color: #FF6B6B;
+  background: #FFF4F4;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
 }
 
 .trivia-option.disabled {
@@ -144,7 +148,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: #667eea;
+  background: #FF6B6B;
   color: white;
   border-radius: 50%;
   margin-right: 15px;
@@ -153,31 +157,33 @@
 }
 
 .trivia-option.selected .option-letter {
-  background: #764ba2;
+  background: #FF6B6B;
 }
 
 .option-text {
   flex: 1;
+  color: #484848;
 }
 
 /* Submit Button */
 .trivia-submit-btn {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #FF6B6B;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 18px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
 }
 
 .trivia-submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  background: #ff5252;
 }
 
 .trivia-submit-btn:disabled {
@@ -190,32 +196,52 @@
 .trivia-status {
   text-align: center;
   padding: 15px;
-  background: #e8f5e9;
-  border-radius: 8px;
-  border-left: 4px solid #4caf50;
+  background: #FFF4F4;
+  border-radius: 12px;
+  border-left: 4px solid #FF6B6B;
 }
 
 .waiting-message {
   margin: 0;
   font-size: 16px;
-  color: #2e7d32;
+  color: #484848;
   font-weight: 500;
+}
+
+/* Waiting Section */
+.trivia-waiting-section {
+  background: #FFF4F4;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  color: #484848;
+}
+
+.trivia-waiting-section h3 {
+  color: #484848;
+  margin-bottom: 10px;
+}
+
+.trivia-waiting-section p {
+  color: #484848;
+  margin: 0;
 }
 
 /* Game Over Section */
 .trivia-game-over {
-  background: rgba(255, 255, 255, 0.95);
+  background: white;
   padding: 40px;
   border-radius: 12px;
   text-align: center;
-  color: #333;
+  color: #484848;
+  border: 1px solid #FFF4F4;
 }
 
 .trivia-game-over h2 {
   font-size: 36px;
-  color: #667eea;
+  color: #FF6B6B;
   margin-bottom: 25px;
-  text-shadow: none;
+  font-weight: bold;
 }
 
 .trivia-final-scores {
@@ -226,21 +252,22 @@
 
 .trivia-final-scores p {
   margin: 10px 0;
-  color: #2c3e50;
+  color: #484848;
 }
 
 .trivia-winner {
   margin-top: 25px;
   padding: 20px;
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  background: #FFF4F4;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+  border: 2px solid #FF6B6B;
 }
 
 .winner-announce {
   font-size: 24px;
   margin: 0;
-  color: #2c3e50;
+  color: #484848;
   font-weight: bold;
 }
 

@@ -3,12 +3,24 @@ import Game from './game';
 import TriviaQuestionModel from '../../models/triviaQuestion.model';
 
 /**
- * Represents a game of Trivia, extending the generic Game class, so this class contains the specific game logic for playing a trivia quiz game
+ * TRIVIA FEATURE: Core Game Logic - TriviaGame Class
+ * This is the main class that handles all Trivia-specific game logic.
+ * It extends the generic Game class and implements:
+ * - Question fetching from database
+ * - Answer validation and scoring
+ * - Progress tracking (current question, player answers, scores)
+ * - Game state changing (WAITING_TO_START -> IN_PROGRESS -> OVER)
+ * 
+ * Represents a game of Trivia, extending the generic Game class.
+ * 
+ * This class contains the specific game logic for playing a Trivia Quiz game
  */
 class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
   private correctAnswers: number[] = [];
 
-    // Constructor
+  /**
+   * Constructor for the TriviaGame class which initializes the game state and type.
+   */
   public constructor() {
     super(
       {
@@ -24,7 +36,12 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     );
   }
 
-  // Fetches 10 random questions from database
+  /**
+   * TRIVIA FEATURE: Question Fetching
+   * Called when the game starts & uses MongoDB aggregation to randomly select 10 questions.
+   * Stores correct answers separately for scoring & maps the questions to the game format.
+   * Fetches 10 random questions from the database.
+   */
   private async _fetchRandomQuestions(): Promise<void> {
     try {
       // MongoDB aggregation
@@ -35,7 +52,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
       // Store correct answers separately for players
       this.correctAnswers = questions.map((q: { correctAnswer: number }) => q.correctAnswer);
 
-      // Map to TriviaQuestion format 
+      // Map to the TriviaQuestion format 
       this.state = {
         ...this.state,
         questions: questions.map((q: { _id: { toString: () => string }; question: string; options: string[] }) => ({
@@ -50,6 +67,9 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
   }
 
   /**
+   * TRIVIA FEATURE: Answer Validation
+   * Ensures that the game is in progress, player is in game, & the answer index is valid (0-3), the question ID matches current question, & the player hasn't already answered.
+   * 
    * Validates the answer submission
    * @param gameMove The move to validate
    * @throws Error if the move is invalid
@@ -78,7 +98,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
       throw new Error('Invalid move: question ID does not match current question');
     }
 
-    // Check if player has already answered question
+    // Check if the player has already answered the question
     const isPlayer1 = playerID === this.state.player1;
     const playerAnswers = isPlayer1 ? this.state.player1Answers : this.state.player2Answers;
     
@@ -95,7 +115,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     );
   }
 
-  // Checks if game has ended and determines winner
+  // Checks if game has ended and determines the winner
   private _gameEndCheck(): void {
     if (this.state.currentQuestionIndex >= this.state.questions.length) {
       const player1Score = this.state.player1Score;
@@ -120,7 +140,15 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
   }
 
   /**
-   * Applies a move (answer submission) to the game
+   * TRIVIA FEATURE: Answer Processing & Scoring
+   * This is called when a player submits an answer. It:
+   * 1. Validates the answer via _validateMove
+   * 2. Records the answer in the player1Answers or player2Answers array
+   * 3. Checks if the answer matches the correct answer and updates their score
+   * 4. If both players answered, it increments currentQuestionIndex
+   * 5. Checks if the game is over (all 10 questions have been answered) and determines the winner
+   * 
+   * Applies a move (an answer submission) to the game
    * @param move The move to apply
    */
   public applyMove(move: GameMove<TriviaAnswer>): void {
@@ -174,11 +202,27 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     } else if (this.state.player2 === undefined) {
       this.state = { ...this.state, player2: playerID };
     }
+    // Removed auto-start logic - game will start when Start Game button is pressed
+  }
 
-    if (this.state.player1 !== undefined && this.state.player2 !== undefined) {
-      await this._fetchRandomQuestions();
-      this.state = { ...this.state, status: 'IN_PROGRESS' };
+  /**
+   * TRIVIA FEATURE: Starting the Game
+   * Called when the "Start Game" button is clicked. Fetches 10 random questions from the database and changes status from WAITING_TO_START to IN_PROGRESS.
+   * Starts the game which can be started with 1 or 2 players.
+   * @throws Will throw an error if the game cannot be started.
+   */
+  public async startGame(): Promise<void> {
+    if (this.state.status !== 'WAITING_TO_START') {
+      throw new Error('Game is not waiting to start');
     }
+
+    if (this.state.player1 === undefined) {
+      throw new Error('Cannot start game: no players in game');
+    }
+
+    // Fetch questions & start the game
+    await this._fetchRandomQuestions();
+    this.state = { ...this.state, status: 'IN_PROGRESS' };
   }
 
   /**
