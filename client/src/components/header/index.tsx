@@ -50,7 +50,7 @@ const Header = () => {
             className='profile-image'
             onClick={() => navigate(`/user/${currentUser.username}`)}
           />
-          {currentUser.isOnline && <span className='profile-online-indicator'></span>}
+          <span className='profile-online-indicator'></span>
         </div>
       </div>
     </div>

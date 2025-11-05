@@ -37,7 +37,7 @@
   margin-top: 2px;
 }
 
-.online-status {
+.online-indicator {
   display: inline-block;
   width: 10px;
   height: 10px;
@@ -46,6 +46,8 @@
   margin-right: 8px;
   box-shadow: 0 0 4px rgba(0, 255, 0, 0.6);
   animation: pulse 2s infinite;
+}
+
 .user_card_joined {
   color: #9CA3AF;
   font-size: 12px;
