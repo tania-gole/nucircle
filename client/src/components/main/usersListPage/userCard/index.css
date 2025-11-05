@@ -21,3 +21,14 @@
   color: cornflowerblue;
   cursor: pointer;
 }
+
+.online-status {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: #00ff00;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 0 4px rgba(0, 255, 0, 0.6);
+  animation: pulse 2s infinite;
+}

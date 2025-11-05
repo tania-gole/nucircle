@@ -25,7 +25,10 @@ const UserCardView = (props: UserProps) => {
   return (
     <div className='user right_padding' onClick={() => handleUserCardViewClickHandler(user)}>
       <div className='user_mid'>
-        <div className='userUsername'>{user.username}</div>
+        <div className='userUsername'>
+          {user.isOnline && <span className='online-status'></span>}
+          {user.username}
+        </div>
       </div>
       <div className='userStats'>
         <div>joined {new Date(user.dateJoined).toUTCString()}</div>
