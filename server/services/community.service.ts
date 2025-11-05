@@ -2,6 +2,22 @@ import CommunityModel from '../models/community.model';
 import { Community, CommunityResponse, DatabaseCommunity } from '../types/types';
 
 /**
+ * Retrieves all communities that a user is a part of
+ * @param username username of the user
+ * @returns A Promise resolving to an array of community documents or an error object
+ */
+export const getCommunitiesByUser = async (
+  username: string,
+): Promise<DatabaseCommunity[] | { error: string }> => {
+  try {
+    const communities = await CommunityModel.find({ participants: username });
+    return communities;
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+};
+
+/**
  * Retrieves a community by its ID.
  *
  * @param communityId - The ID of the community to retrieve
