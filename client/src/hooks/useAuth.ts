@@ -91,13 +91,6 @@ const useAuth = (authType: 'login' | 'signup') => {
         setErr('Please use a valid Northeastern email');
         return false;
       }
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(password)) {
-        setErr(
-          'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character',
-        );
-        return false;
-      }
 
       if (password !== passwordConfirmation) {
         setErr('Passwords do not match');
@@ -130,10 +123,15 @@ const useAuth = (authType: 'login' | 'signup') => {
     let user;
 
     try {
+      let cleanUsername = username;
       if (authType === 'signup') {
-        user = await createUser({ firstName, lastName, username, password });
+        cleanUsername = username.split('@')[0];
+        user = await createUser({ firstName, lastName, username: cleanUsername, password });
       } else if (authType === 'login') {
-        user = await loginUser({ username, password });
+        if (username.includes('@')) {
+          cleanUsername = username.split('@')[0];
+        }
+        user = await loginUser({ username: cleanUsername, password });
       } else {
         throw new Error('Invalid auth type');
       }

@@ -1,25 +1,40 @@
-.user {
+.user_card {
   display: flex;
-  flex-direction: row;
-  border-top: #000000 1px dashed;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  border-radius: 25px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 18px 24px;
+  margin: 16px 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.userStats {
-  color: #bbbbbb;
-  text-align: right;
-  width: 30%;
+.user_card_left {
+  display: flex;
+  flex-direction: column;
 }
 
-.user_mid {
-  margin-left: 2rem;
-  margin-top: auto;
-  margin-bottom: auto;
-  width: 60%;
+.user_card_name {
+  font-weight: 500;
+  font-size: 18px;
+  color: #4f5866; 
+}
+
+.user_card_right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .userUsername {
-  color: cornflowerblue;
+  color: #727F91;
   cursor: pointer;
+  margin-top: 2px;
 }
 
 .online-status {
@@ -31,4 +46,8 @@
   margin-right: 8px;
   box-shadow: 0 0 4px rgba(0, 255, 0, 0.6);
   animation: pulse 2s infinite;
+.user_card_joined {
+  color: #9CA3AF;
+  font-size: 12px;
+  align-self: flex-start;
 }

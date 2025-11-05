@@ -10,6 +10,7 @@ import {
 } from '../../services/user.service';
 import { SafeDatabaseUser, User, UserLogin } from '../../types/types';
 import { user, safeUser } from '../mockData.models';
+import bcryptjs from 'bcryptjs';
 
 describe('User model', () => {
   beforeEach(() => {
@@ -142,12 +143,9 @@ describe('loginUser', () => {
   });
 
   it('should return the user if authentication succeeds', async () => {
-    jest.spyOn(UserModel, 'findOne').mockImplementation((filter?: any) => {
-      expect(filter.username).toBeDefined();
-      expect(filter.password).toBeDefined();
-      const query: any = {};
-      query.select = jest.fn().mockReturnValue(Promise.resolve(safeUser));
-      return query;
+    jest.spyOn(UserModel, 'findOne').mockResolvedValue({
+      ...safeUser,
+      password: await bcryptjs.hash(user.password, 10),
     });
 
     const credentials: UserLogin = {

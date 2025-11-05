@@ -12,7 +12,8 @@ export interface Message {
   msg: string;
   msgFrom: string;
   msgDateTime: Date;
-  type: 'global' | 'direct';
+  type: 'global' | 'direct' | 'community';
+  communityId?: string;
 }
 
 /**
@@ -40,5 +41,27 @@ export type MessageResponse = DatabaseMessage | { error: string };
 export interface AddMessageRequest extends Request {
   body: {
     messageToAdd: Omit<Message, 'type'>;
+  };
+}
+
+/**
+ * Express request for adding a message to a community chat.
+ * - `body`: Contains the `messageToAdd` object (same structure as AddMessageRequest)
+ *   plus the `communityID` indicating which community the message belongs to.
+ */
+export interface AddCommunityMessageRequest extends Request {
+  body: {
+    messageToAdd: Omit<Message, 'type'>;
+    communityID: string;
+  };
+}
+
+/**
+ * Express request for getting community messages.
+ * - `params`: Contains the `communityID` parameter.
+ */
+export interface GetCommunityMessageRequest extends Request {
+  params: {
+    communityID: string;
   };
 }

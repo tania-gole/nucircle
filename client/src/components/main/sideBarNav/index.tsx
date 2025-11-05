@@ -35,7 +35,7 @@ const SideBarNav = () => {
         Tags
       </NavLink>
       <NavLink
-        to='/messaging'
+        to='/messaging/direct-message'
         id='menu_messaging'
         className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}
         onClick={toggleOptions}>
@@ -44,14 +44,19 @@ const SideBarNav = () => {
       {showOptions && (
         <div className='additional-options'>
           <NavLink
-            to='/messaging'
-            className={`menu_button message-options ${isActiveOption('/messaging')}`}>
-            Global Messages
-          </NavLink>
-          <NavLink
             to='/messaging/direct-message'
             className={`menu_button message-options ${isActiveOption('/messaging/direct-message')}`}>
             Direct Messages
+          </NavLink>
+          <NavLink
+            to='/messaging/community-messages'
+            className={`menu_button message-options ${isActiveOption('/messaging/community-message')}`}>
+            Community Messages
+          </NavLink>
+          <NavLink
+            to='/messaging'
+            className={`menu_button message-options ${isActiveOption('/messaging')}`}>
+            Global Messages
           </NavLink>
         </div>
       )}

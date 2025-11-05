@@ -23,7 +23,12 @@ const messageSchema: Schema = new Schema(
     },
     type: {
       type: String,
-      enum: ['global', 'direct'],
+      enum: ['global', 'direct', 'community'],
+    },
+    communityId: {
+      type: String,
+      ref: 'Community',
+      default: null,
     },
   },
   { collection: 'Message' },
