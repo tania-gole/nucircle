@@ -18,6 +18,7 @@ import {
   updateUser,
 } from '../services/user.service';
 import { generateToken } from '../utils/jwt.util';
+import authMiddleware from '../middleware/auth';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -197,6 +198,22 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const getCurrentUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const username = req.user!.username;
+      const user = await getUserByUsername(username);
+
+      if ('error' in user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get current user' });
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -205,6 +222,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
+  router.get('/me', authMiddleware, getCurrentUser);
   return router;
 };
 
