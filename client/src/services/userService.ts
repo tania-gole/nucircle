@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SafeDatabaseUser, UserLogin, UserSignup } from '../types/types';
+import { AuthResponse, SafeDatabaseUser, UserLogin, UserSignup } from '../types/types';
 import api from './config';
 
 const USER_API_URL = `/api/user`;
@@ -57,7 +57,7 @@ const createUser = async (user: UserSignup): Promise<SafeDatabaseUser> => {
  * @returns {Promise<User>} The authenticated user object.
  * @throws {Error} If an error occurs during the login process.
  */
-const loginUser = async (user: UserLogin): Promise<SafeDatabaseUser> => {
+const loginUser = async (user: UserLogin): Promise<AuthResponse> => {
   try {
     const res = await api.post(`${USER_API_URL}/login`, user);
     return res.data;

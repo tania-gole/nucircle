@@ -50,6 +50,7 @@ const useHeader = () => {
    * Signs the user out by clearing the user context and navigating to the landing page.
    */
   const handleSignOut = () => {
+    localStorage.removeItem('authToken');
     setUser(null);
     navigate('/');
   };
