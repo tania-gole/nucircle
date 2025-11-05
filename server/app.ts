@@ -24,6 +24,7 @@ import chatController from './controllers/chat.controller';
 import gameController from './controllers/game.controller';
 import collectionController from './controllers/collection.controller';
 import communityController from './controllers/community.controller';
+import { updateUserOnlineStatus } from './services/user.service';
 import communityMessagesController from './controllers/communityMessagesController';
 // import authMiddleware from './middleware/auth';
 
@@ -52,11 +53,60 @@ function startServer() {
   });
 }
 
+// CODE CHANGE
 socket.on('connection', socket => {
   console.log('A user connected ->', socket.id);
 
-  socket.on('disconnect', () => {
+  // Listen for userConnect event: client sends this after successful login
+  socket.on('userConnect', async (username: string) => {
+    console.log(`User ${username} connected with socket ${socket.id}`);
+
+    // Update the database: set user online, store their socket ID for real-time messaging
+    const result = await updateUserOnlineStatus(username, true, socket.id);
+
+    if ('error' in result) {
+      console.error('Error updating user status:', result.error);
+      return;
+    }
+
+    // Store username in socket instance
+    socket.data.username = username;
+
+    socket.broadcast.emit('userStatusUpdate', {
+      username,
+      isOnline: true,
+    });
+
+    // Notify all connected clients that this user came online
+    console.log(`User ${username} is online`);
+  });
+
+  // Listen for disconnect event: when user logs out, closes browser, or loses connection
+  socket.on('disconnect', async () => {
     console.log('User disconnected');
+
+    // Same username stored above - retrieve this
+    const username = socket.data.username;
+
+    if (username) {
+      console.log(`User ${username} disconnecting...`);
+
+      const result = await updateUserOnlineStatus(username, false, null);
+
+      if ('error' in result) {
+        console.error('Error updating user status:', result.error);
+        return;
+      }
+
+      // Notify all connected clients that this user went offline
+      socket.broadcast.emit('userStatusUpdate', {
+        username,
+        isOnline: false,
+        lastSeen: new Date(),
+      });
+
+      console.log(`User ${username} is offline`);
+    }
   });
 });
 

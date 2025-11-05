@@ -75,10 +75,29 @@
   background-color: #cc4d4d;  
 }
 
+.profile-container {
+  position: relative;
+  display: inline-block;
+}
+
 .profile-image {
   width: 40px;
   height: 40px;
   vertical-align: middle;
   border: none;
   cursor: pointer;
+  border-radius: 50%;
+}
+
+.profile-online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background-color: #00ff00;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 255, 0, 0.6);
+  animation: pulse 2s infinite;
 }

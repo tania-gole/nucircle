@@ -8,6 +8,9 @@ import { Schema } from 'mongoose';
  * - `username`: The username of the user.
  * - `password`: The encrypted password securing the user's account.
  * - `dateJoined`: The date the user joined the platform.
+ * - `isOnline`: The boolean status indicating if the user is currently online.
+ * - `socketId`: The socket.io connection ID for real-time communication.
+ * - `lastSeen`: The last time the user was active on the platform.
  */
 const userSchema: Schema = new Schema(
   {
@@ -35,6 +38,18 @@ const userSchema: Schema = new Schema(
     biography: {
       type: String,
       default: '',
+    },
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+    socketId: {
+      type: String,
+      default: null,
+    },
+    lastSeen: {
+      type: Date,
+      default: Date.now,
     },
   },
   { collection: 'User' },

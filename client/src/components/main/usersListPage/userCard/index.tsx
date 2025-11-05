@@ -14,8 +14,8 @@ interface UserProps {
 
 /**
  * User component renders the details of a user including its username and dateJoined.
- * Clicking on the component triggers the handleUserPage function,
- * and clicking on a tag triggers the clickTag function.
+ * Displays a green dot indicator if the user is currently online.
+ * Clicking on the component triggers the handleUserPage function.
  *
  * @param user - The user object containing user details.
  */
@@ -28,7 +28,10 @@ const UserCardView = (props: UserProps) => {
         <div className='user_card_name'>
           {user.firstName} {user.lastName}
         </div>
-        <div className='userUsername'>{user.username}</div>
+        <div className='userUsername'>
+          {user.isOnline && <span className='online-indicator'></span>}
+          {user.username}
+        </div>
       </div>
 
       <div className='user_card_right'>
