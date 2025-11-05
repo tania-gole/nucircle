@@ -1,6 +1,7 @@
 import './index.css';
 import useCommunityMessagesPage from '../../../hooks/useCommunityMessagesPage';
 import MessageCard from '../messageCard';
+import useUserContext from '../../../hooks/useUserContext';
 
 /**
  * Represents the CommunityMessagesPage component which displays the community chat room.
@@ -18,8 +19,12 @@ const CommunityMessages = () => {
     handleSendMessage,
     error,
   } = useCommunityMessagesPage();
+  const { user } = useUserContext();
   return (
     <div className='community-messages-page'>
+      <h2 className='community-chat-header'>
+        {selectedCommunity ? `My Community Chat: ${selectedCommunity.name}` : 'Select a Community'}
+      </h2>
       <div className='community-selector'>
         {communities.map(community => (
           <button
@@ -35,18 +40,18 @@ const CommunityMessages = () => {
 
       <div className='messages-container'>
         {messages.map(message => (
-          <MessageCard key={String(message._id)} message={message} />
+          <MessageCard key={String(message._id)} message={message} currentUser={user.username} />
         ))}
       </div>
-      <div className='message-input'>
-        <textarea
+      <div className='community-message-input'>
+        <input
           className='message-textbox'
           placeholder='Type your message here'
           value={newMessage}
           onChange={e => setNewMessage(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSendMessage}
         />
-        <div className='message-actions'>
+        <div className='community-message-actions'>
           <button type='button' className='send-button' onClick={handleSendMessage}>
             Send
           </button>

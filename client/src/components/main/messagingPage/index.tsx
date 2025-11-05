@@ -1,6 +1,7 @@
 import './index.css';
 import useMessagingPage from '../../../hooks/useMessagingPage';
 import MessageCard from '../messageCard';
+import useUserContext from '../../../hooks/useUserContext';
 
 /**
  * Represents the MessagingPage component which displays the public chat room.
@@ -8,15 +9,15 @@ import MessageCard from '../messageCard';
  */
 const MessagingPage = () => {
   const { messages, newMessage, setNewMessage, handleSendMessage, error } = useMessagingPage();
-
+  const { user } = useUserContext();
   return (
     <div className='chat-room'>
       <div className='chat-header'>
-        <h2>Chat Room</h2>
+        <h2>Global Chat Room</h2>
       </div>
-      <div className='chat-messages'>
+      <div className='global-chat-messages'>
         {messages.map(message => (
-          <MessageCard key={String(message._id)} message={message} />
+          <MessageCard key={String(message._id)} message={message} currentUser={user.username} />
         ))}
       </div>
       <div className='message-input'>
