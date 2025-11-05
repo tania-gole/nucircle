@@ -43,12 +43,15 @@ const Header = () => {
         <button onClick={handleSignOut} className='logout-button'>
           Log out
         </button>
-        <img
-          src={profileImage}
-          alt='Profile'
-          className='profile-image'
-          onClick={() => navigate(`/user/${currentUser.username}`)}
-        />
+        <div className='profile-container'>
+          <img
+            src={profileImage}
+            alt='Profile'
+            className='profile-image'
+            onClick={() => navigate(`/user/${currentUser.username}`)}
+          />
+          {currentUser.isOnline && <span className='profile-online-indicator'></span>}
+        </div>
       </div>
     </div>
   );
