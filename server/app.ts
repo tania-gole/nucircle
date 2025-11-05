@@ -35,7 +35,7 @@ const server = http.createServer(app);
 const socket: FakeSOSocket = new Server(server, {
   path: '/socket.io',
   cors: {
-    origin: `${process.env.CLIENT_URL}` || 'http://localhost:4530',
+    origin: process.env.CLIENT_URL || 'http://localhost:4530',
     credentials: true,
   },
 });
@@ -75,13 +75,15 @@ socket.on('connection', socket => {
       isOnline: true,
     });
 
-    // Notify all OTHER connected clients that this user came online
+    // Notify all connected clients that this user came online
     console.log(`User ${username} is online`);
   });
 
+  // Listen for disconnect event: when user logs out, closes browser, or loses connection
   socket.on('disconnect', async () => {
     console.log('User disconnected');
 
+    // Same username stored above - retrieve this
     const username = socket.data.username;
 
     if (username) {
@@ -94,7 +96,7 @@ socket.on('connection', socket => {
         return;
       }
 
-      // Broadcast to all clients that this user is offline
+      // Notify all connected clients that this user went offline
       socket.broadcast.emit('userStatusUpdate', {
         username,
         isOnline: false,
