@@ -1,7 +1,7 @@
 /* Container styles */
 .direct-message-container {
   display: flex;
-  height: 100vh;
+  height: 100%;
   gap: 16px;
   padding: 16px;
   box-sizing: border-box;
@@ -16,8 +16,10 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 0;
+  padding-top: 25px;
   box-sizing: border-box;
+  /* overflow: hidden; */
 }
 
 /* Chat list styles */
@@ -37,10 +39,13 @@
 }
 
 .create-chat-icon {
-  position: absolute;
-  bottom: 16px;
-  right: 20px;
+  position: sticky;
+  bottom: 20px;
+  margin-right: 6px;
+  align-self: auto;
   cursor: pointer;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .users-list-panel {
@@ -49,33 +54,6 @@
   height: 100%;
   position: relative;
 }
-
-
-
-
-.custom-button {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.custom-button:hover {
-  background-color: #0056b3;
-}
-
-.custom-input {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 10px;
-  font-size: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 
 
 /* Chat panel styles */
@@ -88,6 +66,7 @@
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
 
 .chat-container h2 {
@@ -99,43 +78,49 @@
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  /* border: 1px solid #ddd; */
   border-radius: 6px;
-  padding: 10px;
+  padding: 10px 0;
   margin-bottom: 16px;
   background-color: #fefefe;
   max-height: 400px;
-}
-
-.chat-message {
-  margin-bottom: 10px;
-}
-
-.chat-message strong {
-  color: #007bff;
 }
 
 .message-input {
   display: flex;
   gap: 8px;
   align-items: center;
+  margin-top: auto;
 }
 
-
-
-/* Create panel styles */
-.create-panel {
-  margin: 16px;
-  padding: 16px;
-  background-color: #fff;
+.custom-input {
   border: none;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  background-color: #FFF0F0;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.create-panel p {
-  margin-bottom: 8px;
-  color: #555;
+.custom-input:focus {
+  outline: none;
+  box-shadow: 0 0 8px -2px rgba(172, 172, 172, 0.481);
+}
+
+
+.custom-button {
+  background-color: #FF6B6B;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.custom-button:hover {
+  background-color: #e55a5a;
 }
 
 .direct-message-error {

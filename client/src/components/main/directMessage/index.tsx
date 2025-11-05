@@ -3,7 +3,7 @@ import useDirectMessage from '../../../hooks/useDirectMessage';
 import ChatsListCard from './chatsListCard';
 import UsersListPage from '../usersListPage';
 import MessageCard from '../messageCard';
-
+import useUserContext from '../../../hooks/useUserContext';
 /**
  * DirectMessage component renders a page for direct messaging between users.
  * It includes a list of users and a chat window to send and receive messages.
@@ -23,6 +23,8 @@ const DirectMessage = () => {
     handleCreateChat,
     error,
   } = useDirectMessage();
+
+  const { user } = useUserContext();
 
   return (
     <>
@@ -91,10 +93,16 @@ const DirectMessage = () => {
         <div className='chat-container'>
           {selectedChat ? (
             <>
-              <h2>Chat Participants: {selectedChat.participants.join(', ')}</h2>
+              <h2>
+                Chat with: {selectedChat.participants.filter(p => p !== user.username).join(', ')}
+              </h2>
               <div className='chat-messages'>
                 {selectedChat.messages.map(message => (
-                  <MessageCard key={String(message._id)} message={message} />
+                  <MessageCard
+                    key={String(message._id)}
+                    message={message}
+                    currentUser={user.username}
+                  />
                 ))}
               </div>
               <div className='message-input'>

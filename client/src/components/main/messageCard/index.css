@@ -3,35 +3,28 @@
   flex-direction: column;
   padding: 10px;
   margin: auto;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
+  margin-bottom: 20px;
   border-radius: 8px;
-  background-color: #f9f9f9;
-  width: 98%;
+  background-color: #F2F3F3;
+  width: 95%;
 }
 
-.message.sender {
-  align-self: flex-end;
-  background-color: #d1e7ff;
-}
-
-.message.receiver {
-  align-self: flex-start;
-  background-color: #ffffff;
+.message-mine {
+  background-color: #C4CAD3;
 }
 
 .message-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
-  font-size: 0.9rem;
+  margin-bottom: 0px;
+  font-size: 14px;
   color: #666;
 }
 
 .message-sender {
   font-weight: bold;
-  color: #333;
+  color: #37404D;
 }
 
 .message-time {
@@ -41,7 +34,7 @@
 
 .message-body {
   font-size: 1rem;
-  color: #333;
+  color: #37404D;
   line-height: 1.5;
   word-wrap: break-word;
 }
