@@ -48,6 +48,9 @@ const ProtectedRoute = ({
 const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
   const [user, setUser] = useState<SafeDatabaseUser | null>(null);
 
+  // Connects the socket when user logs in, disconnect when user logs out
+  useSocket(user?.username || null);
+
   return (
     <LoginContext.Provider value={{ setUser }}>
       <Routes>

@@ -12,7 +12,7 @@ let socket: Socket | null = null;
  * @param username - The logged-in user's username
  * @returns The socket instance for manual event listening if needed
  */
-export const useSocket = (username: string | null) => {
+export const useSocket = (username: string | null): void => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -53,8 +53,6 @@ export const useSocket = (username: string | null) => {
       }
     };
   }, [username]); // Re-run when username changes
-
-  return socketRef.current;
 };
 
 /**
