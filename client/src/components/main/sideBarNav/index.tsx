@@ -49,6 +49,11 @@ const SideBarNav = () => {
             Direct Messages
           </NavLink>
           <NavLink
+            to='/messaging/community-messages'
+            className={`menu_button message-options ${isActiveOption('/messaging/community-message')}`}>
+            Community Messages
+          </NavLink>
+          <NavLink
             to='/messaging'
             className={`menu_button message-options ${isActiveOption('/messaging')}`}>
             Global Messages
