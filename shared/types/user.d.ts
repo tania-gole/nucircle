@@ -25,10 +25,16 @@ export interface UserSignup {
  * - `password`: The user's password.
  * - `dateJoined`: The date when the user registered.
  * - `biography`: A short description or bio of the user (optional).
+ * - `isOnline`: A boolean value indicating if the user is currently connected to the platform.
+ * - `socketId`: The Socket.IO connection ID for real-time communication (null when offline).
+ * - `lastSeen`: The timestamp of when the user was last active or disconnected.
  */
 export interface User extends UserSignup {
   dateJoined: Date;
   biography?: string;
+  isOnline?: boolean;
+  socketId?: string | null;
+  lastSeen?: Date;
 }
 
 /**
