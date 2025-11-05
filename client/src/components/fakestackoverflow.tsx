@@ -23,6 +23,7 @@ import CommunityPage from './main/communities/communityPage';
 import AllCollectionsPage from './main/collections/allCollectionsPage';
 import CollectionPage from './main/collections/collectionPage';
 import NewCollectionPage from './main/collections/newCollectionPage';
+import { useSocket } from '../hooks/useSocket';
 
 const ProtectedRoute = ({
   user,
