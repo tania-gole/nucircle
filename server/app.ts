@@ -25,6 +25,7 @@ import gameController from './controllers/game.controller';
 import collectionController from './controllers/collection.controller';
 import communityController from './controllers/community.controller';
 import communityMessagesController from './controllers/communityMessagesController';
+// import authMiddleware from './middleware/auth';
 
 const MONGO_URL = `${process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'}/fake_so`;
 const PORT = parseInt(process.env.PORT || '8000');
@@ -101,21 +102,24 @@ try {
   console.error('Failed to load or initialize OpenAPI Validator:', e);
 }
 
+app.use('/api/user', userController(socket));
+
+const openApiDocument = yaml.parse(fs.readFileSync('./openapi.yaml', 'utf8'));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+console.log('Swagger UI is available at /api/docs');
+
+// app.use(authMiddleware); // Protect routes below this line
+
 app.use('/api/question', questionController(socket));
 app.use('/api/tags', tagController());
 app.use('/api/answer', answerController(socket));
 app.use('/api/comment', commentController(socket));
 app.use('/api/message', messageController(socket));
-app.use('/api/user', userController(socket));
 app.use('/api/chat', chatController(socket));
 app.use('/api/games', gameController(socket));
 app.use('/api/collection', collectionController(socket));
 app.use('/api/community', communityController(socket));
 app.use('/api/community/messages', communityMessagesController(socket));
-
-const openApiDocument = yaml.parse(fs.readFileSync('./openapi.yaml', 'utf8'));
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
-console.log('Swagger UI is available at /api/docs');
 
 // Export the app instance
 export { app, server, startServer };

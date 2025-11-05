@@ -116,3 +116,8 @@ export interface UpdateBiographyRequest extends Request {
     biography: string;
   };
 }
+
+export type AuthResponse = {
+  user: SafeDatabaseUser;
+  token: string;
+};
