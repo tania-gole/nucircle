@@ -7,6 +7,7 @@ import {
   DeleteCommunityRequest,
 } from '../types/types';
 import {
+  getCommunitiesByUser,
   getCommunity,
   getAllCommunities,
   toggleCommunityMembership,
@@ -22,6 +23,27 @@ import {
  */
 const communityController = (socket: FakeSOSocket) => {
   const router = express.Router();
+
+  /**
+   * Retrieves all communities that a user is a part of.
+   * @param req - The request object containing the username parameter
+   * @param res - The response object used to send back the result
+   */
+  const getCommunitiesByUserRoute = async (req: express.Request, res: Response): Promise<void> => {
+    const { username } = req.params;
+
+    try {
+      const communities = await getCommunitiesByUser(username);
+
+      if ('error' in communities) {
+        throw new Error(communities.error);
+      }
+
+      res.json(communities);
+    } catch (err: unknown) {
+      res.status(500).send(`Error retrieving user communities: ${(err as Error).message}`);
+    }
+  };
 
   /**
    * Retrieves a community by its ID.
@@ -190,6 +212,7 @@ const communityController = (socket: FakeSOSocket) => {
   // Registering routes
   router.get('/getCommunity/:communityId', getCommunityRoute);
   router.get('/getAllCommunities', getAllCommunitiesRoute);
+  router.get('/getUserCommunities/:username', getCommunitiesByUserRoute);
   router.post('/toggleMembership', toggleMembershipRoute);
   router.post('/create', createCommunityRoute);
   router.delete('/delete/:communityId', deleteCommunityRoute);
