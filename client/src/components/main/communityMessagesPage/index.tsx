@@ -45,11 +45,11 @@ const CommunityMessages = () => {
       </div>
       <div className='community-message-input'>
         <input
-          className='message-textbox'
+          className='community-message-textbox'
           placeholder='Type your message here'
           value={newMessage}
           onChange={e => setNewMessage(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSendMessage}
+          onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
         />
         <div className='community-message-actions'>
           <button type='button' className='send-button' onClick={handleSendMessage}>

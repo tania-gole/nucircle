@@ -56,6 +56,8 @@ const DirectMessage = () => {
                   key={String(chat._id)}
                   chat={chat}
                   handleChatSelect={handleChatSelect}
+                  participant={chat.participants.filter(p => p !== user.username).join(', ')}
+                  isActive={selectedChat?._id === chat._id}
                 />
               ))}
               <div className='create-chat-icon' onClick={() => setShowCreatePanel(true)}>
@@ -110,6 +112,7 @@ const DirectMessage = () => {
                   className='custom-input'
                   type='text'
                   value={newMessage}
+                  onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
                   onChange={e => setNewMessage(e.target.value)}
                   placeholder='Type a message...'
                 />

@@ -78,11 +78,11 @@
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  /* border: 1px solid #ddd; */
+  border: 1px solid #efefef;
   border-radius: 6px;
   padding: 10px 0;
   margin-bottom: 16px;
-  background-color: #fefefe;
+  background-color: #fdf8f8;
   max-height: 400px;
 }
 
