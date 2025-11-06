@@ -16,6 +16,8 @@ const SideBarNav = () => {
   const isActiveOption = (path: string) =>
     location.pathname === path ? 'message-option-selected ' : '';
 
+  const isMessagingActive = location.pathname.startsWith('/messaging');
+
   return (
     <div id='sideBarNav' className='sideBarNav'>
       <NavLink
@@ -37,7 +39,7 @@ const SideBarNav = () => {
         <NavLink
           to='/messaging/direct-message'
           id='menu_messaging'
-          className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
+          className={`menu_button ${isMessagingActive ? 'menu_selected' : ''}`}>
           Messaging
         </NavLink>
         {hovered && (
