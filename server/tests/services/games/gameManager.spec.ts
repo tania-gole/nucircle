@@ -1,8 +1,7 @@
 import NimModel from '../../../models/nim.model';
 import GameManager from '../../../services/games/gameManager';
 import NimGame from '../../../services/games/nim';
-import { MAX_NIM_OBJECTS } from '../../../types/constants';
-import { GameInstance, GameInstanceID, NimGameState, GameType } from '../../../types/types';
+import { GameType } from '../../../types/types';
 
 jest.mock('nanoid', () => ({
   nanoid: jest.fn(() => 'testGameID'), // Mock the return value

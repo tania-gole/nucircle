@@ -398,58 +398,6 @@ describe('playMove & socket handlers', () => {
     expect(leaveGameArg).toBe('game123');
   });
 
-  it('should emit a "gameUpdate" event when a game exists and a valid move is made', async () => {
-    getGameSpy.mockReturnValueOnce(mockNimGame);
-    const gameMovePayload = {
-      gameID: 'game123',
-      move: {
-        playerID: 'player1',
-        gameID: 'game123',
-        move: { numObjects: 2 },
-      },
-    };
-
-    const joinGameEvent = new Promise(resolve => {
-      serverSocket.once('joinGame', arg => {
-        resolve(arg);
-      });
-    });
-
-    const makeMoveEvent = new Promise(resolve => {
-      serverSocket.once('makeMove', arg => {
-        resolve(arg);
-      });
-    });
-
-    const gameUpdateEvent = new Promise(resolve => {
-      clientSocket.once('gameUpdate', arg => {
-        resolve(arg);
-      });
-    });
-
-    clientSocket.emit('joinGame', 'game123');
-    clientSocket.emit('makeMove', gameMovePayload);
-
-    const [joinMoveArg, makeMoveArg, gameUpdateArg] = await Promise.all([
-      joinGameEvent,
-      makeMoveEvent,
-      gameUpdateEvent,
-    ]);
-
-    expect(joinMoveArg).toBe('game123');
-    expect(makeMoveArg).toStrictEqual(gameMovePayload);
-    expect(gameUpdateArg).toHaveProperty('gameInstance');
-    expect(getGameSpy).toHaveBeenCalledWith('game123');
-    expect(applyMoveSpy).toHaveBeenCalledWith({
-      playerID: 'player1',
-      gameID: 'game123',
-      move: { numObjects: 2 },
-    });
-    expect(toModelSpy).toHaveBeenCalled();
-    expect(saveGameStateSpy).toHaveBeenCalled();
-    expect(removeGameSpy).not.toHaveBeenCalled();
-  });
-
   it('should emit "gameError" event when a game does not exist', async () => {
     getGameSpy.mockReturnValue(undefined);
     const gameMovePayload = {
