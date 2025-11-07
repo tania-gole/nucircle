@@ -20,11 +20,11 @@ describe('POST /create', () => {
     it('should return 200 with a game ID when successful', async () => {
       addGameSpy.mockResolvedValueOnce('testGameID');
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim' });
+      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(200);
       expect(response.text).toEqual(JSON.stringify('testGameID'));
-      expect(addGameSpy).toHaveBeenCalledWith('Nim');
+      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
     });
   });
 
@@ -60,21 +60,21 @@ describe('POST /create', () => {
     it('should return 500 if addGame fails', async () => {
       addGameSpy.mockResolvedValueOnce({ error: 'test error' });
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim' });
+      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when creating game: test error');
-      expect(addGameSpy).toHaveBeenCalledWith('Nim');
+      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
     });
 
     it('should return 500 if addGame throws an error', async () => {
       addGameSpy.mockRejectedValueOnce(new Error('test error'));
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim' });
+      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when creating game: test error');
-      expect(addGameSpy).toHaveBeenCalledWith('Nim');
+      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
     });
   });
 });
@@ -455,6 +455,16 @@ describe('playMove & socket handlers', () => {
     applyMoveSpy.mockImplementation(() => {
       mockNimGame.state.status = 'OVER';
     });
+    toModelSpy.mockReturnValueOnce({
+      state: {
+        moves: [],
+        remainingObjects: 0,
+        status: 'OVER',
+      },
+      gameID: 'game123',
+      players: ['player1', 'player2'],
+      gameType: 'Nim',
+    });
     const gameMovePayload = {
       gameID: 'game123',
       move: {
@@ -490,6 +500,9 @@ describe('playMove & socket handlers', () => {
       makeMoveEvent,
       gameUpdateEvent,
     ]);
+
+    // Wait for async saveGameState to complete and the status check to happen
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     expect(joinMoveArg).toBe('game123');
     expect(makeMoveArg).toStrictEqual(gameMovePayload);
