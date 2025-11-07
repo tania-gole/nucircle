@@ -10,8 +10,9 @@ import Game from './game';
 class NimGame extends Game<NimGameState, NimMove> {
   /**
    * Constructor for the NimGame class, initializes the game state and type.
+   * @param createdBy The username of the user creating the game.
    */
-  public constructor() {
+  public constructor(createdBy: string) {
     super(
       {
         status: 'WAITING_TO_START',
@@ -19,6 +20,7 @@ class NimGame extends Game<NimGameState, NimMove> {
         remainingObjects: MAX_NIM_OBJECTS,
       },
       'Nim',
+      createdBy,
     );
   }
 
@@ -106,7 +108,7 @@ class NimGame extends Game<NimGameState, NimMove> {
       throw new Error('Cannot join game: already started');
     }
 
-    if (this._players.includes(playerID)) {
+    if (this.state.player1 === playerID || this.state.player2 === playerID) {
       throw new Error('Cannot join game: player already in game');
     }
 
@@ -115,7 +117,6 @@ class NimGame extends Game<NimGameState, NimMove> {
     } else if (this.state.player2 === undefined) {
       this.state = { ...this.state, player2: playerID };
     }
-    // Removed auto-start logic - game will start when Start Game button is pressed
   }
 
   /**

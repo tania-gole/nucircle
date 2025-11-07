@@ -24,14 +24,18 @@ const gameController = (socket: FakeSOSocket) => {
    * The game starts in the WAITING_TO_START status with no players or questions yet.
    * 
    * Creates a new game based on the provided game type and responds with the created game or an error message.
-   * @param req The request object containing the game type.
+   * @param req The request object containing the game type and creator username.
    * @param res The response object to send the result.
    */
   const createGame = async (req: CreateGameRequest, res: Response) => {
     try {
-      const { gameType } = req.body;
+      const { gameType, createdBy } = req.body;
 
-      const newGame = await GameManager.getInstance().addGame(gameType);
+      if (!createdBy) {
+        throw new Error('Creator username is required');
+      }
+
+      const newGame = await GameManager.getInstance().addGame(gameType, createdBy);
 
       if (typeof newGame !== 'string') {
         throw new Error(newGame.error);
@@ -59,6 +63,11 @@ const gameController = (socket: FakeSOSocket) => {
     try {
       const { gameID, playerID } = req.body;
 
+      if (!playerID) {
+        res.status(400).send('Player ID is required');
+        return;
+      }
+
       const game = await GameManager.getInstance().joinGame(gameID, playerID);
 
       if ('error' in game) {
@@ -80,6 +89,11 @@ const gameController = (socket: FakeSOSocket) => {
   const leaveGame = async (req: GameRequest, res: Response) => {
     try {
       const { gameID, playerID } = req.body;
+
+      if (!playerID) {
+        res.status(400).send('Player ID is required');
+        return;
+      }
 
       const game = await GameManager.getInstance().leaveGame(gameID, playerID);
 
@@ -115,7 +129,7 @@ const gameController = (socket: FakeSOSocket) => {
    * TRIVIA FEATURE: Part 3 - Starting the Game
    * When a user clicks "Start Game", this endpoint:
    * 1. Calls GameManager.startGame() which calls TriviaGame.startGame()
-   * 2. has TriviaGame fetch 10 random questions from the database
+   * 2. Has TriviaGame fetch 10 random questions from the database
    * 3. Changes the game status from WAITING_TO_START to IN_PROGRESS
    * 4. Emits a socket event to notify all players that the game has begun
    * 
@@ -141,13 +155,42 @@ const gameController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Deletes a game with the specified game ID.
-   * @param req The request object containing the game ID.
+   * Deletes a game with the specified game ID; only the original creator can delete the game, except for stale games (IN_PROGRESS with no active players) which any user can delete.
+   * @param req The request object containing the game ID and username.
    * @param res The response object to send the result.
    */
   const deleteGame = async (req: GameRequest, res: Response) => {
     try {
-      const { gameID } = req.body;
+      const { gameID, username } = req.body;
+
+      if (!username) {
+        res.status(400).send('Username is required to delete a game');
+        return;
+      }
+
+      // Check if game exists
+      const gameData = await GameModel.findOne({ gameID });
+      if (!gameData) {
+        res.status(404).send('Game not found');
+        return;
+      }
+
+      // Check if game is stale (IN_PROGRESS but no active players)
+      const state = gameData.state as any;
+      const isStale = gameData.state?.status === 'IN_PROGRESS' && 
+        (!state?.player1 && !state?.player2);
+
+      // Allow deletion if:
+      // 1. Game is stale (anyone can delete)
+      // 2. User is creator
+      // 3. Old game without createdBy but user is a player
+      const isPlayer = gameData.players && gameData.players.includes(username);
+      const canDelete = isStale || gameData.createdBy === username || (!gameData.createdBy && isPlayer);
+      
+      if (!canDelete) {
+        res.status(403).send('Only the game creator can delete this game');
+        return;
+      }
 
       // Remove from GameManager if it exists
       GameManager.getInstance().removeGame(gameID);

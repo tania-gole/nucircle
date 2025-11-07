@@ -44,6 +44,7 @@ const findGames = async (
         gameID: game.gameID as GameInstanceID,
         players: game.players as string[],
         gameType: game.gameType as GameType,
+        createdBy: (game as any).createdBy,
       }))
       .reverse();
   } catch (error) {

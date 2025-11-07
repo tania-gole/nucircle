@@ -6,7 +6,7 @@ describe('TriviaGame tests', () => {
   let triviaGame : TriviaGame;
 
   beforeEach(() => {
-    triviaGame = new TriviaGame();
+    triviaGame = new TriviaGame('testUser');
   });
 
   describe('constructor', () => {
@@ -153,43 +153,36 @@ describe('TriviaGame tests', () => {
       expect(triviaGame.state.player2).toBeUndefined();
       expect(triviaGame.state.status).toEqual('OVER');
 
-      // act
       expect(() => triviaGame.join('player3')).toThrow('Cannot join game: already started');
     });
 
     it('throws an error if trying to join a game the player is already in', () => {
-      // assemble
       triviaGame.join('player1');
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
 
-      // act
       expect(() => triviaGame.join('player1')).toThrow('Cannot join game: player already in game');
     });
   });
 
   describe('leave', () => {
     it('should remove player 1 from a game waiting to start', () => {
-      // assemble
       triviaGame.join('player1');
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
 
-      // act
       triviaGame.leave('player1');
       expect(triviaGame.state.player1).toBeUndefined();
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
     });
 
     it('should remove player 1 from a game in progress and set it to over', () => {
-      // assemble
       triviaGame.join('player1');
       triviaGame.join('player2');
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.player2).toEqual('player2');
       expect(triviaGame.state.status).toEqual('IN_PROGRESS');
 
-      // act
       triviaGame.leave('player1');
       expect(triviaGame.state.player1).toBeUndefined();
       expect(triviaGame.state.status).toEqual('OVER');
@@ -197,14 +190,12 @@ describe('TriviaGame tests', () => {
     });
 
     it('should remove player 2 from a game in progress and set it to over', () => {
-      // assemble
       triviaGame.join('player1');
       triviaGame.join('player2');
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.player2).toEqual('player2');
       expect(triviaGame.state.status).toEqual('IN_PROGRESS');
 
-      // act
       triviaGame.leave('player2');
       expect(triviaGame.state.player2).toBeUndefined();
       expect(triviaGame.state.status).toEqual('OVER');
@@ -212,7 +203,6 @@ describe('TriviaGame tests', () => {
     });
 
     it('throws an error if trying to join a game the player is not in', () => {
-      // act
       expect(() => triviaGame.leave('player1')).toThrow(
         'Cannot leave game: player player1 is not in the game.',
       );

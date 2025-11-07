@@ -58,6 +58,14 @@ const useGamePage = () => {
 
   useEffect(() => {
     const handleJoinGame = async (id: string) => {
+      // Check if already joined this game
+      if (joinedGameID === id && gameInstance) {
+        const state = gameInstance.state as any;
+        if (state?.player1 === user.username || state?.player2 === user.username) {
+          return; // Already in this game
+        }
+      }
+
       try {
         // Join the socket room first to ensure receive updates
         socket.emit('joinGame', id);
@@ -67,13 +75,18 @@ const useGamePage = () => {
         console.log('Game players:', joinedGame.players);
         setGameInstance(joinedGame);
         setJoinedGameID(joinedGame.gameID);
+        setError(null);
       } catch (error) {
         console.error('Error joining game:', error);
-        setError(error instanceof Error ? error.message : 'Error joining game');
+        const errorMessage = error instanceof Error ? error.message : 'Error joining game';
+        // Don't show error if user is already in game (might be a race condition)
+        if (!errorMessage.includes('already in game')) {
+          setError(errorMessage);
+        }
       }
     };
 
-    if (gameID) {
+    if (gameID && gameID !== joinedGameID) {
       handleJoinGame(gameID);
     }
 

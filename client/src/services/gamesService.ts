@@ -17,10 +17,11 @@ const GAMES_API_URL = `/api/games`;
  * @returns A promise resolving to the game ID of the created game.
  * @throws Error if there is an issue while creating the game.
  */
-const createGame = async (gameType: GameType): Promise<string> => {
+const createGame = async (gameType: GameType, createdBy: string): Promise<string> => {
   try {
     const res = await api.post(`${GAMES_API_URL}/create`, {
       gameType,
+      createdBy,
     });
 
     if (res.status !== 200) {
@@ -178,12 +179,14 @@ const startGame = async (gameID: string): Promise<GameInstance<GameState>> => {
 /**
  * Function to delete a game.
  * @param gameID The ID of the game to delete.
+ * @param username The username of the user attempting to delete the game.
  * @returns A promise resolving when the game is deleted.
  * @throws Error if there is an issue while deleting the game.
  */
-const deleteGame = async (gameID: string): Promise<void> => {
+const deleteGame = async (gameID: string, username: string): Promise<void> => {
   const res = await api.post(`${GAMES_API_URL}/delete`, {
     gameID,
+    username,
   });
 
   if (res.status !== 200) {

@@ -33,13 +33,14 @@ class GameManager {
   /**
    * Factory method to create a new game based on the provided game type.
    * @param gameType The type of the game to create.
+   * @param createdBy The username of the user creating the game.
    * @returns A promise resolving to the created game instance.
    * @throws an error for an unsupported game type
    */
-  private async _gameFactory(gameType: GameType): Promise<Game<GameState, BaseMove>> {
+  private async _gameFactory(gameType: GameType, createdBy: string): Promise<Game<GameState, BaseMove>> {
     switch (gameType) {
       case 'Nim': {
-        const newGame = new NimGame();
+        const newGame = new NimGame(createdBy);
         try {
           await NimModel.create(newGame.toModel());
         } catch (error) {
@@ -49,7 +50,7 @@ class GameManager {
         return newGame;
       }
       case 'Trivia': {
-        const newGame = new TriviaGame();
+        const newGame = new TriviaGame(createdBy);
         try {
           await GameModel.create(newGame.toModel());
         } catch (error) {
@@ -83,11 +84,12 @@ class GameManager {
    * 
    * Creates and adds a new game to the manager games map.
    * @param gameType The type of the game to add.
+   * @param createdBy The username of the user creating the game.
    * @returns The game ID or an error message.
    */
-  public async addGame(gameType: GameType): Promise<GameInstanceID | { error: string }> {
+  public async addGame(gameType: GameType, createdBy: string): Promise<GameInstanceID | { error: string }> {
     try {
-      const newGame = await this._gameFactory(gameType);
+      const newGame = await this._gameFactory(gameType, createdBy);
       this._games.set(newGame.id, newGame);
 
       return newGame.id;
@@ -125,19 +127,27 @@ class GameManager {
 
       // Recreate the game instance based on game type
       let game: Game<GameState, BaseMove>;
+      // just in case there are old games
+      const createdBy = gameData.createdBy || 'unknown';
+      const state = gameData.state as any;
+      // Sync players array with actual player1/player2 state
+      const activePlayers: string[] = [];
+      if (state?.player1) activePlayers.push(state.player1);
+      if (state?.player2) activePlayers.push(state.player2);
+      
       if (gameData.gameType === 'Nim') {
-        const nimGame = new NimGame();
+        const nimGame = new NimGame(createdBy);
         // Override the ID and restore state
         Object.defineProperty(nimGame, 'id', { value: gameID, writable: false });
         (nimGame as any)._state = gameData.state;
-        (nimGame as any)._players = gameData.players || [];
+        (nimGame as any)._players = activePlayers;
         game = nimGame;
       } else if (gameData.gameType === 'Trivia') {
-        const triviaGame = new TriviaGame();
+        const triviaGame = new TriviaGame(createdBy);
         // Override the ID and restore state
         Object.defineProperty(triviaGame, 'id', { value: gameID, writable: false });
         (triviaGame as any)._state = gameData.state;
-        (triviaGame as any)._players = gameData.players || [];
+        (triviaGame as any)._players = activePlayers;
         game = triviaGame;
       } else {
         console.error(`Unknown game type: ${gameData.gameType}`);
@@ -177,21 +187,16 @@ class GameManager {
         throw new Error('Game requested does not exist.');
       }
 
-      const stateBefore = gameToJoin.state as any;
-      console.log(`Before join - Status: ${gameToJoin.state.status}, Players: ${stateBefore.player1 || 'none'}, ${stateBefore.player2 || 'none'}`);
+      // Check if player is already in the game - if so, just return current state
+      const state = gameToJoin.state as any;
+      if (state?.player1 === playerID || state?.player2 === playerID) {
+        return gameToJoin.toModel();
+      }
       
       await gameToJoin.join(playerID);
-      
-      const stateAfter = gameToJoin.state as any;
-      console.log(`After join - Status: ${gameToJoin.state.status}, Players: ${stateAfter.player1 || 'none'}, ${stateAfter.player2 || 'none'}`);
-      console.log(`_players array: ${JSON.stringify((gameToJoin as any)._players)}`);
-      
       await gameToJoin.saveGameState();
       
-      const model = gameToJoin.toModel();
-      console.log(`Returning model - Status: ${model.state.status}, Players array: ${JSON.stringify(model.players)}`);
-      
-      return model;
+      return gameToJoin.toModel();
     } catch (error) {
       return { error: (error as Error).message };
     }

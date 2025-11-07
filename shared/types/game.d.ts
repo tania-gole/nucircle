@@ -33,12 +33,14 @@ export interface GameState {
  * gameID: The unique identifier for the game instance.
  * players: An array of player IDs participating in the game.
  * gameType: The type of game (e.g., 'Nim').
+ * createdBy: The username of the user who created the game.
  */
 export interface GameInstance<T extends GameState> {
   state: T;
   gameID: GameInstanceID;
   players: string[];
   gameType: GameType;
+  createdBy?: string;
 }
 
 /**
@@ -130,10 +132,12 @@ export interface TriviaGameState extends WinnableGameState {
 /**
  * Interface extending the request body when creating a game, which contains:
  * gameType: The type of game to be created (e.g., 'Nim').
+ * createdBy: The username of the user creating the game.
  */
 export interface CreateGameRequest extends Request {
   body: {
     gameType: GameType;
+    createdBy: string;
   };
 }
 
@@ -159,7 +163,8 @@ export interface GetGamesRequest extends Request {
 export interface GameRequest extends Request {
   body: {
     gameID: GameInstanceID;
-    playerID: string;
+    playerID?: string;
+    username?: string;
   };
 }
 

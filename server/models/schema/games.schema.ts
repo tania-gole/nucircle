@@ -29,6 +29,10 @@ const gameSchema: Schema = new Schema(
       enum: ['Nim', 'Trivia'],
       required: true,
     },
+    createdBy: {
+      type: String,
+      required: true,
+    },
   },
   { collection: 'Game' },
 );

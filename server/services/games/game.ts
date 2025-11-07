@@ -18,15 +18,19 @@ abstract class Game<StateType extends GameState, MoveType> {
 
   protected _gameType: GameType;
 
+  protected _createdBy: string;
+
   /**
    * Creates a new game instance with the provided initial state and game type.
    * @param initialState The initial state of the game.
    * @param gameType The type of the game.
+   * @param createdBy The username of the user creating the game.
    */
-  public constructor(initialState: StateType, gameType: GameType) {
+  public constructor(initialState: StateType, gameType: GameType, createdBy: string) {
     this.id = nanoid() as GameInstanceID;
     this._state = initialState;
     this._gameType = gameType;
+    this._createdBy = createdBy;
   }
 
   /**
@@ -101,6 +105,7 @@ abstract class Game<StateType extends GameState, MoveType> {
       gameID: this.id,
       players: [...this._players],
       gameType: this._gameType,
+      createdBy: this._createdBy,
     };
   }
 

@@ -42,11 +42,11 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
 
       const gameManager = GameManager.getInstance();
-      const gameID = await gameManager.addGame('Nim');
+      const gameID = await gameManager.addGame('Nim', 'testUser');
 
       expect(gameID).toEqual('testGameID');
       expect(mapSetSpy).toHaveBeenCalledWith(gameID, expect.any(NimGame));
@@ -55,7 +55,7 @@ describe('GameManager', () => {
     it('should return an error for an invalid game type', async () => {
       const gameManager = GameManager.getInstance();
       // casting string for error testing purposes
-      const error = await gameManager.addGame('fakeGame' as GameType);
+      const error = await gameManager.addGame('fakeGame' as GameType, 'testUser');
 
       expect(mapSetSpy).not.toHaveBeenCalled();
       expect(error).toHaveProperty('error');
@@ -67,7 +67,7 @@ describe('GameManager', () => {
 
       const gameManager = GameManager.getInstance();
       // casting string for error testing purposes
-      const error = await gameManager.addGame('Nim');
+      const error = await gameManager.addGame('Nim', 'testUser');
 
       expect(mapSetSpy).not.toHaveBeenCalled();
       expect(error).toHaveProperty('error');
@@ -81,12 +81,12 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
 
       // assemble
       const gameManager = GameManager.getInstance();
-      const gameID = await gameManager.addGame('Nim');
+      const gameID = await gameManager.addGame('Nim', 'testUser');
       expect(gameManager.getActiveGameInstances().length).toEqual(1);
 
       if (typeof gameID === 'string') {
@@ -122,11 +122,11 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
 
       gameManager = GameManager.getInstance();
-      const addGameResult = await gameManager.addGame('Nim');
+      const addGameResult = await gameManager.addGame('Nim', 'testUser');
 
       if (typeof addGameResult === 'string') {
         gameID = addGameResult;
@@ -173,12 +173,12 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
       jest.spyOn(NimGame.prototype, 'saveGameState').mockResolvedValue();
 
       gameManager = GameManager.getInstance();
-      const addGameResult = await gameManager.addGame('Nim');
+      const addGameResult = await gameManager.addGame('Nim', 'testUser');
 
       if (typeof addGameResult === 'string') {
         gameID = addGameResult;
@@ -261,10 +261,10 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
 
-      const gameID = await gameManager.addGame('Nim');
+      const gameID = await gameManager.addGame('Nim', 'testUser');
 
       if (typeof gameID === 'string') {
         // act
@@ -294,11 +294,11 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
       // assemble
       const gameManager = GameManager.getInstance();
-      await gameManager.addGame('Nim');
+      await gameManager.addGame('Nim', 'testUser');
 
       // act
       const games = gameManager.getActiveGameInstances();

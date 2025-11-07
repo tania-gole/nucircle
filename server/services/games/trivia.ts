@@ -20,8 +20,9 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
 
   /**
    * Constructor for the TriviaGame class which initializes the game state and type.
+   * @param createdBy The username of the user creating the game.
    */
-  public constructor() {
+  public constructor(createdBy: string) {
     super(
       {
         status: 'WAITING_TO_START',
@@ -33,6 +34,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
         player2Score: 0,
       },
       'Trivia',
+      createdBy,
     );
   }
 
@@ -44,15 +46,8 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
    */
   private async _fetchRandomQuestions(): Promise<void> {
     try {
-      // MongoDB aggregation
-      const questions = await TriviaQuestionModel.aggregate([
-        { $sample: { size: 10 } },
-      ]);
-
-      // Store correct answers separately for players
+      const questions = await TriviaQuestionModel.aggregate([{ $sample: { size: 10 } }]);
       this.correctAnswers = questions.map((q: { correctAnswer: number }) => q.correctAnswer);
-
-      // Map to the TriviaQuestion format 
       this.state = {
         ...this.state,
         questions: questions.map((q: { _id: { toString: () => string }; question: string; options: string[] }) => ({
@@ -101,7 +96,6 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     // Check if the player has already answered the question
     const isPlayer1 = playerID === this.state.player1;
     const playerAnswers = isPlayer1 ? this.state.player1Answers : this.state.player2Answers;
-    
     if (playerAnswers.length > this.state.currentQuestionIndex) {
       throw new Error('Invalid move: player has already answered this question');
     }
@@ -118,24 +112,18 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
   // Checks if game has ended and determines the winner
   private _gameEndCheck(): void {
     if (this.state.currentQuestionIndex >= this.state.questions.length) {
-      const player1Score = this.state.player1Score;
-      const player2Score = this.state.player2Score;
-
+      const { player1Score, player2Score, player1, player2 } = this.state;
       let winners: string[] = [];
-      if (player1Score > player2Score && this.state.player1) {
-        winners = [this.state.player1];
-      } else if (player2Score > player1Score && this.state.player2) {
-        winners = [this.state.player2];
-      } else if (this.state.player1 && this.state.player2) {
-
-        winners = [this.state.player1, this.state.player2];
+      
+      if (player1Score > player2Score && player1) {
+        winners = [player1];
+      } else if (player2Score > player1Score && player2) {
+        winners = [player2];
+      } else if (player1 && player2) {
+        winners = [player1, player2];
       }
 
-      this.state = {
-        ...this.state,
-        status: 'OVER',
-        winners,
-      };
+      this.state = { ...this.state, status: 'OVER', winners };
     }
   }
 
@@ -156,8 +144,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
 
     const { playerID, move: answer } = move;
     const isPlayer1 = playerID === this.state.player1;
-    const correctAnswer = this.correctAnswers[this.state.currentQuestionIndex];
-    const isCorrect = answer.answerIndex === correctAnswer;
+    const isCorrect = answer.answerIndex === this.correctAnswers[this.state.currentQuestionIndex];
 
     if (isPlayer1) {
       this.state = {
@@ -174,10 +161,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     }
 
     if (this._bothPlayersAnswered()) {
-      this.state = {
-        ...this.state,
-        currentQuestionIndex: this.state.currentQuestionIndex + 1,
-      };
+      this.state = { ...this.state, currentQuestionIndex: this.state.currentQuestionIndex + 1 };
     }
 
     this._gameEndCheck();
@@ -193,7 +177,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
       throw new Error('Cannot join game: already started');
     }
 
-    if (this._players.includes(playerID)) {
+    if (this.state.player1 === playerID || this.state.player2 === playerID) {
       throw new Error('Cannot join game: player already in game');
     }
 
@@ -202,13 +186,12 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     } else if (this.state.player2 === undefined) {
       this.state = { ...this.state, player2: playerID };
     }
-    // Removed auto-start logic - game will start when Start Game button is pressed
   }
 
   /**
    * TRIVIA FEATURE: Starting the Game
    * Called when the "Start Game" button is clicked. Fetches 10 random questions from the database and changes status from WAITING_TO_START to IN_PROGRESS.
-   * Starts the game which can be started with 1 or 2 players.
+   * Requires 2 players to start.
    * @throws Will throw an error if the game cannot be started.
    */
   public async startGame(): Promise<void> {
@@ -216,11 +199,10 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
       throw new Error('Game is not waiting to start');
     }
 
-    if (this.state.player1 === undefined) {
-      throw new Error('Cannot start game: no players in game');
+    if (this.state.player1 === undefined || this.state.player2 === undefined) {
+      throw new Error('Cannot start game: requires 2 players');
     }
 
-    // Fetch questions & start the game
     await this._fetchRandomQuestions();
     this.state = { ...this.state, status: 'IN_PROGRESS' };
   }

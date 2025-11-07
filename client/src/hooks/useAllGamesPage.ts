@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createGame, getGames, deleteGame } from '../services/gamesService';
 import { GameInstance, GameState, GameType } from '../types/types';
+import useUserContext from './useUserContext';
 
 /**
  * Custom hook to manage the state and logic for the "All Games" page, including fetching games,
@@ -16,6 +17,7 @@ import { GameInstance, GameState, GameType } from '../types/types';
  */
 const useAllGamesPage = () => {
   const navigate = useNavigate();
+  const { user } = useUserContext();
   const [availableGames, setAvailableGames] = useState<GameInstance<GameState>[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ const useAllGamesPage = () => {
   const handleCreateGame = async (gameType: GameType) => {
     try {
       setError(null); // Clear any previous errors
-      await createGame(gameType);
+      await createGame(gameType, user.username);
       await fetchGames(); // Refresh the list after creating a game
     } catch (createGameError) {
       const errorMessage = createGameError instanceof Error ? createGameError.message : 'Error creating game';
@@ -49,7 +51,7 @@ const useAllGamesPage = () => {
   const handleDeleteGame = async (gameID: string) => {
     try {
       setError(null);
-      await deleteGame(gameID);
+      await deleteGame(gameID, user.username);
       await fetchGames(); // Refresh the list after deleting a game
     } catch (deleteGameError) {
       setError('Error deleting game');

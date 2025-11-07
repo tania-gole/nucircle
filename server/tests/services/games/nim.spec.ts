@@ -7,7 +7,7 @@ describe('NimGame tests', () => {
   let nimGame: NimGame;
 
   beforeEach(() => {
-    nimGame = new NimGame();
+    nimGame = new NimGame('testUser');
   });
 
   describe('constructor', () => {
@@ -311,7 +311,7 @@ describe('NimGame tests', () => {
 
     it('should throw an error if the game is not in progress', () => {
       // assemble
-      const newGame = new NimGame();
+      const newGame = new NimGame('testUser');
       newGame.join('player1');
 
       // act + assess
@@ -321,7 +321,7 @@ describe('NimGame tests', () => {
 
     it('should throw an error if the game is not in progress', () => {
       // assemble
-      const newGame = new NimGame();
+      const newGame = new NimGame('testUser');
       newGame.join('player1');
       newGame.join('player2');
       newGame.leave('player2');
