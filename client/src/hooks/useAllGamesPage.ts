@@ -24,7 +24,7 @@ const useAllGamesPage = () => {
 
   const fetchGames = async () => {
     try {
-      setError(null); // Clear any previous errors
+      setError(null);
       const games = await getGames(undefined, undefined);
       setAvailableGames(games);
     } catch (getGamesError) {
@@ -34,11 +34,12 @@ const useAllGamesPage = () => {
 
   const handleCreateGame = async (gameType: GameType) => {
     try {
-      setError(null); // Clear any previous errors
+      setError(null);
       await createGame(gameType, user.username);
-      await fetchGames(); // Refresh the list after creating a game
+      await fetchGames();
     } catch (createGameError) {
-      const errorMessage = createGameError instanceof Error ? createGameError.message : 'Error creating game';
+      const errorMessage =
+        createGameError instanceof Error ? createGameError.message : 'Error creating game';
       setError(errorMessage);
       console.error('Error creating game:', createGameError);
     }

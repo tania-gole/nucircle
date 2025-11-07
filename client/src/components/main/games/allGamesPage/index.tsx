@@ -8,7 +8,7 @@ import GameCard from './gameCard';
  * - Create a new Trivia Quiz game, with the button opening the modal
  * - See all available games in a list
  * - Click "Join" on a game to enter it
- * 
+ *
  * Component to display the "All Games" page that lets players view, create, and join games
  * @returns A React component that includes:
  * - A Create Game button to open a modal for selecting a game type
@@ -55,7 +55,12 @@ const AllGamesPage = () => {
           </button>
           <div className='game-items'>
             {availableGames.map(game => (
-              <GameCard key={game.gameID} game={game} handleJoin={handleJoin} handleDelete={handleDeleteGame} />
+              <GameCard
+                key={game.gameID}
+                game={game}
+                handleJoin={handleJoin}
+                handleDelete={handleDeleteGame}
+              />
             ))}
           </div>
         </div>

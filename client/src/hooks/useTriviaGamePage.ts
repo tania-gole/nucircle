@@ -9,7 +9,7 @@ import { GameInstance, TriviaGameState, GameMove, TriviaAnswer } from '../types/
  * - Checks if the current player has already answered the current question
  * - When the user clicks "Submit Answer", it emits the 'makeMove' socket event with answer
  * - Server processes answer and emits gameUpdate, which updates gameInstance
- * 
+ *
  * Custom hook to manage the state and logic for the Trivia game page that includes submitting answers and tracking player responses
  * @param gameInstance The current instance of the Trivia game
  * @returns An object containing:
@@ -27,7 +27,7 @@ const useTriviaGamePage = (gameInstance: GameInstance<TriviaGameState>) => {
   const playerAnswers = isPlayer1
     ? gameInstance.state.player1Answers
     : gameInstance.state.player2Answers;
-  
+
   const hasAnswered = playerAnswers.length > gameInstance.state.currentQuestionIndex;
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -48,7 +48,7 @@ const useTriviaGamePage = (gameInstance: GameInstance<TriviaGameState>) => {
     if (selectedAnswer === null || hasAnswered) return;
 
     const currentQuestion = gameInstance.state.questions[gameInstance.state.currentQuestionIndex];
-    
+
     const triviaMove: GameMove<TriviaAnswer> = {
       playerID: user.username,
       gameID: gameInstance.gameID,

@@ -10,13 +10,13 @@ import TriviaQuestionModel from '../../models/triviaQuestion.model';
  * - Answer validation and scoring
  * - Progress tracking (current question, player answers, scores)
  * - Game state changing (WAITING_TO_START -> IN_PROGRESS -> OVER)
- * 
+ *
  * Represents a game of Trivia, extending the generic Game class.
- * 
+ *
  * This class contains the specific game logic for playing a Trivia Quiz game
  */
 class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
-  private correctAnswers: number[] = [];
+  private _correctAnswers: number[] = [];
 
   /**
    * Constructor for the TriviaGame class which initializes the game state and type.
@@ -47,14 +47,16 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
   private async _fetchRandomQuestions(): Promise<void> {
     try {
       const questions = await TriviaQuestionModel.aggregate([{ $sample: { size: 10 } }]);
-      this.correctAnswers = questions.map((q: { correctAnswer: number }) => q.correctAnswer);
+      this._correctAnswers = questions.map((q: { correctAnswer: number }) => q.correctAnswer);
       this.state = {
         ...this.state,
-        questions: questions.map((q: { _id: { toString: () => string }; question: string; options: string[] }) => ({
-          questionId: q._id.toString(),
-          question: q.question,
-          options: q.options,
-        })),
+        questions: questions.map(
+          (q: { _id: { toString: () => string }; question: string; options: string[] }) => ({
+            questionId: q._id.toString(),
+            question: q.question,
+            options: q.options,
+          }),
+        ),
       };
     } catch (error) {
       throw new Error(`Failed to fetch trivia questions: ${(error as Error).message}`);
@@ -64,7 +66,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
   /**
    * TRIVIA FEATURE: Answer Validation
    * Ensures that the game is in progress, player is in game, & the answer index is valid (0-3), the question ID matches current question, & the player hasn't already answered.
-   * 
+   *
    * Validates the answer submission
    * @param gameMove The move to validate
    * @throws Error if the move is invalid
@@ -114,7 +116,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     if (this.state.currentQuestionIndex >= this.state.questions.length) {
       const { player1Score, player2Score, player1, player2 } = this.state;
       let winners: string[] = [];
-      
+
       if (player1Score > player2Score && player1) {
         winners = [player1];
       } else if (player2Score > player1Score && player2) {
@@ -135,7 +137,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
    * 3. Checks if the answer matches the correct answer and updates their score
    * 4. If both players answered, it increments currentQuestionIndex
    * 5. Checks if the game is over (all 10 questions have been answered) and determines the winner
-   * 
+   *
    * Applies a move (an answer submission) to the game
    * @param move The move to apply
    */
@@ -144,7 +146,7 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
 
     const { playerID, move: answer } = move;
     const isPlayer1 = playerID === this.state.player1;
-    const isCorrect = answer.answerIndex === this.correctAnswers[this.state.currentQuestionIndex];
+    const isCorrect = answer.answerIndex === this._correctAnswers[this.state.currentQuestionIndex];
 
     if (isPlayer1) {
       this.state = {

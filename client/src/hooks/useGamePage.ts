@@ -4,6 +4,11 @@ import useUserContext from './useUserContext';
 import { GameErrorPayload, GameInstance, GameState, GameUpdatePayload } from '../types/types';
 import { joinGame, startGame, leaveGame } from '../services/gamesService';
 
+interface GameWithPlayerState extends GameState {
+  player1?: string;
+  player2?: string;
+}
+
 /**
  * TRIVIA FEATURE: Client - Game Page State Management
  * This hook manages the game page lifecycle, as it:
@@ -12,7 +17,7 @@ import { joinGame, startGame, leaveGame } from '../services/gamesService';
  * - Handles "Start Game" button click
  * - Handles "Leave Game" button click
  * - Updates the gameInstance state when socket events arrive
- * 
+ *
  * Custom hook to manage the state and logic for the game page, including joining, leaving the game, and handling game updates.
  * @returns An object containing the following:
  * - `gameInstance`: The current game instance, or null if no game is joined.
@@ -60,7 +65,7 @@ const useGamePage = () => {
     const handleJoinGame = async (id: string) => {
       // Check if already joined this game
       if (joinedGameID === id && gameInstance) {
-        const state = gameInstance.state as any;
+        const state = gameInstance.state as GameWithPlayerState;
         if (state?.player1 === user.username || state?.player2 === user.username) {
           return; // Already in this game
         }

@@ -2,6 +2,12 @@ import { GameInstance, GameState, GameStatus, GameType } from '../types/types';
 import api from './config';
 import axios from 'axios';
 
+interface ValidationError {
+  path?: string;
+  message?: string;
+  error?: string;
+}
+
 const GAMES_API_URL = `/api/games`;
 
 /**
@@ -11,7 +17,7 @@ const GAMES_API_URL = `/api/games`;
  * - joinGame: POST /api/games/join - adds player to game
  * - startGame: POST /api/games/start - starts game & fetches questions
  * - leaveGame: POST /api/games/leave - removes player from game
- * 
+ *
  * Function to create a new game of the specified type.
  * @param gameType The type of game to create.
  * @returns A promise resolving to the game ID of the created game.
@@ -34,14 +40,17 @@ const createGame = async (gameType: GameType, createdBy: string): Promise<string
       // Server sends the error as plain text or a JSON object
       let errorMessage = 'Error while creating a new game';
       const responseData = error.response.data;
-      
+
       if (typeof responseData === 'string') {
         errorMessage = responseData;
       } else if (responseData && typeof responseData === 'object') {
         // Handle validation errors with the proper error messages
         if (responseData.errors && Array.isArray(responseData.errors)) {
           const validationErrors = responseData.errors
-            .map((err: any) => `${err.path || ''}: ${err.message || err.error || 'Validation failed'}`)
+            .map(
+              (err: ValidationError) =>
+                `${err.path || ''}: ${err.message || err.error || 'Validation failed'}`,
+            )
             .join(', ');
           errorMessage = `Validation Error: ${validationErrors}`;
         } else {
@@ -109,9 +118,12 @@ const joinGame = async (gameID: string, playerID: string): Promise<GameInstance<
     return res.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      const errorMessage = typeof error.response.data === 'string' 
-        ? error.response.data 
-        : error.response.data?.message || error.response.data?.error || 'Error while joining a game';
+      const errorMessage =
+        typeof error.response.data === 'string'
+          ? error.response.data
+          : error.response.data?.message ||
+            error.response.data?.error ||
+            'Error while joining a game';
       throw new Error(errorMessage);
     }
     throw error;
@@ -167,9 +179,12 @@ const startGame = async (gameID: string): Promise<GameInstance<GameState>> => {
     return res.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      const errorMessage = typeof error.response.data === 'string' 
-        ? error.response.data 
-        : error.response.data?.message || error.response.data?.error || 'Error while starting a game';
+      const errorMessage =
+        typeof error.response.data === 'string'
+          ? error.response.data
+          : error.response.data?.message ||
+            error.response.data?.error ||
+            'Error while starting a game';
       throw new Error(errorMessage);
     }
     throw error;

@@ -1,9 +1,9 @@
 import GameModel from '../../../models/games.model';
 import TriviaGame from '../../../services/games/trivia';
-import { GameInstance, GameMove, TriviaGameState, TriviaAnswer, TriviaQuestion } from '../../../types/types';
+import { GameInstance, TriviaGameState } from '../../../types/types';
 
 describe('TriviaGame tests', () => {
-  let triviaGame : TriviaGame;
+  let triviaGame: TriviaGame;
 
   beforeEach(() => {
     triviaGame = new TriviaGame('testUser');
@@ -31,7 +31,7 @@ describe('TriviaGame tests', () => {
           player1Answers: [],
           player2Answers: [],
           player1Score: 0,
-          player2Score: 0
+          player2Score: 0,
         },
         gameID: expect.any(String),
         players: [],
@@ -51,7 +51,7 @@ describe('TriviaGame tests', () => {
           player1Answers: [],
           player2Answers: [],
           player1Score: 0,
-          player2Score: 0
+          player2Score: 0,
         },
         gameID: expect.any(String),
         players: ['player1'],
@@ -68,7 +68,7 @@ describe('TriviaGame tests', () => {
           player1Answers: [],
           player2Answers: [],
           player1Score: 0,
-          player2Score: 0
+          player2Score: 0,
         },
         gameID: expect.any(String),
         players: ['player1', 'player2'],
@@ -86,7 +86,7 @@ describe('TriviaGame tests', () => {
           player1Answers: [],
           player2Answers: [],
           player1Score: 0,
-          player2Score: 0
+          player2Score: 0,
         },
         gameID: expect.any(String),
         players: ['player2'],
@@ -219,7 +219,7 @@ describe('TriviaGame tests', () => {
         player1Answers: [],
         player2Answers: [],
         player1Score: 0,
-        player2Score: 0
+        player2Score: 0,
       },
       gameID: expect.any(String),
       players: [],

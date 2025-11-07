@@ -10,7 +10,7 @@ import useTriviaGamePage from '../../../../hooks/useTriviaGamePage';
  * - Renders the "Submit Answer" button, which should be disabled if the question was already answered
  * - Shows a "Waiting for other player" message when the other player has answered
  * - Displays a game over screen with the ultimate winner when all 10 questions have been answered
- * 
+ *
  * Component to display the Trivia game page
  * @param gameInstance The current instance of the Trivia game that has player details, questions, and scores
  * @returns A React component that contains:
@@ -91,7 +91,8 @@ const TriviaGamePage = ({ gameInstance }: { gameInstance: GameInstance<TriviaGam
           {hasAnswered ? (
             <div className='trivia-status'>
               <p className='waiting-message'>
-                ✓ Answer submitted! {otherPlayerAnswered ? 'Moving to next question...' : 'Waiting for other player...'}
+                ✓ Answer submitted!{' '}
+                {otherPlayerAnswered ? 'Moving to next question...' : 'Waiting for other player...'}
               </p>
             </div>
           ) : (

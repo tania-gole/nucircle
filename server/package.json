@@ -43,8 +43,7 @@
   "scripts": {
     "dev": "nodemon server.ts",
     "build": "tsc",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint --fix --ext .js,.jsx .",
     "start": "MODE=production node ./dist/server.js",
     "test": "jest -w=1 --coverage --detectOpenHandles --coverageReporters='json-summary'",
     "debug-test": "jest -w=1 --coverage --detectOpenHandles",

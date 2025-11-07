@@ -2,7 +2,12 @@ import './index.css';
 import NimGamePage from '../nimGamePage';
 import TriviaGamePage from '../triviaGamePage';
 import useGamePage from '../../../../hooks/useGamePage';
-import { GameInstance, NimGameState, TriviaGameState } from '../../../../types/types';
+import { GameInstance, GameState, NimGameState, TriviaGameState } from '../../../../types/types';
+
+interface GameWithPlayerState extends GameState {
+  player1?: string;
+  player2?: string;
+}
 
 /**
  * TRIVIA FEATURE: Client - Main Game Page Component
@@ -10,7 +15,7 @@ import { GameInstance, NimGameState, TriviaGameState } from '../../../../types/t
  * - Shows the game status, players list, and the "Start Game" button
  * - Renders the TriviaGamePage component when the gameType is 'Trivia'
  * - Handles the game controls (starting, leaving, etc.)
- * 
+ *
  * Component to display the game page for a specific game type, including controls and game state
  * @returns A React component including:
  * - A header with the game title and current game status
@@ -41,7 +46,11 @@ const GamePage = () => {
 
   const getGameTitle = () => {
     if (!gameInstance) return 'Game';
-    return gameInstance.gameType === 'Nim' ? 'Nim Game' : gameInstance.gameType === 'Trivia' ? 'Trivia Quiz' : 'Game';
+    return gameInstance.gameType === 'Nim'
+      ? 'Nim Game'
+      : gameInstance.gameType === 'Trivia'
+        ? 'Trivia Quiz'
+        : 'Game';
   };
 
   return (
@@ -58,9 +67,7 @@ const GamePage = () => {
           <h3>Players in Game:</h3>
           <ul>
             {gameInstance.players.length > 0 ? (
-              gameInstance.players.map((player: string) => (
-                <li key={player}>{player}</li>
-              ))
+              gameInstance.players.map((player: string) => <li key={player}>{player}</li>)
             ) : (
               <li>No players yet</li>
             )}
@@ -71,23 +78,31 @@ const GamePage = () => {
       <div className='game-controls'>
         {/* Game Info, lowkey can be helpful for debugging :P */}
         {gameInstance && (
-          <div style={{ marginBottom: '10px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-            <p><strong>Game Info:</strong></p>
+          <div
+            style={{
+              marginBottom: '10px',
+              padding: '10px',
+              background: '#f0f0f0',
+              borderRadius: '5px',
+            }}>
+            <p>
+              <strong>Game Info:</strong>
+            </p>
             <p>Game Status: {gameInstance.state.status}</p>
             <p>Game Type: {gameInstance.gameType}</p>
             <p>Player Count: {gameInstance.players.length}</p>
             <p>Players: {JSON.stringify(gameInstance.players)}</p>
-            <p>Player 1: {(gameInstance.state as any).player1 || 'undefined'}</p>
-            <p>Player 2: {(gameInstance.state as any).player2 || 'undefined'}</p>
+            <p>Player 1: {(gameInstance.state as GameWithPlayerState).player1 || 'undefined'}</p>
+            <p>Player 2: {(gameInstance.state as GameWithPlayerState).player2 || 'undefined'}</p>
           </div>
         )}
-        
+
         {gameInstance && gameInstance.state.status === 'WAITING_TO_START' && (
           <button className='btn-start-game' onClick={handleStartGame}>
             Start Game
           </button>
         )}
-        
+
         <button className='btn-leave-game' onClick={handleLeaveGame}>
           Leave Game
         </button>

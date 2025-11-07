@@ -5,10 +5,16 @@ import {
   GameMovePayload,
   GameRequest,
   GetGamesRequest,
+  GameState,
 } from '../types/types';
 import findGames from '../services/game.service';
 import GameManager from '../services/games/gameManager';
 import GameModel from '../models/games.model';
+
+interface GameWithPlayerState extends GameState {
+  player1?: string;
+  player2?: string;
+}
 
 /**
  * Express controller for handling game-related requests, including creating, joining, leaving games, and fetching games.
@@ -22,7 +28,7 @@ const gameController = (socket: FakeSOSocket) => {
    * TRIVIA FEATURE: Part 1 - Game Creation
    * When a user clicks "Create Trivia Quiz", this endpoint creates a new game instance.
    * The game starts in the WAITING_TO_START status with no players or questions yet.
-   * 
+   *
    * Creates a new game based on the provided game type and responds with the created game or an error message.
    * @param req The request object containing the game type and creator username.
    * @param res The response object to send the result.
@@ -54,7 +60,7 @@ const gameController = (socket: FakeSOSocket) => {
    * When a user clicks "Join Game", this endpoint adds them to the game.
    * Updates the game state with player1 or player2 & adds them to the players array.
    * Emits a socket event to notify all players in the game room of the update.
-   * 
+   *
    * Joins a game with the specified game ID and player ID, and emits the updated game state.
    * @param req The request object containing the game ID and player ID.
    * @param res The response object to send the result.
@@ -132,7 +138,7 @@ const gameController = (socket: FakeSOSocket) => {
    * 2. Has TriviaGame fetch 10 random questions from the database
    * 3. Changes the game status from WAITING_TO_START to IN_PROGRESS
    * 4. Emits a socket event to notify all players that the game has begun
-   * 
+   *
    * Starts a game with the specified game ID.
    * @param req The request object containing the game ID.
    * @param res The response object to send the result.
@@ -176,17 +182,18 @@ const gameController = (socket: FakeSOSocket) => {
       }
 
       // Check if game is stale (IN_PROGRESS but no active players)
-      const state = gameData.state as any;
-      const isStale = gameData.state?.status === 'IN_PROGRESS' && 
-        (!state?.player1 && !state?.player2);
+      const state = gameData.state as GameWithPlayerState;
+      const isStale =
+        gameData.state?.status === 'IN_PROGRESS' && !state?.player1 && !state?.player2;
 
       // Allow deletion if:
       // 1. Game is stale (anyone can delete)
       // 2. User is creator
       // 3. Old game without createdBy but user is a player
       const isPlayer = gameData.players && gameData.players.includes(username);
-      const canDelete = isStale || gameData.createdBy === username || (!gameData.createdBy && isPlayer);
-      
+      const canDelete =
+        isStale || gameData.createdBy === username || (!gameData.createdBy && isPlayer);
+
       if (!canDelete) {
         res.status(403).send('Only the game creator can delete this game');
         return;
@@ -213,7 +220,7 @@ const gameController = (socket: FakeSOSocket) => {
    * 4. If both players answered, moves to the next question
    * 5. If all 10 questions answered, ends the game and determines the winner
    * 6. Emits a gameUpdate event to all players in the game room
-   * 
+   *
    * Handles a game move by applying the move to the game state, emitting updates to all players, and saving the state.
    * @param gameMove The payload containing the game ID and move details.
    * @throws Error if applying the move or saving the game state fails.
