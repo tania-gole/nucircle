@@ -327,7 +327,7 @@ describe('playMove & socket handlers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockNimGame = new NimGame();
+    mockNimGame = new NimGame('testUser');
     mockNimGame.join('player1');
     mockNimGame.join('player2');
 
