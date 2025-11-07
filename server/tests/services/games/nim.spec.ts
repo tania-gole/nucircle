@@ -1,7 +1,5 @@
-import GameModel from '../../../models/games.model';
 import NimGame from '../../../services/games/nim';
 import { MAX_NIM_OBJECTS } from '../../../types/constants';
-import { GameInstance, GameMove, NimGameState, NimMove } from '../../../types/types';
 
 describe('NimGame tests', () => {
   let nimGame: NimGame;
