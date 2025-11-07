@@ -40,7 +40,7 @@ describe('NimGame tests', () => {
       expect(nimGame.toModel()).toEqual(gameState);
     });
 
-    it('should return a representation of the current game state', () => {
+    it('should return a representation of the current game state', async () => {
       const gameState1: GameInstance<NimGameState> = {
         state: {
           moves: [],
@@ -80,11 +80,11 @@ describe('NimGame tests', () => {
         gameType: 'Nim',
       };
 
-      nimGame.join('player1');
+      await nimGame.join('player1');
 
       expect(nimGame.toModel()).toEqual(gameState1);
 
-      nimGame.join('player2');
+      await nimGame.join('player2');
 
       expect(nimGame.toModel()).toEqual(gameState2);
 
@@ -95,45 +95,45 @@ describe('NimGame tests', () => {
   });
 
   describe('join', () => {
-    it('adds player1 to the game', () => {
+    it('adds player1 to the game', async () => {
       expect(nimGame.state.player1).toBeUndefined();
 
-      nimGame.join('player1');
+      await nimGame.join('player1');
 
       expect(nimGame.state.player1).toEqual('player1');
       expect(nimGame.state.status).toEqual('WAITING_TO_START');
     });
 
-    it('adds player2 to the game and sets the game status to IN_PROGRESS', () => {
+    it('adds player2 to the game and sets the game status to IN_PROGRESS', async () => {
       // assemble
-      nimGame.join('player1');
+      await nimGame.join('player1');
       expect(nimGame.state.player1).toEqual('player1');
       expect(nimGame.state.status).toEqual('WAITING_TO_START');
 
       // act
-      nimGame.join('player2');
+      await nimGame.join('player2');
       expect(nimGame.state.player1).toEqual('player1');
       expect(nimGame.state.player2).toEqual('player2');
       expect(nimGame.state.status).toEqual('IN_PROGRESS');
     });
 
-    it('throws an error if trying to join an in progress game', () => {
+    it('throws an error if trying to join an in progress game', async () => {
       // assemble
-      nimGame.join('player1');
-      nimGame.join('player2');
+      await nimGame.join('player1');
+      await nimGame.join('player2');
 
       expect(nimGame.state.player1).toEqual('player1');
       expect(nimGame.state.player2).toEqual('player2');
       expect(nimGame.state.status).toEqual('IN_PROGRESS');
 
       // act
-      expect(() => nimGame.join('player3')).toThrow('Cannot join game: already started');
+      await expect(nimGame.join('player3')).rejects.toThrow('Cannot join game: already started');
     });
 
-    it('throws an error if trying to join a completed game', () => {
+    it('throws an error if trying to join a completed game', async () => {
       // assemble
-      nimGame.join('player1');
-      nimGame.join('player2');
+      await nimGame.join('player1');
+      await nimGame.join('player2');
       nimGame.leave('player2');
 
       expect(nimGame.state.player1).toEqual('player1');
@@ -141,24 +141,24 @@ describe('NimGame tests', () => {
       expect(nimGame.state.status).toEqual('OVER');
 
       // act
-      expect(() => nimGame.join('player3')).toThrow('Cannot join game: already started');
+      await expect(nimGame.join('player3')).rejects.toThrow('Cannot join game: already started');
     });
 
-    it('throws an error if trying to join a game the player is already in', () => {
+    it('throws an error if trying to join a game the player is already in', async () => {
       // assemble
-      nimGame.join('player1');
+      await nimGame.join('player1');
       expect(nimGame.state.player1).toEqual('player1');
       expect(nimGame.state.status).toEqual('WAITING_TO_START');
 
       // act
-      expect(() => nimGame.join('player1')).toThrow('Cannot join game: player already in game');
+      await expect(nimGame.join('player1')).rejects.toThrow('Cannot join game: player already in game');
     });
   });
 
   describe('leave', () => {
-    it('should remove player 1 from a game waiting to start', () => {
+    it('should remove player 1 from a game waiting to start', async () => {
       // assemble
-      nimGame.join('player1');
+      await nimGame.join('player1');
       expect(nimGame.state.player1).toEqual('player1');
       expect(nimGame.state.status).toEqual('WAITING_TO_START');
 
@@ -168,10 +168,10 @@ describe('NimGame tests', () => {
       expect(nimGame.state.status).toEqual('WAITING_TO_START');
     });
 
-    it('should remove player 1 from a game in progress and set it to over', () => {
+    it('should remove player 1 from a game in progress and set it to over', async () => {
       // assemble
-      nimGame.join('player1');
-      nimGame.join('player2');
+      await nimGame.join('player1');
+      await nimGame.join('player2');
       expect(nimGame.state.player1).toEqual('player1');
       expect(nimGame.state.player2).toEqual('player2');
       expect(nimGame.state.status).toEqual('IN_PROGRESS');
@@ -183,10 +183,10 @@ describe('NimGame tests', () => {
       expect(nimGame.state.winners).toEqual(['player2']);
     });
 
-    it('should remove player 2 from a game in progress and set it to over', () => {
+    it('should remove player 2 from a game in progress and set it to over', async () => {
       // assemble
-      nimGame.join('player1');
-      nimGame.join('player2');
+      await nimGame.join('player1');
+      await nimGame.join('player2');
       expect(nimGame.state.player1).toEqual('player1');
       expect(nimGame.state.player2).toEqual('player2');
       expect(nimGame.state.status).toEqual('IN_PROGRESS');
@@ -245,9 +245,9 @@ describe('NimGame tests', () => {
       gameID: 'testGameID',
     };
 
-    beforeEach(() => {
-      nimGame.join('player1');
-      nimGame.join('player2');
+    beforeEach(async () => {
+      await nimGame.join('player1');
+      await nimGame.join('player2');
       expect(nimGame.state.status).toEqual('IN_PROGRESS');
       expect(nimGame.state.moves).toEqual([]);
     });
