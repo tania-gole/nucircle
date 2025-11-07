@@ -1,4 +1,5 @@
 import GameModel from '../../../models/games.model';
+import TriviaQuestionModel from '../../../models/triviaQuestion.model';
 import TriviaGame from '../../../services/games/trivia';
 import { GameInstance, TriviaGameState } from '../../../types/types';
 
@@ -22,152 +23,110 @@ describe('TriviaGame tests', () => {
   });
 
   describe('toModel', () => {
-    it('should return a representation of the current game state', () => {
-      const gameState: GameInstance<TriviaGameState> = {
-        state: {
-          status: 'WAITING_TO_START',
-          currentQuestionIndex: 0,
-          questions: [],
-          player1Answers: [],
-          player2Answers: [],
-          player1Score: 0,
-          player2Score: 0,
-        },
-        gameID: expect.any(String),
-        players: [],
-        gameType: 'Trivia',
-      };
-
-      expect(triviaGame.toModel()).toEqual(gameState);
+    it('should return a representation of the initial game state', () => {
+      const actualModel = triviaGame.toModel();
+      expect(actualModel.state.status).toEqual('WAITING_TO_START');
+      expect(actualModel.state.currentQuestionIndex).toEqual(0);
+      expect(actualModel.state.questions).toEqual([]);
+      expect(actualModel.state.player1Answers).toEqual([]);
+      expect(actualModel.state.player2Answers).toEqual([]);
+      expect(actualModel.state.player1Score).toEqual(0);
+      expect(actualModel.state.player2Score).toEqual(0);
+      expect(actualModel.gameID).toEqual(triviaGame.id);
+      expect(actualModel.players).toEqual([]);
+      expect(actualModel.gameType).toEqual('Trivia');
+      expect(actualModel.createdBy).toEqual('testUser');
     });
 
-    it('should return a representation of the current game state', () => {
-      const gameState1: GameInstance<TriviaGameState> = {
-        state: {
-          status: 'WAITING_TO_START',
-          player1: 'player1',
-          currentQuestionIndex: 0,
-          questions: [],
-          player1Answers: [],
-          player2Answers: [],
-          player1Score: 0,
-          player2Score: 0,
-        },
-        gameID: expect.any(String),
-        players: ['player1'],
-        gameType: 'Trivia',
-      };
+    it('should return a representation of the current game state', async () => {
+      jest.spyOn(TriviaQuestionModel, 'aggregate').mockResolvedValue([]);
 
-      const gameState2: GameInstance<TriviaGameState> = {
-        state: {
-          status: 'IN_PROGRESS',
-          player1: 'player1',
-          player2: 'player2',
-          currentQuestionIndex: 0,
-          questions: [],
-          player1Answers: [],
-          player2Answers: [],
-          player1Score: 0,
-          player2Score: 0,
-        },
-        gameID: expect.any(String),
-        players: ['player1', 'player2'],
-        gameType: 'Trivia',
-      };
+      await triviaGame.join('player1');
 
-      const gameState3: GameInstance<TriviaGameState> = {
-        state: {
-          status: 'OVER',
-          player1: undefined,
-          player2: 'player2',
-          winners: ['player2'],
-          currentQuestionIndex: 0,
-          questions: [],
-          player1Answers: [],
-          player2Answers: [],
-          player1Score: 0,
-          player2Score: 0,
-        },
-        gameID: expect.any(String),
-        players: ['player2'],
-        gameType: 'Trivia',
-      };
+      const gameState1 = triviaGame.toModel();
+      expect(gameState1.state.status).toEqual('WAITING_TO_START');
+      expect(gameState1.state.player1).toEqual('player1');
+      expect(gameState1.players).toEqual(['player1']);
 
-      triviaGame.join('player1');
+      await triviaGame.join('player2');
+      await triviaGame.startGame();
 
-      expect(triviaGame.toModel()).toEqual(gameState1);
-
-      triviaGame.join('player2');
-
-      expect(triviaGame.toModel()).toEqual(gameState2);
+      const gameState2 = triviaGame.toModel();
+      expect(gameState2.state.status).toEqual('IN_PROGRESS');
+      expect(gameState2.state.player1).toEqual('player1');
+      expect(gameState2.state.player2).toEqual('player2');
+      expect(gameState2.players).toEqual(['player1', 'player2']);
 
       triviaGame.leave('player1');
 
-      expect(triviaGame.toModel()).toEqual(gameState3);
+      const gameState3 = triviaGame.toModel();
+      expect(gameState3.state.status).toEqual('OVER');
+      expect(gameState3.state.player1).toBeUndefined();
+      expect(gameState3.state.player2).toEqual('player2');
+      expect(gameState3.state.winners).toEqual(['player2']);
+      expect(gameState3.players).toEqual(['player2']);
     });
   });
 
   describe('join', () => {
-    it('adds player1 to the game', () => {
+    it('adds player1 to the game', async () => {
       expect(triviaGame.state.player1).toBeUndefined();
 
-      triviaGame.join('player1');
+      await triviaGame.join('player1');
 
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
     });
 
-    it('adds player2 to the game and sets the game status to IN_PROGRESS', () => {
-      // assemble
-      triviaGame.join('player1');
+    it('adds player2 to the game and sets the game status to IN_PROGRESS', async () => {
+      await triviaGame.join('player1');
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
 
-      // act
-      triviaGame.join('player2');
+      await triviaGame.join('player2');
+      expect(triviaGame.state.player1).toEqual('player1');
+      expect(triviaGame.state.player2).toEqual('player2');
+      expect(triviaGame.state.status).toEqual('WAITING_TO_START');
+    });
+
+    it('throws an error if trying to join an in progress game', async () => {
+      await triviaGame.join('player1');
+      await triviaGame.join('player2');
+      await triviaGame.startGame();
+
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.player2).toEqual('player2');
       expect(triviaGame.state.status).toEqual('IN_PROGRESS');
+
+      await expect(triviaGame.join('player3')).rejects.toThrow('Cannot join game: already started');
     });
 
-    it('throws an error if trying to join an in progress game', () => {
-      // assemble
-      triviaGame.join('player1');
-      triviaGame.join('player2');
-
-      expect(triviaGame.state.player1).toEqual('player1');
-      expect(triviaGame.state.player2).toEqual('player2');
-      expect(triviaGame.state.status).toEqual('IN_PROGRESS');
-
-      // act
-      expect(() => triviaGame.join('player3')).toThrow('Cannot join game: already started');
-    });
-
-    it('throws an error if trying to join a completed game', () => {
-      // assemble
-      triviaGame.join('player1');
-      triviaGame.join('player2');
+    it('throws an error if trying to join a completed game', async () => {
+      jest.spyOn(TriviaQuestionModel, 'aggregate').mockResolvedValue([]);
+      await triviaGame.join('player1');
+      await triviaGame.join('player2');
+      await triviaGame.startGame();
       triviaGame.leave('player2');
 
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.player2).toBeUndefined();
       expect(triviaGame.state.status).toEqual('OVER');
 
-      expect(() => triviaGame.join('player3')).toThrow('Cannot join game: already started');
+      await expect(triviaGame.join('player3')).rejects.toThrow('Cannot join game: already started');
     });
 
-    it('throws an error if trying to join a game the player is already in', () => {
-      triviaGame.join('player1');
+    it('throws an error if trying to join a game the player is already in', async () => {
+      await triviaGame.join('player1');
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
 
-      expect(() => triviaGame.join('player1')).toThrow('Cannot join game: player already in game');
+      await expect(triviaGame.join('player1')).rejects.toThrow('Cannot join game: player already in game');
     });
   });
 
   describe('leave', () => {
-    it('should remove player 1 from a game waiting to start', () => {
-      triviaGame.join('player1');
+    it('should remove player 1 from a game waiting to start', async () => {
+      await triviaGame.join('player1');
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
 
@@ -176,9 +135,10 @@ describe('TriviaGame tests', () => {
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
     });
 
-    it('should remove player 1 from a game in progress and set it to over', () => {
-      triviaGame.join('player1');
-      triviaGame.join('player2');
+    it('should remove player 1 from a game in progress and set it to over', async () => {
+      await triviaGame.join('player1');
+      await triviaGame.join('player2');
+      await triviaGame.startGame();
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.player2).toEqual('player2');
       expect(triviaGame.state.status).toEqual('IN_PROGRESS');
@@ -189,9 +149,10 @@ describe('TriviaGame tests', () => {
       expect(triviaGame.state.winners).toEqual(['player2']);
     });
 
-    it('should remove player 2 from a game in progress and set it to over', () => {
-      triviaGame.join('player1');
-      triviaGame.join('player2');
+    it('should remove player 2 from a game in progress and set it to over', async () => {
+      await triviaGame.join('player1');
+      await triviaGame.join('player2');
+      await triviaGame.startGame();
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.player2).toEqual('player2');
       expect(triviaGame.state.status).toEqual('IN_PROGRESS');
@@ -211,29 +172,16 @@ describe('TriviaGame tests', () => {
 
   describe('saveGameState', () => {
     const findOneAndUpdateSpy = jest.spyOn(GameModel, 'findOneAndUpdate');
-    const startGameState: GameInstance<TriviaGameState> = {
-      state: {
-        status: 'WAITING_TO_START',
-        currentQuestionIndex: 0,
-        questions: [],
-        player1Answers: [],
-        player2Answers: [],
-        player1Score: 0,
-        player2Score: 0,
-      },
-      gameID: expect.any(String),
-      players: [],
-      gameType: 'Nim',
-    };
 
     it('should call findOneAndUpdate with the correct model arguments', async () => {
-      findOneAndUpdateSpy.mockResolvedValue(startGameState);
+      const expectedState = triviaGame.toModel();
+      findOneAndUpdateSpy.mockResolvedValue(expectedState);
 
       await triviaGame.saveGameState();
 
       expect(findOneAndUpdateSpy).toHaveBeenLastCalledWith(
         { gameID: expect.any(String) },
-        startGameState,
+        expectedState,
         { upsert: true },
       );
     });
