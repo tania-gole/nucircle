@@ -49,7 +49,6 @@ const gameController = (socket: FakeSOSocket) => {
 
       res.status(200).json(newGame);
     } catch (error) {
-      console.error('Error creating game:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       res.status(500).send(`Error when creating game: ${errorMessage}`);
     }

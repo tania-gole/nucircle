@@ -55,22 +55,14 @@ class GameManager {
     switch (gameType) {
       case 'Nim': {
         const newGame = new NimGame(createdBy);
-        try {
-          await NimModel.create(newGame.toModel());
-        } catch (error) {
-          console.error('Error creating Nim game in database:', error);
-          throw error;
-        }
+        await NimModel.create(newGame.toModel());
+
         return newGame;
       }
       case 'Trivia': {
         const newGame = new TriviaGame(createdBy);
-        try {
-          await GameModel.create(newGame.toModel());
-        } catch (error) {
-          console.error('Error creating Trivia game in database:', error);
-          throw error;
-        }
+
+        await GameModel.create(newGame.toModel());
         return newGame;
       }
       default: {
@@ -111,7 +103,6 @@ class GameManager {
 
       return newGame.id;
     } catch (error) {
-      console.error('Error in addGame:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       return { error: errorMessage };
     }
@@ -138,13 +129,8 @@ class GameManager {
       const gameData = await GameModel.findOne({ gameID }).lean();
 
       if (!gameData) {
-        console.log(`Game ${gameID} not found in database`);
         return undefined;
       }
-
-      console.log(
-        `Loading game ${gameID} from database, type: ${gameData.gameType}, status: ${gameData.state?.status}`,
-      );
 
       // Recreate the game instance based on game type
       let game: Game<GameState, BaseMove>;
@@ -187,17 +173,15 @@ class GameManager {
         });
         game = triviaGame;
       } else {
-        console.error(`Unknown game type: ${gameData.gameType}`);
         return undefined;
       }
 
       // Add to in-memory map
       this._games.set(gameID, game);
 
-      console.log(`Game ${gameID} loaded successfully, status: ${game.state.status}`);
       return game;
     } catch (error) {
-      console.error('Error loading game from database:', error);
+      // silent error
       return undefined;
     }
   }

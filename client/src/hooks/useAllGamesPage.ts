@@ -41,7 +41,6 @@ const useAllGamesPage = () => {
       const errorMessage =
         createGameError instanceof Error ? createGameError.message : 'Error creating game';
       setError(errorMessage);
-      console.error('Error creating game:', createGameError);
     }
   };
 

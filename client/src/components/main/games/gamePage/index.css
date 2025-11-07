@@ -114,18 +114,18 @@ button:disabled {
 }
 
 /* Game Info Debug Section */
-.game-controls > div {
+.game-controls>div {
   background: #FFF4F4 !important;
   border-radius: 12px !important;
   border: 1px solid #FFF4F4 !important;
   color: #484848 !important;
 }
 
-.game-controls > div p {
+.game-controls>div p {
   color: #484848 !important;
 }
 
-.game-controls > div strong {
+.game-controls>div strong {
   color: #484848 !important;
 }
 

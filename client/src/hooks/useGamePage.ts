@@ -50,8 +50,7 @@ const useGamePage = () => {
       try {
         await leaveGame(joinedGameID, user.username);
       } catch (error) {
-        // silently handle leave errors since user is leaving regardless
-        console.warn('Error leaving game (non-critical):', error);
+        // silent leave error
       }
       setGameInstance(null);
       setJoinedGameID('');
@@ -75,16 +74,12 @@ const useGamePage = () => {
         // Join the socket room first to ensure receive updates
         socket.emit('joinGame', id);
         const joinedGame = await joinGame(id, user.username);
-        console.log('Joined game:', joinedGame);
-        console.log('Game status:', joinedGame.state.status);
-        console.log('Game players:', joinedGame.players);
         setGameInstance(joinedGame);
         setJoinedGameID(joinedGame.gameID);
         setError(null);
       } catch (error) {
-        console.error('Error joining game:', error);
         const errorMessage = error instanceof Error ? error.message : 'Error joining game';
-        // Don't show error if user is already in game (might be a race condition)
+        // Don't show error if user is already in game
         if (!errorMessage.includes('already in game')) {
           setError(errorMessage);
         }
@@ -120,7 +115,7 @@ const useGamePage = () => {
       socket.off('gameUpdate', handleGameUpdate);
       socket.off('gameError', handleGameError);
     };
-  }, [gameID, socket, user.username]);
+  }, [gameID, socket, user.username, gameInstance, joinedGameID]);
 
   return {
     gameInstance,

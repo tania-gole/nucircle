@@ -57,10 +57,8 @@ const createGame = async (gameType: GameType, createdBy: string): Promise<string
           errorMessage = responseData.message || responseData.error || errorMessage;
         }
       }
-      console.error('Create game error:', error.response.status, error.response.data);
       throw new Error(errorMessage);
     }
-    console.error('Create game error:', error);
     throw error;
   }
 };
@@ -152,7 +150,6 @@ const leaveGame = async (gameID: string, playerID: string): Promise<GameInstance
   } catch (error) {
     // Silent leave errors
     if (axios.isAxiosError(error)) {
-      console.warn('Error leaving game (non-critical):', error.response?.data || error.message);
       // Return a dummy game instance for make return type happy GAHH
       return {} as GameInstance<GameState>;
     }
