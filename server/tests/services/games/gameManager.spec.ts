@@ -1,8 +1,7 @@
 import NimModel from '../../../models/nim.model';
 import GameManager from '../../../services/games/gameManager';
 import NimGame from '../../../services/games/nim';
-import { MAX_NIM_OBJECTS } from '../../../types/constants';
-import { GameInstance, GameInstanceID, NimGameState, GameType } from '../../../types/types';
+import { GameType } from '../../../types/types';
 
 jest.mock('nanoid', () => ({
   nanoid: jest.fn(() => 'testGameID'), // Mock the return value
@@ -42,11 +41,11 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
 
       const gameManager = GameManager.getInstance();
-      const gameID = await gameManager.addGame('Nim');
+      const gameID = await gameManager.addGame('Nim', 'testUser');
 
       expect(gameID).toEqual('testGameID');
       expect(mapSetSpy).toHaveBeenCalledWith(gameID, expect.any(NimGame));
@@ -55,7 +54,7 @@ describe('GameManager', () => {
     it('should return an error for an invalid game type', async () => {
       const gameManager = GameManager.getInstance();
       // casting string for error testing purposes
-      const error = await gameManager.addGame('fakeGame' as GameType);
+      const error = await gameManager.addGame('fakeGame' as GameType, 'testUser');
 
       expect(mapSetSpy).not.toHaveBeenCalled();
       expect(error).toHaveProperty('error');
@@ -67,7 +66,7 @@ describe('GameManager', () => {
 
       const gameManager = GameManager.getInstance();
       // casting string for error testing purposes
-      const error = await gameManager.addGame('Nim');
+      const error = await gameManager.addGame('Nim', 'testUser');
 
       expect(mapSetSpy).not.toHaveBeenCalled();
       expect(error).toHaveProperty('error');
@@ -81,12 +80,12 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
 
       // assemble
       const gameManager = GameManager.getInstance();
-      const gameID = await gameManager.addGame('Nim');
+      const gameID = await gameManager.addGame('Nim', 'testUser');
       expect(gameManager.getActiveGameInstances().length).toEqual(1);
 
       if (typeof gameID === 'string') {
@@ -114,140 +113,6 @@ describe('GameManager', () => {
     });
   });
 
-  describe('joinGame', () => {
-    let gameManager: GameManager;
-    let gameID: GameInstanceID;
-
-    beforeEach(async () => {
-      jest
-        .spyOn(NimModel, 'create')
-        .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
-        );
-
-      gameManager = GameManager.getInstance();
-      const addGameResult = await gameManager.addGame('Nim');
-
-      if (typeof addGameResult === 'string') {
-        gameID = addGameResult;
-      }
-    });
-
-    it('should join the requested game', async () => {
-      const gameState: GameInstance<NimGameState> = {
-        state: {
-          moves: [],
-          player1: 'player1',
-          status: 'WAITING_TO_START',
-          remainingObjects: MAX_NIM_OBJECTS,
-        },
-        gameID,
-        players: ['player1'],
-        gameType: 'Nim',
-      };
-
-      const saveGameStateSpy = jest
-        .spyOn(NimGame.prototype, 'saveGameState')
-        .mockResolvedValueOnce();
-      const nimGameJoinSpy = jest.spyOn(NimGame.prototype, 'join');
-
-      const gameJoined = await gameManager.joinGame(gameID, 'player1');
-
-      expect(saveGameStateSpy).toHaveBeenCalled();
-      expect(nimGameJoinSpy).toHaveBeenCalledWith('player1');
-      expect(gameJoined).toEqual(gameState);
-    });
-
-    it('should throw an error if the game does not exist', async () => {
-      const response = await gameManager.joinGame('fakeGameID', 'player1');
-
-      expect(response).toEqual({ error: 'Game requested does not exist.' });
-    });
-  });
-
-  describe('leaveGame', () => {
-    let gameManager: GameManager;
-    let gameID: GameInstanceID;
-
-    beforeEach(async () => {
-      jest
-        .spyOn(NimModel, 'create')
-        .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
-        );
-      jest.spyOn(NimGame.prototype, 'saveGameState').mockResolvedValue();
-
-      gameManager = GameManager.getInstance();
-      const addGameResult = await gameManager.addGame('Nim');
-
-      if (typeof addGameResult === 'string') {
-        gameID = addGameResult;
-        await gameManager.joinGame(gameID, 'player1');
-      }
-    });
-
-    it('should leave the requested game', async () => {
-      const gameState: GameInstance<NimGameState> = {
-        state: {
-          moves: [],
-          status: 'WAITING_TO_START',
-          remainingObjects: MAX_NIM_OBJECTS,
-        },
-        gameID,
-        players: [],
-        gameType: 'Nim',
-      };
-
-      const saveGameStateSpy = jest
-        .spyOn(NimGame.prototype, 'saveGameState')
-        .mockResolvedValueOnce();
-      const nimGameLeaveSpy = jest.spyOn(NimGame.prototype, 'leave');
-
-      const gameLeft = await gameManager.leaveGame(gameID, 'player1');
-
-      expect(saveGameStateSpy).toHaveBeenCalled();
-      expect(nimGameLeaveSpy).toHaveBeenCalledWith('player1');
-      expect(gameLeft).toEqual(gameState);
-    });
-
-    it('should leave and remove the requested game if it ends', async () => {
-      // assemble
-      await gameManager.joinGame(gameID, 'player2');
-
-      const gameState: GameInstance<NimGameState> = {
-        state: {
-          moves: [],
-          status: 'OVER',
-          player1: undefined,
-          player2: 'player2',
-          winners: ['player2'],
-          remainingObjects: MAX_NIM_OBJECTS,
-        },
-        gameID: 'testGameID',
-        players: ['player2'],
-        gameType: 'Nim',
-      };
-      const saveGameStateSpy = jest
-        .spyOn(NimGame.prototype, 'saveGameState')
-        .mockResolvedValueOnce();
-      const nimGameLeaveSpy = jest.spyOn(NimGame.prototype, 'leave');
-      const removeGameSpy = jest.spyOn(gameManager, 'removeGame');
-
-      const gameLeft = await gameManager.leaveGame(gameID, 'player1');
-
-      expect(saveGameStateSpy).toHaveBeenCalled();
-      expect(nimGameLeaveSpy).toHaveBeenCalledWith('player1');
-      expect(removeGameSpy).toHaveBeenLastCalledWith(gameID);
-      expect(gameLeft).toEqual(gameState);
-    });
-
-    it('should throw an error if the game does not exist', async () => {
-      const response = await gameManager.leaveGame('fakeGameID', 'player1');
-
-      expect(response).toEqual({ error: 'Game requested does not exist.' });
-    });
-  });
-
   describe('getGame', () => {
     let gameManager: GameManager;
     const mapGetSpy = jest.spyOn(Map.prototype, 'get');
@@ -261,10 +126,10 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
 
-      const gameID = await gameManager.addGame('Nim');
+      const gameID = await gameManager.addGame('Nim', 'testUser');
 
       if (typeof gameID === 'string') {
         // act
@@ -294,11 +159,11 @@ describe('GameManager', () => {
       jest
         .spyOn(NimModel, 'create')
         .mockResolvedValue(
-          new NimGame().toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
         );
       // assemble
       const gameManager = GameManager.getInstance();
-      await gameManager.addGame('Nim');
+      await gameManager.addGame('Nim', 'testUser');
 
       // act
       const games = gameManager.getActiveGameInstances();

@@ -1,4 +1,5 @@
 import NimModel from '../../models/nim.model';
+import GameModel from '../../models/games.model';
 import {
   BaseMove,
   GameInstance,
@@ -6,9 +7,21 @@ import {
   GameMove,
   GameState,
   GameType,
+  NimGameState,
+  TriviaGameState,
 } from '../../types/types';
 import Game from './game';
 import NimGame from './nim';
+import TriviaGame from './trivia';
+
+interface GameWithStartMethod {
+  startGame(): void | Promise<void>;
+}
+
+interface GameWithPlayerState extends GameState {
+  player1?: string;
+  player2?: string;
+}
 
 /**
  * Manages the lifecycle of games, including creation, joining, and leaving games.
@@ -31,15 +44,25 @@ class GameManager {
   /**
    * Factory method to create a new game based on the provided game type.
    * @param gameType The type of the game to create.
+   * @param createdBy The username of the user creating the game.
    * @returns A promise resolving to the created game instance.
    * @throws an error for an unsupported game type
    */
-  private async _gameFactory(gameType: GameType): Promise<Game<GameState, BaseMove>> {
+  private async _gameFactory(
+    gameType: GameType,
+    createdBy: string,
+  ): Promise<Game<GameState, BaseMove>> {
     switch (gameType) {
       case 'Nim': {
-        const newGame = new NimGame();
+        const newGame = new NimGame(createdBy);
         await NimModel.create(newGame.toModel());
 
+        return newGame;
+      }
+      case 'Trivia': {
+        const newGame = new TriviaGame(createdBy);
+
+        await GameModel.create(newGame.toModel());
         return newGame;
       }
       default: {
@@ -61,18 +84,27 @@ class GameManager {
   }
 
   /**
+   * TRIVIA FEATURE: GameManager - Game Creation
+   * Central manager that creates game instances and stores them in memory.
+   * Also saves to MongoDB database for persistence across server restarts.
+   *
    * Creates and adds a new game to the manager games map.
    * @param gameType The type of the game to add.
+   * @param createdBy The username of the user creating the game.
    * @returns The game ID or an error message.
    */
-  public async addGame(gameType: GameType): Promise<GameInstanceID | { error: string }> {
+  public async addGame(
+    gameType: GameType,
+    createdBy: string,
+  ): Promise<GameInstanceID | { error: string }> {
     try {
-      const newGame = await this._gameFactory(gameType);
+      const newGame = await this._gameFactory(gameType, createdBy);
       this._games.set(newGame.id, newGame);
 
       return newGame.id;
     } catch (error) {
-      return { error: (error as Error).message };
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { error: errorMessage };
     }
   }
 
@@ -86,6 +118,75 @@ class GameManager {
   }
 
   /**
+   * Loads a game from the database and restores it to a Game instance.
+   * @param gameID The ID of the game to load.
+   * @returns The restored game instance or undefined if not found.
+   */
+  private async _loadGameFromDatabase(
+    gameID: GameInstanceID,
+  ): Promise<Game<GameState, BaseMove> | undefined> {
+    try {
+      const gameData = await GameModel.findOne({ gameID }).lean();
+
+      if (!gameData) {
+        return undefined;
+      }
+
+      // Recreate the game instance based on game type
+      let game: Game<GameState, BaseMove>;
+      // just in case there are old games
+      const createdBy = gameData.createdBy || 'unknown';
+      const state = gameData.state as GameWithPlayerState;
+      // Sync players array with actual player1/player2 state
+      const activePlayers: string[] = [];
+      if (state?.player1) activePlayers.push(state.player1);
+      if (state?.player2) activePlayers.push(state.player2);
+
+      if (gameData.gameType === 'Nim') {
+        const nimGame = new NimGame(createdBy);
+        // Override the ID and restore state
+        Object.defineProperty(nimGame, 'id', { value: gameID, writable: false });
+        Object.defineProperty(nimGame, '_state', {
+          value: gameData.state as NimGameState,
+          writable: true,
+          configurable: true,
+        });
+        Object.defineProperty(nimGame, '_players', {
+          value: activePlayers,
+          writable: true,
+          configurable: true,
+        });
+        game = nimGame;
+      } else if (gameData.gameType === 'Trivia') {
+        const triviaGame = new TriviaGame(createdBy);
+        // Override the ID and restore state
+        Object.defineProperty(triviaGame, 'id', { value: gameID, writable: false });
+        Object.defineProperty(triviaGame, '_state', {
+          value: gameData.state as TriviaGameState,
+          writable: true,
+          configurable: true,
+        });
+        Object.defineProperty(triviaGame, '_players', {
+          value: activePlayers,
+          writable: true,
+          configurable: true,
+        });
+        game = triviaGame;
+      } else {
+        return undefined;
+      }
+
+      // Add to in-memory map
+      this._games.set(gameID, game);
+
+      return game;
+    } catch (error) {
+      // silent error
+      return undefined;
+    }
+  }
+
+  /**
    * Joins an existing game.
    * @param gameID The ID of the game to join.
    * @param playerID The ID of the player joining the game.
@@ -96,16 +197,74 @@ class GameManager {
     playerID: string,
   ): Promise<GameInstance<GameState> | { error: string }> {
     try {
-      const gameToJoin = this.getGame(gameID);
+      let gameToJoin = this.getGame(gameID);
+
+      // If game not in memory, try loading from database
+      if (gameToJoin === undefined) {
+        gameToJoin = await this._loadGameFromDatabase(gameID);
+      }
 
       if (gameToJoin === undefined) {
         throw new Error('Game requested does not exist.');
       }
 
-      gameToJoin.join(playerID);
+      // Check if player is already in the game - if so, just return current state
+      const state = gameToJoin.state as GameWithPlayerState;
+      if (state?.player1 === playerID || state?.player2 === playerID) {
+        return gameToJoin.toModel();
+      }
+
+      await gameToJoin.join(playerID);
       await gameToJoin.saveGameState();
 
       return gameToJoin.toModel();
+    } catch (error) {
+      return { error: (error as Error).message };
+    }
+  }
+
+  /**
+   * TRIVIA FEATURE: GameManager - Starting Game
+   * Calls the game-specific startGame() method which:
+   * - For Trivia: fetches 10 random questions from the database
+   * - Changes the status from WAITING_TO_START to IN_PROGRESS
+   *
+   * Starts a game.
+   * @param gameID The ID of the game to start.
+   * @returns The updated game instance or an error message.
+   */
+  public async startGame(
+    gameID: GameInstanceID,
+  ): Promise<GameInstance<GameState> | { error: string }> {
+    try {
+      let gameToStart = this.getGame(gameID);
+
+      // If game not in memory, try loading from database
+      if (gameToStart === undefined) {
+        gameToStart = await this._loadGameFromDatabase(gameID);
+      }
+
+      if (gameToStart === undefined) {
+        throw new Error('Game requested does not exist.');
+      }
+
+      // Type guard to check if the game has a startGame method
+      if (
+        'startGame' in gameToStart &&
+        typeof (gameToStart as GameWithStartMethod).startGame === 'function'
+      ) {
+        const startResult = (gameToStart as GameWithStartMethod).startGame();
+        // Handle both sync and async startGame methods
+        if (startResult instanceof Promise) {
+          await startResult;
+        }
+      } else {
+        throw new Error('Game type does not support starting');
+      }
+
+      await gameToStart.saveGameState();
+
+      return gameToStart.toModel();
     } catch (error) {
       return { error: (error as Error).message };
     }
@@ -122,7 +281,12 @@ class GameManager {
     playerID: string,
   ): Promise<GameInstance<GameState> | { error: string }> {
     try {
-      const gameToLeave = this.getGame(gameID);
+      let gameToLeave = this.getGame(gameID);
+
+      // If game not in memory, try loading from database
+      if (gameToLeave === undefined) {
+        gameToLeave = await this._loadGameFromDatabase(gameID);
+      }
 
       if (gameToLeave === undefined) {
         throw new Error('Game requested does not exist.');

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createGame, getGames } from '../services/gamesService';
+import { createGame, getGames, deleteGame } from '../services/gamesService';
 import { GameInstance, GameState, GameType } from '../types/types';
+import useUserContext from './useUserContext';
 
 /**
  * Custom hook to manage the state and logic for the "All Games" page, including fetching games,
@@ -16,12 +17,14 @@ import { GameInstance, GameState, GameType } from '../types/types';
  */
 const useAllGamesPage = () => {
   const navigate = useNavigate();
+  const { user } = useUserContext();
   const [availableGames, setAvailableGames] = useState<GameInstance<GameState>[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchGames = async () => {
     try {
+      setError(null);
       const games = await getGames(undefined, undefined);
       setAvailableGames(games);
     } catch (getGamesError) {
@@ -31,15 +34,28 @@ const useAllGamesPage = () => {
 
   const handleCreateGame = async (gameType: GameType) => {
     try {
-      await createGame(gameType);
-      await fetchGames(); // Refresh the list after creating a game
+      setError(null);
+      await createGame(gameType, user.username);
+      await fetchGames();
     } catch (createGameError) {
-      setError('Error creating game');
+      const errorMessage =
+        createGameError instanceof Error ? createGameError.message : 'Error creating game';
+      setError(errorMessage);
     }
   };
 
   const handleJoin = (gameID: string) => {
     navigate(`/games/${gameID}`);
+  };
+
+  const handleDeleteGame = async (gameID: string) => {
+    try {
+      setError(null);
+      await deleteGame(gameID, user.username);
+      await fetchGames(); // Refresh the list after deleting a game
+    } catch (deleteGameError) {
+      setError('Error deleting game');
+    }
   };
 
   useEffect(() => {
@@ -58,6 +74,7 @@ const useAllGamesPage = () => {
   return {
     availableGames,
     handleJoin,
+    handleDeleteGame,
     fetchGames,
     isModalOpen,
     handleToggleModal,

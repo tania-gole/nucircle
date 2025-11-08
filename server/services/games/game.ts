@@ -18,15 +18,19 @@ abstract class Game<StateType extends GameState, MoveType> {
 
   protected _gameType: GameType;
 
+  protected _createdBy: string;
+
   /**
    * Creates a new game instance with the provided initial state and game type.
    * @param initialState The initial state of the game.
    * @param gameType The type of the game.
+   * @param createdBy The username of the user creating the game.
    */
-  public constructor(initialState: StateType, gameType: GameType) {
+  public constructor(initialState: StateType, gameType: GameType, createdBy: string) {
     this.id = nanoid() as GameInstanceID;
     this._state = initialState;
     this._gameType = gameType;
+    this._createdBy = createdBy;
   }
 
   /**
@@ -63,7 +67,7 @@ abstract class Game<StateType extends GameState, MoveType> {
    * Abstract method for handling a player joining the game.
    * @param playerID The player ID to join.
    */
-  protected abstract _join(playerID: string): void;
+  protected abstract _join(playerID: string): void | Promise<void>;
 
   /**
    * Abstract method for handling a player leaving the game.
@@ -75,8 +79,8 @@ abstract class Game<StateType extends GameState, MoveType> {
    * Adds a player to the game.
    * @param playerID The player ID to join the game.
    */
-  public join(playerID: string): void {
-    this._join(playerID);
+  public async join(playerID: string): Promise<void> {
+    await this._join(playerID);
     this._players.push(playerID);
   }
 
@@ -94,11 +98,14 @@ abstract class Game<StateType extends GameState, MoveType> {
    * @returns The game model representation.
    */
   public toModel(): GameInstance<StateType> {
+    // Deep clone and ensure arrays are regular arrays (not ReadonlyArray) for MongoDB
+    const serializedState = JSON.parse(JSON.stringify(this._state));
     return {
-      state: this._state,
+      state: serializedState,
       gameID: this.id,
-      players: this._players,
+      players: [...this._players],
       gameType: this._gameType,
+      createdBy: this._createdBy,
     };
   }
 

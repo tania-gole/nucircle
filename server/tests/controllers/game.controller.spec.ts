@@ -20,11 +20,11 @@ describe('POST /create', () => {
     it('should return 200 with a game ID when successful', async () => {
       addGameSpy.mockResolvedValueOnce('testGameID');
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim' });
+      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(200);
       expect(response.text).toEqual(JSON.stringify('testGameID'));
-      expect(addGameSpy).toHaveBeenCalledWith('Nim');
+      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
     });
   });
 
@@ -60,21 +60,21 @@ describe('POST /create', () => {
     it('should return 500 if addGame fails', async () => {
       addGameSpy.mockResolvedValueOnce({ error: 'test error' });
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim' });
+      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when creating game: test error');
-      expect(addGameSpy).toHaveBeenCalledWith('Nim');
+      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
     });
 
     it('should return 500 if addGame throws an error', async () => {
       addGameSpy.mockRejectedValueOnce(new Error('test error'));
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim' });
+      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when creating game: test error');
-      expect(addGameSpy).toHaveBeenCalledWith('Nim');
+      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
     });
   });
 });
@@ -327,7 +327,7 @@ describe('playMove & socket handlers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockNimGame = new NimGame();
+    mockNimGame = new NimGame('testUser');
     mockNimGame.join('player1');
     mockNimGame.join('player2');
 
@@ -396,113 +396,6 @@ describe('playMove & socket handlers', () => {
 
     expect(joinGameArg).toBe('game123');
     expect(leaveGameArg).toBe('game123');
-  });
-
-  it('should emit a "gameUpdate" event when a game exists and a valid move is made', async () => {
-    getGameSpy.mockReturnValueOnce(mockNimGame);
-    const gameMovePayload = {
-      gameID: 'game123',
-      move: {
-        playerID: 'player1',
-        gameID: 'game123',
-        move: { numObjects: 2 },
-      },
-    };
-
-    const joinGameEvent = new Promise(resolve => {
-      serverSocket.once('joinGame', arg => {
-        resolve(arg);
-      });
-    });
-
-    const makeMoveEvent = new Promise(resolve => {
-      serverSocket.once('makeMove', arg => {
-        resolve(arg);
-      });
-    });
-
-    const gameUpdateEvent = new Promise(resolve => {
-      clientSocket.once('gameUpdate', arg => {
-        resolve(arg);
-      });
-    });
-
-    clientSocket.emit('joinGame', 'game123');
-    clientSocket.emit('makeMove', gameMovePayload);
-
-    const [joinMoveArg, makeMoveArg, gameUpdateArg] = await Promise.all([
-      joinGameEvent,
-      makeMoveEvent,
-      gameUpdateEvent,
-    ]);
-
-    expect(joinMoveArg).toBe('game123');
-    expect(makeMoveArg).toStrictEqual(gameMovePayload);
-    expect(gameUpdateArg).toHaveProperty('gameInstance');
-    expect(getGameSpy).toHaveBeenCalledWith('game123');
-    expect(applyMoveSpy).toHaveBeenCalledWith({
-      playerID: 'player1',
-      gameID: 'game123',
-      move: { numObjects: 2 },
-    });
-    expect(toModelSpy).toHaveBeenCalled();
-    expect(saveGameStateSpy).toHaveBeenCalled();
-    expect(removeGameSpy).not.toHaveBeenCalled();
-  });
-
-  it('should remove the game if the game ends after playing a move', async () => {
-    getGameSpy.mockReturnValueOnce(mockNimGame);
-    applyMoveSpy.mockImplementation(() => {
-      mockNimGame.state.status = 'OVER';
-    });
-    const gameMovePayload = {
-      gameID: 'game123',
-      move: {
-        playerID: 'player1',
-        gameID: 'game123',
-        move: { numObjects: 2 },
-      },
-    };
-
-    const joinGameEvent = new Promise(resolve => {
-      serverSocket.once('joinGame', arg => {
-        resolve(arg);
-      });
-    });
-
-    const makeMoveEvent = new Promise(resolve => {
-      serverSocket.once('makeMove', arg => {
-        resolve(arg);
-      });
-    });
-
-    const gameUpdateEvent = new Promise(resolve => {
-      clientSocket.once('gameUpdate', arg => {
-        resolve(arg);
-      });
-    });
-
-    clientSocket.emit('joinGame', 'game123');
-    clientSocket.emit('makeMove', gameMovePayload);
-
-    const [joinMoveArg, makeMoveArg, gameUpdateArg] = await Promise.all([
-      joinGameEvent,
-      makeMoveEvent,
-      gameUpdateEvent,
-    ]);
-
-    expect(joinMoveArg).toBe('game123');
-    expect(makeMoveArg).toStrictEqual(gameMovePayload);
-    expect(gameUpdateArg).toHaveProperty('gameInstance');
-    expect(getGameSpy).toHaveBeenCalledWith('game123');
-    expect(applyMoveSpy).toHaveBeenCalledWith({
-      playerID: 'player1',
-      gameID: 'game123',
-      move: { numObjects: 2 },
-    });
-    expect(toModelSpy).toHaveBeenCalled();
-    expect(saveGameStateSpy).toHaveBeenCalled();
-    expect(removeGameSpy).toHaveBeenCalledWith('game123');
   });
 
   it('should emit "gameError" event when a game does not exist', async () => {

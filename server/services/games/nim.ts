@@ -10,8 +10,9 @@ import Game from './game';
 class NimGame extends Game<NimGameState, NimMove> {
   /**
    * Constructor for the NimGame class, initializes the game state and type.
+   * @param createdBy The username of the user creating the game.
    */
-  public constructor() {
+  public constructor(createdBy: string) {
     super(
       {
         status: 'WAITING_TO_START',
@@ -19,6 +20,7 @@ class NimGame extends Game<NimGameState, NimMove> {
         remainingObjects: MAX_NIM_OBJECTS,
       },
       'Nim',
+      createdBy,
     );
   }
 
@@ -106,7 +108,7 @@ class NimGame extends Game<NimGameState, NimMove> {
       throw new Error('Cannot join game: already started');
     }
 
-    if (this._players.includes(playerID)) {
+    if (this.state.player1 === playerID || this.state.player2 === playerID) {
       throw new Error('Cannot join game: player already in game');
     }
 
@@ -115,10 +117,23 @@ class NimGame extends Game<NimGameState, NimMove> {
     } else if (this.state.player2 === undefined) {
       this.state = { ...this.state, player2: playerID };
     }
+  }
 
-    if (this.state.player1 !== undefined && this.state.player2 !== undefined) {
-      this.state = { ...this.state, status: 'IN_PROGRESS' };
+  /**
+   * Starts the game. Can be started with 1 or 2 players.
+   * @throws Will throw an error if the game cannot be started.
+   */
+  public startGame(): void {
+    if (this.state.status !== 'WAITING_TO_START') {
+      throw new Error('Game is not waiting to start');
     }
+
+    if (this.state.player1 === undefined) {
+      throw new Error('Cannot start game: no players in game');
+    }
+
+    // Start the game
+    this.state = { ...this.state, status: 'IN_PROGRESS' };
   }
 
   /**

@@ -9,6 +9,10 @@ import {
   GameType,
 } from '../types/types';
 
+interface GameDocument extends GameInstance<GameState> {
+  createdBy?: string;
+}
+
 /**
  * Retrieves games from the database based on the specified game type and status.
  * @param {GameType | undefined} gameType - The type of the game to filter by (e.g., 'Nim').
@@ -31,7 +35,7 @@ const findGames = async (
   }
 
   try {
-    const games: GameInstance<GameState>[] = await GameModel.find(query).lean();
+    const games = (await GameModel.find(query).lean()) as GameDocument[];
 
     if (games === null) {
       throw new Error('No games found');
@@ -44,6 +48,7 @@ const findGames = async (
         gameID: game.gameID as GameInstanceID,
         players: game.players as string[],
         gameType: game.gameType as GameType,
+        createdBy: game.createdBy,
       }))
       .reverse();
   } catch (error) {
