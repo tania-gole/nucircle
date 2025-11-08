@@ -1,7 +1,6 @@
 import GameModel from '../../../models/games.model';
 import TriviaQuestionModel from '../../../models/triviaQuestion.model';
 import TriviaGame from '../../../services/games/trivia';
-import { GameInstance, TriviaGameState } from '../../../types/types';
 
 describe('TriviaGame tests', () => {
   let triviaGame: TriviaGame;
@@ -24,18 +23,18 @@ describe('TriviaGame tests', () => {
 
   describe('toModel', () => {
     it('should return a representation of the initial game state', () => {
-      const actualModel = triviaGame.toModel();
-      expect(actualModel.state.status).toEqual('WAITING_TO_START');
-      expect(actualModel.state.currentQuestionIndex).toEqual(0);
-      expect(actualModel.state.questions).toEqual([]);
-      expect(actualModel.state.player1Answers).toEqual([]);
-      expect(actualModel.state.player2Answers).toEqual([]);
-      expect(actualModel.state.player1Score).toEqual(0);
-      expect(actualModel.state.player2Score).toEqual(0);
-      expect(actualModel.gameID).toEqual(triviaGame.id);
-      expect(actualModel.players).toEqual([]);
-      expect(actualModel.gameType).toEqual('Trivia');
-      expect(actualModel.createdBy).toEqual('testUser');
+      const ActualModel = triviaGame.toModel();
+      expect(ActualModel.state.status).toEqual('WAITING_TO_START');
+      expect(ActualModel.state.currentQuestionIndex).toEqual(0);
+      expect(ActualModel.state.questions).toEqual([]);
+      expect(ActualModel.state.player1Answers).toEqual([]);
+      expect(ActualModel.state.player2Answers).toEqual([]);
+      expect(ActualModel.state.player1Score).toEqual(0);
+      expect(ActualModel.state.player2Score).toEqual(0);
+      expect(ActualModel.gameID).toEqual(triviaGame.id);
+      expect(ActualModel.players).toEqual([]);
+      expect(ActualModel.gameType).toEqual('Trivia');
+      expect(ActualModel.createdBy).toEqual('testUser');
     });
 
     it('should return a representation of the current game state', async () => {
