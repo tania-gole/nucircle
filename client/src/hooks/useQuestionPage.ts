@@ -21,7 +21,7 @@ const useQuestionPage = () => {
   const [qlist, setQlist] = useState<PopulatedDatabaseQuestion[]>([]);
 
   useEffect(() => {
-    let pageTitle = 'All Questions';
+    let pageTitle = 'Questions';
     let searchString = '';
 
     const searchQuery = searchParams.get('search');
@@ -105,7 +105,7 @@ const useQuestionPage = () => {
     };
   }, [questionOrder, search, socket]);
 
-  return { titleText, qlist, setQuestionOrder };
+  return { titleText, qlist, setQuestionOrder, questionOrder };
 };
 
 export default useQuestionPage;

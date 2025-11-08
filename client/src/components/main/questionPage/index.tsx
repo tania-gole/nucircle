@@ -9,7 +9,7 @@ import useQuestionPage from '../../../hooks/useQuestionPage';
  * It includes a header with order buttons and a button to ask a new question.
  */
 const QuestionPage = () => {
-  const { titleText, qlist, setQuestionOrder } = useQuestionPage();
+  const { titleText, qlist, setQuestionOrder, questionOrder } = useQuestionPage();
 
   return (
     <>
@@ -17,6 +17,7 @@ const QuestionPage = () => {
         titleText={titleText}
         qcnt={qlist.length}
         setQuestionOrder={setQuestionOrder}
+        currentOrder={questionOrder}
       />
       <div id='question_list' className='question_list'>
         {qlist.map(q => (

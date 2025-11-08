@@ -6,6 +6,7 @@ import {
   toggleCommunityMembership,
   createCommunity,
   deleteCommunity,
+  getCommunitiesByUser,
 } from '../../services/community.service';
 import { Community, DatabaseCommunity } from '../../types/types';
 
@@ -33,6 +34,46 @@ describe('Community Service', () => {
     participants: ['user1'],
     visibility: 'PRIVATE',
   };
+
+  const mockCommunities: DatabaseCommunity[] = [
+    mockCommunity,
+    {
+      _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dd'),
+      name: 'Test Community 2',
+      description: 'Description 2',
+      admin: 'admin_user2',
+      participants: ['admin_user2', 'user1'],
+      visibility: 'PRIVATE',
+      createdAt: new Date('2024-03-02'),
+      updatedAt: new Date('2024-03-02'),
+    },
+  ];
+
+  describe('getCommunitiesByUser', () => {
+    test('should return all communities the user is part of', async () => {
+      jest.spyOn(CommunityModel, 'find').mockResolvedValueOnce(mockCommunities);
+      const result = await getCommunitiesByUser('user1');
+      expect(result).toEqual(mockCommunities);
+      expect(CommunityModel.find).toHaveBeenCalledWith({ participants: 'user1' });
+    });
+    test('should return all communities the user is part of if user is not in all communities', async () => {
+      jest.spyOn(CommunityModel, 'find').mockResolvedValueOnce([mockCommunity]);
+      const result = await getCommunitiesByUser('user2');
+      expect(result).toEqual([mockCommunity]);
+      expect(CommunityModel.find).toHaveBeenCalledWith({ participants: 'user2' });
+    });
+    test('should return empty array if user is in no communities', async () => {
+      jest.spyOn(CommunityModel, 'find').mockResolvedValueOnce([]);
+      const result = await getCommunitiesByUser('nonexistent_user');
+      expect(result).toEqual([]);
+      expect(CommunityModel.find).toHaveBeenCalledWith({ participants: 'nonexistent_user' });
+    });
+    test('should return error when database throws error', async () => {
+      jest.spyOn(CommunityModel, 'find').mockRejectedValueOnce(new Error('Database error'));
+      const result = await getCommunitiesByUser('user1');
+      expect(result).toEqual({ error: 'Database error' });
+    });
+  });
 
   describe('getCommunity', () => {
     test('should return the community when found', async () => {

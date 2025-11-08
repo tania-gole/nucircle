@@ -3,10 +3,11 @@ import {
   DatabaseUser,
   SafeDatabaseUser,
   User,
-  UserCredentials,
+  UserLogin,
   UserResponse,
   UsersResponse,
 } from '../types/types';
+import bcryptjs from 'bcryptjs';
 
 /**
  * Saves a new user to the database.
@@ -16,7 +17,18 @@ import {
  */
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
-    const result: DatabaseUser = await UserModel.create(user);
+    // Password security reqs: 8+ chars, upper, lower, number, special
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!regex.test(user.password)) {
+      throw Error(
+        'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character',
+      );
+    }
+    // Hash password
+    const result: DatabaseUser = await UserModel.create({
+      ...user,
+      password: bcryptjs.hashSync(user.password, 10),
+    });
 
     if (!result) {
       throw Error('Failed to create user');
@@ -81,22 +93,24 @@ export const getUsersList = async (): Promise<UsersResponse> => {
 /**
  * Authenticates a user by verifying their username and password.
  *
- * @param {UserCredentials} loginCredentials - An object containing the username and password.
+ * @param {loginCredentials} loginCredentials - An object containing the username and password.
  * @returns {Promise<UserResponse>} - Resolves with the authenticated user object (without the password) or an error message.
  */
-export const loginUser = async (loginCredentials: UserCredentials): Promise<UserResponse> => {
+export const loginUser = async (loginCredentials: UserLogin): Promise<UserResponse> => {
   const { username, password } = loginCredentials;
 
   try {
-    const user: SafeDatabaseUser | null = await UserModel.findOne({ username, password }).select(
-      '-password',
-    );
-
+    const user: DatabaseUser | null = await UserModel.findOne({ username });
     if (!user) {
       throw Error('Authentication failed');
     }
 
-    return user;
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      throw Error('Authentication failed');
+    }
+
+    return user as UserResponse;
   } catch (error) {
     return { error: `Error occurred when authenticating user: ${error}` };
   }
@@ -149,5 +163,60 @@ export const updateUser = async (
     return updatedUser;
   } catch (error) {
     return { error: `Error occurred when updating user: ${error}` };
+  }
+};
+
+/**
+ * Updates a user's online status and socket ID.
+ *
+ * @param {string} username - The username of the user.
+ * @param {boolean} isOnline - Whether the user is online.
+ * @param {string | null} socketId - The socket ID (null when offline).
+ * @returns {Promise<UserResponse>} - Resolves with the updated user or an error message.
+ */
+export const updateUserOnlineStatus = async (
+  username: string,
+  isOnline: boolean,
+  socketId: string | null = null,
+): Promise<UserResponse> => {
+  try {
+    const updates: Partial<User> = {
+      isOnline,
+      socketId,
+      ...(!isOnline && { lastSeen: new Date() }),
+    };
+
+    const updatedUser: SafeDatabaseUser | null = await UserModel.findOneAndUpdate(
+      { username },
+      { $set: updates },
+      { new: true },
+    ).select('-password');
+
+    if (!updatedUser) {
+      throw Error('Error updating this users online status');
+    }
+
+    return updatedUser;
+  } catch (error) {
+    return { error: `Error occurred when updating this users status: ${error}` };
+  }
+};
+
+/**
+ * Retrieves all online users from the database.
+ *
+ * @returns {Promise<UsersResponse>} - Resolves with the list of online users or an error message.
+ */
+export const getOnlineUsers = async (): Promise<UsersResponse> => {
+  try {
+    const users: SafeDatabaseUser[] = await UserModel.find({ isOnline: true }).select('-password');
+
+    if (!users) {
+      throw Error('Could not retrieve users online');
+    }
+
+    return users;
+  } catch (error) {
+    return { error: `Error occurred when finding online users: ${error}` };
   }
 };

@@ -5,6 +5,21 @@ import { Community, DatabaseCommunity } from '../types/types';
 const COMMUNITIES_API_URL = `/api/community`;
 
 /**
+ * Fetches the communities a user is part of.
+ * @param username - username of the user
+ * @returns - an array of DatabaseCommunity objects.
+ */
+const getUserCommunities = async (username: string): Promise<DatabaseCommunity[]> => {
+  const res = await api.get(`${COMMUNITIES_API_URL}/getUserCommunities/${username}`);
+
+  if (res.status !== 200) {
+    throw new Error('Error while fetching user communities');
+  }
+
+  return res.data;
+};
+
+/**
  * Adds or removes a user to a community.
  *
  * @param communityId - The ID of the community to join or leave.
@@ -92,6 +107,7 @@ const deleteCommunity = async (communityId: string, username: string): Promise<v
 };
 
 export {
+  getUserCommunities,
   changeCommunityMembership,
   getCommunities,
   createCommunity,

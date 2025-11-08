@@ -8,8 +8,9 @@ import {
   saveUser,
   updateUser,
 } from '../../services/user.service';
-import { SafeDatabaseUser, User, UserCredentials } from '../../types/types';
+import { SafeDatabaseUser, User, UserLogin } from '../../types/types';
 import { user, safeUser } from '../mockData.models';
+import bcryptjs from 'bcryptjs';
 
 describe('User model', () => {
   beforeEach(() => {
@@ -142,15 +143,12 @@ describe('loginUser', () => {
   });
 
   it('should return the user if authentication succeeds', async () => {
-    jest.spyOn(UserModel, 'findOne').mockImplementation((filter?: any) => {
-      expect(filter.username).toBeDefined();
-      expect(filter.password).toBeDefined();
-      const query: any = {};
-      query.select = jest.fn().mockReturnValue(Promise.resolve(safeUser));
-      return query;
+    jest.spyOn(UserModel, 'findOne').mockResolvedValue({
+      ...safeUser,
+      password: await bcryptjs.hash(user.password, 10),
     });
 
-    const credentials: UserCredentials = {
+    const credentials: UserLogin = {
       username: user.username,
       password: user.password,
     };
@@ -164,7 +162,7 @@ describe('loginUser', () => {
   it('should return the user if the password fails', async () => {
     jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
 
-    const credentials: UserCredentials = {
+    const credentials: UserLogin = {
       username: user.username,
       password: 'wrongPassword',
     };
@@ -177,7 +175,7 @@ describe('loginUser', () => {
   it('should return the user is not found', async () => {
     jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
 
-    const credentials: UserCredentials = {
+    const credentials: UserLogin = {
       username: 'wrongUsername',
       password: user.password,
     };
@@ -192,7 +190,7 @@ describe('loginUser', () => {
       select: jest.fn().mockResolvedValue(null),
     } as unknown as Query<SafeDatabaseUser, typeof UserModel>);
 
-    const credentials: UserCredentials = {
+    const credentials: UserLogin = {
       username: user.username,
       password: user.password,
     };
@@ -260,6 +258,8 @@ describe('updateUser', () => {
   const safeUpdatedUser: SafeDatabaseUser = {
     _id: new mongoose.Types.ObjectId(),
     username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
     dateJoined: user.dateJoined,
   };
 

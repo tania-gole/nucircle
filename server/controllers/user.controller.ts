@@ -1,8 +1,10 @@
 import express, { Request, Response, Router } from 'express';
 import {
+  SignupRequest,
+  LoginRequest,
   UserRequest,
   User,
-  UserCredentials,
+  UserLogin,
   UserByUsernameRequest,
   FakeSOSocket,
   UpdateBiographyRequest,
@@ -15,6 +17,7 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
+import { generateToken } from '../utils/jwt.util';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -25,7 +28,7 @@ const userController = (socket: FakeSOSocket) => {
    * @param res The response, either returning the created user or an error.
    * @returns A promise resolving to void.
    */
-  const createUser = async (req: UserRequest, res: Response): Promise<void> => {
+  const createUser = async (req: SignupRequest, res: Response): Promise<void> => {
     const requestUser = req.body;
 
     const user: User = {
@@ -57,9 +60,9 @@ const userController = (socket: FakeSOSocket) => {
    * @param res The response, either returning the user or an error.
    * @returns A promise resolving to void.
    */
-  const userLogin = async (req: UserRequest, res: Response): Promise<void> => {
+  const userLogin = async (req: LoginRequest, res: Response): Promise<void> => {
     try {
-      const loginCredentials: UserCredentials = {
+      const loginCredentials: UserLogin = {
         username: req.body.username,
         password: req.body.password,
       };
@@ -70,7 +73,8 @@ const userController = (socket: FakeSOSocket) => {
         throw Error(user.error);
       }
 
-      res.status(200).json(user);
+      const token = generateToken({ userId: user._id.toString(), username: user.username });
+      res.status(200).json({ user, token });
     } catch (error) {
       res.status(500).send('Login failed');
     }

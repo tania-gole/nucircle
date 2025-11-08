@@ -130,10 +130,18 @@ const useAuth = (authType: 'login' | 'signup') => {
     let user;
 
     try {
+      let cleanUsername = username;
       if (authType === 'signup') {
-        user = await createUser({ firstName, lastName, username, password });
+        cleanUsername = username.split('@')[0];
+        user = await createUser({ firstName, lastName, username: cleanUsername, password });
       } else if (authType === 'login') {
-        user = await loginUser({ username, password });
+        if (username.includes('@')) {
+          cleanUsername = username.split('@')[0];
+        }
+        user = (await loginUser({ username: cleanUsername, password })).user;
+        const token = (await loginUser({ username: cleanUsername, password })).token;
+        localStorage.setItem('authToken', token);
+        // console.log('TOKEN!!: ', (await loginUser({ username: cleanUsername, password })).token);
       } else {
         throw new Error('Invalid auth type');
       }

@@ -34,10 +34,41 @@ const getAllCommunitiesSpy = jest.spyOn(communityService, 'getAllCommunities');
 const toggleCommunityMembershipSpy = jest.spyOn(communityService, 'toggleCommunityMembership');
 const createCommunitySpy = jest.spyOn(communityService, 'createCommunity');
 const deleteCommunitySpy = jest.spyOn(communityService, 'deleteCommunity');
+const getCommunitiesByUserSpy = jest.spyOn(communityService, 'getCommunitiesByUser');
 
 describe('Community Controller', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('GET /getUserCommunities/:username', () => {
+    test('should return communities for a user', async () => {
+      getCommunitiesByUserSpy.mockResolvedValueOnce([mockCommunity]);
+
+      const response = await supertest(app).get('/api/community/getUserCommunities/test_user');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0]).toEqual(mockCommunityResponse);
+      expect(getCommunitiesByUserSpy).toHaveBeenCalledWith('test_user');
+    });
+
+    test('should return 500 when service returns error', async () => {
+      getCommunitiesByUserSpy.mockResolvedValueOnce({ error: 'Database error' });
+
+      const response = await supertest(app).get('/api/community/getUserCommunities/test_user');
+      expect(response.status).toBe(500);
+      expect(response.text).toContain('Error retrieving user communities: Database error');
+    });
+
+    test('should return empty array when user has no communities', async () => {
+      getCommunitiesByUserSpy.mockResolvedValueOnce([]);
+
+      const response = await supertest(app).get('/api/community/getUserCommunities/test_user');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([]);
+    });
   });
 
   describe('GET /getCommunity/:communityId', () => {

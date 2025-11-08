@@ -1,42 +1,103 @@
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  height: 10%;
+  justify-content: space-between;
+  height: 80px;
   width: 100%;
-  background: #dddddd;
+  padding: 0 20px;
+  background: #FFFFFF;
+  box-sizing: border-box;
 }
 
 .title {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 800;
+  color: #FF6B6B;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  flex: 1;
+  max-width: 600px;
+  margin: 0 60px;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-wrapper .search-icon {
+  position: absolute;
+  left: 15px;
+  display: flex;
+  align-items: center;
+  pointer-events: none; 
+}
+
+.header-search-input {
+  padding-left: 45px; /* Leave space for icon */
+  border-radius: 25px;
+  background-color: #FFF9F9;
+  width: 100%;
+  border: none;
+  font-size: 16px;
+  height: 45px;
+  color: #9CA3AF;
+  box-sizing: border-box;
+}
+
+#searchBar:focus {
+  outline: none;
+  box-shadow: 0 0 8px -2px rgba(172, 172, 172, 0.481);
+}
+
+.right-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .logout-button {
-  padding: 12px;
-  font-size: 16px;
-  background-color: #007bff;
+  padding: 8px 16px;
+  font-size: 15px;
+  background-color: #FF6B6B;
   color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
-.view-profile-button {
-  background-color: #007bff;
-  color: white;
+.logout-button:hover {
+  background-color: #e55a5a;  
+}
+
+.logout-button:active {
+  background-color: #cc4d4d;  
+}
+
+.profile-container {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-image {
+  width: 40px;
+  height: 40px;
+  vertical-align: middle;
   border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
   cursor: pointer;
-  margin-left: 10px; /* Add spacing from Logout button */
+  border-radius: 50%;
 }
 
-.view-profile-button:hover {
-  background-color: #0056b3;
-}
-
-.view-profile-button:active {
-  background-color: #003f7f;
+.profile-online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background-color: #00ff00;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 255, 0, 0.6);
+  animation: pulse 2s infinite;
 }

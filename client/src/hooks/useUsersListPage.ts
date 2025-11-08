@@ -81,8 +81,22 @@ const useUsersListPage = () => {
 
     socket.on('userUpdate', handleModifiedUserUpdate);
 
+    socket.on(
+      'userStatusUpdate',
+      (statusUpdate: { username: string; isOnline: boolean; lastSeen?: Date }) => {
+        setUserList(prevUserList =>
+          prevUserList.map(user =>
+            user.username === statusUpdate.username
+              ? { ...user, isOnline: statusUpdate.isOnline, lastSeen: statusUpdate.lastSeen }
+              : user,
+          ),
+        );
+      },
+    );
+
     return () => {
       socket.off('userUpdate', handleModifiedUserUpdate);
+      socket.off('userStatusUpdate');
     };
   }, [socket]);
 

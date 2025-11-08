@@ -122,6 +122,8 @@ export interface CollectionUpdatePayload {
  * - `leaveGame`: Client can leave a game.
  * - `joinChat`: Client can join a chat.
  * - `leaveChat`: Client can leave a chat.
+ * - `userConnect`: Client has connected to server.
+ * - `userDisconnect`: Client has disconnected from server.
  */
 export interface ClientToServerEvents {
   makeMove: (move: GameMovePayload) => void;
@@ -129,6 +131,8 @@ export interface ClientToServerEvents {
   leaveGame: (gameID: string) => void;
   joinChat: (chatID: string) => void;
   leaveChat: (chatID: string | undefined) => void;
+  userConnect: (username: string) => void;
+  userDisconnect: () => void;
 }
 
 /**
@@ -145,6 +149,7 @@ export interface ClientToServerEvents {
  * - `chatUpdate`: Server sends updated chat.
  * - `communityUpdate`: Server sends updated community.
  * - `collectionUpdate`: Server sends updated collection.
+ * - `userStatusUpdate`: Server sends updated user status.
  */
 export interface ServerToClientEvents {
   questionUpdate: (question: PopulatedDatabaseQuestion) => void;
@@ -159,4 +164,5 @@ export interface ServerToClientEvents {
   chatUpdate: (chat: ChatUpdatePayload) => void;
   communityUpdate: (community: CommunityUpdatePayload) => void;
   collectionUpdate: (community: CollectionUpdatePayload) => void;
+  userStatusUpdate: (payload: { username: string; isOnline: boolean; lastSeen?: Date }) => void;
 }
