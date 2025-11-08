@@ -42,9 +42,7 @@ const NewQuestionPage = () => {
         setState={setText}
         err={textErr}
       />
-      <h5>
-        <i>Markdown formatting is supported.</i>
-      </h5>
+      <h5 className='markdown_hint'>Markdown formatting is supported.</h5>
       <Input
         title={'Tags'}
         hint={'Add keywords separated by whitespace'}

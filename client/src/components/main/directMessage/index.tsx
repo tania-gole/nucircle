@@ -69,7 +69,7 @@ const DirectMessage = () => {
           <div className='users-list-panel'>
             <div className='users-panel-header'>
               <p className='selected-user-text'>
-                Selected user: <span className='selected-user'>{chatToCreate || 'None'}</span>
+                Selected user: <span className='selected-user'>{chatToCreate || 'none'}</span>
               </p>
               <button
                 className='close-button'
