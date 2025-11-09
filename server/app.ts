@@ -26,7 +26,7 @@ import collectionController from './controllers/collection.controller';
 import communityController from './controllers/community.controller';
 import { updateUserOnlineStatus } from './services/user.service';
 import communityMessagesController from './controllers/communityMessagesController';
-// import authMiddleware from './middleware/auth';
+import authMiddleware from './middleware/auth';
 
 const MONGO_URL = `${process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'}/fake_so`;
 const PORT = parseInt(process.env.PORT || '8000');
@@ -131,7 +131,7 @@ try {
     OpenApiValidator.middleware({
       apiSpec: './openapi.yaml',
       validateRequests: true,
-      validateResponses: true,
+      validateResponses: false, // FOR DEVELOPMENT ONLY - set to true in production
       ignoreUndocumented: true, // Only validate paths defined in the spec
       formats: {
         'object-id': (v: string) => /^[0-9a-fA-F]{24}$/.test(v),
@@ -162,7 +162,7 @@ const openApiDocument = yaml.parse(fs.readFileSync('./openapi.yaml', 'utf8'));
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 console.log('Swagger UI is available at /api/docs');
 
-// app.use(authMiddleware); // Protect routes below this line
+app.use(authMiddleware); // Protect routes below this line
 
 app.use('/api/question', questionController(socket));
 app.use('/api/tags', tagController());

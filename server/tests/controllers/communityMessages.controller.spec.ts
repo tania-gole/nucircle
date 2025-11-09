@@ -4,6 +4,15 @@ import { app } from '../../app';
 import * as communityService from '../../services/communityMessagesService';
 import { DatabaseMessage, Message } from '../../types/types';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 const addCommunityMessageSpy = jest.spyOn(communityService, 'addCommunityMessage');
 const getCommunityMessagesSpy = jest.spyOn(communityService, 'getCommunityMessages');
 

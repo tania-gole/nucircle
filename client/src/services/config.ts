@@ -5,15 +5,6 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'ax
  */
 const handleRes = (res: AxiosResponse) => res;
 
-/**
- * Function to handle errors
- */
-const handleErr = (err: AxiosError) => {
-  // eslint-disable-next-line no-console
-  console.log(err);
-  return Promise.reject(err);
-};
-
 const api = axios.create({ withCredentials: true });
 
 /**
@@ -28,15 +19,27 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error: AxiosError) => handleErr(error),
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  },
 );
 
 /**
  * Add a response interceptor to the Axios instance.
+ * Handle successful responses and 401/403 errors.
  */
 api.interceptors.response.use(
-  (response: AxiosResponse) => handleRes(response),
-  (error: AxiosError) => handleErr(error),
+  (response: AxiosResponse) => {
+    return handleRes(response);
+  },
+  (error: AxiosError) => {
+    // Handle authentication errors
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      localStorage.removeItem('authToken');
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
+  },
 );
 
 export default api;
