@@ -4,6 +4,15 @@ import { app } from '../../app';
 import * as util from '../../services/message.service';
 import { DatabaseMessage, Message } from '../../types/types';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 const saveMessageSpy = jest.spyOn(util, 'saveMessage');
 const getMessagesSpy = jest.spyOn(util, 'getMessages');
 

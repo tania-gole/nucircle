@@ -11,6 +11,15 @@ import gameController from '../../controllers/game.controller';
 import NimGame from '../../services/games/nim';
 import { MAX_NIM_OBJECTS } from '../../types/constants';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 const mockGameManager = GameManager.getInstance();
 
 describe('POST /create', () => {
@@ -20,7 +29,9 @@ describe('POST /create', () => {
     it('should return 200 with a game ID when successful', async () => {
       addGameSpy.mockResolvedValueOnce('testGameID');
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
+      const response = await supertest(app)
+        .post('/api/games/create')
+        .send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(200);
       expect(response.text).toEqual(JSON.stringify('testGameID'));
@@ -60,7 +71,9 @@ describe('POST /create', () => {
     it('should return 500 if addGame fails', async () => {
       addGameSpy.mockResolvedValueOnce({ error: 'test error' });
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
+      const response = await supertest(app)
+        .post('/api/games/create')
+        .send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when creating game: test error');
@@ -70,7 +83,9 @@ describe('POST /create', () => {
     it('should return 500 if addGame throws an error', async () => {
       addGameSpy.mockRejectedValueOnce(new Error('test error'));
 
-      const response = await supertest(app).post('/api/games/create').send({ gameType: 'Nim', createdBy: 'testUser' });
+      const response = await supertest(app)
+        .post('/api/games/create')
+        .send({ gameType: 'Nim', createdBy: 'testUser' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when creating game: test error');

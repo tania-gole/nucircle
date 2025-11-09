@@ -4,6 +4,15 @@ import { app } from '../../app';
 import * as communityService from '../../services/community.service';
 import { DatabaseCommunity } from '../../types/types';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 // Mock community data for testing
 const mockCommunity: DatabaseCommunity = {
   _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6dc'),

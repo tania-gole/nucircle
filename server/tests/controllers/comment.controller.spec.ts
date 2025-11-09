@@ -4,6 +4,15 @@ import { app } from '../../app';
 import * as commentUtil from '../../services/comment.service';
 import * as databaseUtil from '../../utils/database.util';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 const saveCommentSpy = jest.spyOn(commentUtil, 'saveComment');
 const addCommentSpy = jest.spyOn(commentUtil, 'addComment');
 const popDocSpy = jest.spyOn(databaseUtil, 'populateDocument');

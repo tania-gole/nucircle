@@ -119,7 +119,9 @@ describe('TriviaGame tests', () => {
       expect(triviaGame.state.player1).toEqual('player1');
       expect(triviaGame.state.status).toEqual('WAITING_TO_START');
 
-      await expect(triviaGame.join('player1')).rejects.toThrow('Cannot join game: player already in game');
+      await expect(triviaGame.join('player1')).rejects.toThrow(
+        'Cannot join game: player already in game',
+      );
     });
   });
 

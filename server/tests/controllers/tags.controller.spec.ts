@@ -5,6 +5,15 @@ import * as tagUtil from '../../services/tag.service';
 import TagModel from '../../models/tags.model';
 import { DatabaseTag, Tag } from '../../types/types';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 const getTagCountMapSpy: jest.SpyInstance = jest.spyOn(tagUtil, 'getTagCountMap');
 // Spy on the TagModel.findOne method
 const findOneSpy = jest.spyOn(TagModel, 'findOne');

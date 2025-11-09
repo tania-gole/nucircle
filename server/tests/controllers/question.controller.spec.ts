@@ -15,6 +15,15 @@ import {
   VoteResponse,
 } from '../../types/types';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 const addVoteToQuestionSpy = jest.spyOn(questionUtil, 'addVoteToQuestion');
 const getQuestionsByOrderSpy: jest.SpyInstance = jest.spyOn(questionUtil, 'getQuestionsByOrder');
 const filterQuestionsBySearchSpy: jest.SpyInstance = jest.spyOn(

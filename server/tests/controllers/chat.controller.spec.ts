@@ -11,6 +11,15 @@ import * as databaseUtil from '../../utils/database.util';
 import { DatabaseChat, PopulatedDatabaseChat, Message } from '../../types/types';
 import chatController from '../../controllers/chat.controller';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 /**
  * Spies on the service functions
  */

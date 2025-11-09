@@ -5,6 +5,15 @@ import * as collectionService from '../../services/collection.service';
 import * as databaseUtil from '../../utils/database.util';
 import { DatabaseCollection, PopulatedDatabaseCollection } from '../../types/types';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 // Mock question IDs for testing
 const mockQuestionId1 = new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6aa');
 
