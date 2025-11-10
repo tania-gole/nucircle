@@ -6,7 +6,7 @@ import {
   resetPassword,
   updateBiography,
 } from '../services/userService';
-import badgeService from "../services/badgeService"
+import badgeService from '../services/badgeService';
 import { SafeDatabaseUser, Badge } from '../types/types';
 import useUserContext from './useUserContext';
 

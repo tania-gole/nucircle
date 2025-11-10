@@ -68,6 +68,10 @@ const userSchema: Schema = new Schema(
         },
       },
     ],
+    hasSeenWelcomeMessage: {
+      type: Boolean,
+      default: false,
+    },
   },
   { collection: 'User' },
 );

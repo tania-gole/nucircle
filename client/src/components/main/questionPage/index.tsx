@@ -1,7 +1,10 @@
 import './index.css';
+import { useState, useEffect } from 'react';
 import QuestionHeader from './header';
 import QuestionView from './question';
 import useQuestionPage from '../../../hooks/useQuestionPage';
+import useLoginContext from '../../../hooks/useLoginContext';
+import WelcomePopup from '../../welcomePopup';
 
 /**
  * QuestionPage component renders a page displaying a list of questions
@@ -10,9 +13,23 @@ import useQuestionPage from '../../../hooks/useQuestionPage';
  */
 const QuestionPage = () => {
   const { titleText, qlist, setQuestionOrder, questionOrder } = useQuestionPage();
+  const { user } = useLoginContext();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // welcome message popup logic
+  useEffect(() => {
+    if (user) {
+      if (user.hasSeenWelcomeMessage === false) {
+        setShowWelcome(true);
+      } else {
+        setShowWelcome(false);
+      }
+    }
+  }, [user]);
 
   return (
     <>
+      {showWelcome && <WelcomePopup onClose={() => setShowWelcome(false)} />}
       <QuestionHeader
         titleText={titleText}
         qcnt={qlist.length}

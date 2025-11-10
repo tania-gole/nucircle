@@ -45,11 +45,14 @@ const userController = (socket: FakeSOSocket) => {
         throw new Error(result.error);
       }
 
+      // Generate token for automatic login after signup
+      const token = generateToken({ userId: result._id.toString(), username: result.username });
+
       socket.emit('userUpdate', {
         user: result,
         type: 'created',
       });
-      res.status(200).json(result);
+      res.status(200).json({ user: result, token });
     } catch (error) {
       res.status(500).send(`Error when saving user: ${error}`);
     }
@@ -215,6 +218,21 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const markWelcomeMessageSeen = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const username = req.user!.username;
+      const updatedUser = await updateUser(username, { hasSeenWelcomeMessage: true });
+
+      if ('error' in updatedUser) {
+        throw Error(updatedUser.error);
+      }
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when marking welcome message as seen: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -224,6 +242,7 @@ const userController = (socket: FakeSOSocket) => {
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
   router.get('/me', authMiddleware, getCurrentUser);
+  router.patch('/markWelcomeSeen', authMiddleware, markWelcomeMessageSeen);
   return router;
 };
 

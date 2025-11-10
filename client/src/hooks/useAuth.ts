@@ -133,7 +133,15 @@ const useAuth = (authType: 'login' | 'signup') => {
       let cleanUsername = username;
       if (authType === 'signup') {
         cleanUsername = username.split('@')[0];
-        user = await createUser({ firstName, lastName, username: cleanUsername, password });
+        const response = await createUser({
+          firstName,
+          lastName,
+          username: cleanUsername,
+          password,
+        });
+        user = response.user;
+        const token = response.token;
+        localStorage.setItem('authToken', token);
       } else if (authType === 'login') {
         if (username.includes('@')) {
           cleanUsername = username.split('@')[0];

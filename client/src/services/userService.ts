@@ -34,10 +34,10 @@ const getUserByUsername = async (username: string): Promise<SafeDatabaseUser> =>
  * Sends a POST request to create a new user account.
  *
  * @param user - The user credentials (username and password) for signup.
- * @returns {Promise<User>} The newly created user object.
+ * @returns {Promise<AuthResponse>} The newly created user object and authentication token.
  * @throws {Error} If an error occurs during the signup process.
  */
-const createUser = async (user: UserSignup): Promise<SafeDatabaseUser> => {
+const createUser = async (user: UserSignup): Promise<AuthResponse> => {
   try {
     const res = await api.post(`${USER_API_URL}/signup`, user);
     return res.data;
@@ -124,6 +124,24 @@ const updateBiography = async (
   return res.data;
 };
 
+/**
+ * Marks the welcome message as seen for the current user if they have had it pop up.
+ * @returns A promise resolving to the updated user
+ * @throws Error if the request fails
+ */
+const markWelcomeMessageSeen = async (): Promise<SafeDatabaseUser> => {
+  try {
+    const res = await api.patch(`${USER_API_URL}/markWelcomeSeen`);
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(`Error while marking welcome message as seen: ${error.response.data}`);
+    } else {
+      throw new Error('Error while marking welcome message as seen');
+    }
+  }
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -132,4 +150,5 @@ export {
   deleteUser,
   resetPassword,
   updateBiography,
+  markWelcomeMessageSeen,
 };
