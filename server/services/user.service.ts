@@ -43,6 +43,7 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       dateJoined: result.dateJoined,
       biography: result.biography,
       badges: result.badges || [],
+      hasSeenWelcomeMessage: result.hasSeenWelcomeMessage || false,
     };
 
     return safeUser;
@@ -120,6 +121,7 @@ export const loginUser = async (loginCredentials: UserLogin): Promise<UserRespon
       dateJoined: user.dateJoined,
       biography: user.biography,
       badges: user.badges || [],
+      hasSeenWelcomeMessage: user.hasSeenWelcomeMessage || false,
     };
 
     return safeUser;

@@ -32,6 +32,20 @@ describe('User model', () => {
       expect(savedUser.dateJoined).toEqual(user.dateJoined);
     });
 
+    it('should set hasSeenWelcomeMessage to false by default for new users', async () => {
+      jest
+        .spyOn(UserModel, 'create')
+        .mockResolvedValueOnce({
+          ...user,
+          _id: mongoose.Types.ObjectId,
+          hasSeenWelcomeMessage: false,
+        } as unknown as ReturnType<typeof UserModel.create<User>>);
+
+      const savedUser = (await saveUser(user)) as SafeDatabaseUser;
+
+      expect(savedUser.hasSeenWelcomeMessage).toBe(false);
+    });
+
     it('should throw an error if error when saving to database', async () => {
       jest
         .spyOn(UserModel, 'create')
@@ -157,6 +171,23 @@ describe('loginUser', () => {
 
     expect(loggedInUser.username).toEqual(user.username);
     expect(loggedInUser.dateJoined).toEqual(user.dateJoined);
+  });
+
+  it('should include hasSeenWelcomeMessage in login response', async () => {
+    jest.spyOn(UserModel, 'findOne').mockResolvedValue({
+      ...safeUser,
+      password: await bcryptjs.hash(user.password, 10),
+      hasSeenWelcomeMessage: false,
+    });
+
+    const credentials: UserLogin = {
+      username: user.username,
+      password: user.password,
+    };
+
+    const loggedInUser = (await loginUser(credentials)) as SafeDatabaseUser;
+
+    expect(loggedInUser.hasSeenWelcomeMessage).toBe(false);
   });
 
   it('should return the user if the password fails', async () => {
@@ -346,5 +377,25 @@ describe('updateUser', () => {
     const updatedError = await updateUser(user.username, biographyUpdates);
 
     expect('error' in updatedError).toBe(true);
+  });
+
+  it('should update hasSeenWelcomeMessage to true when updating user', async () => {
+    const welcomeMessageUpdates: Partial<User> = { hasSeenWelcomeMessage: true };
+    jest.spyOn(UserModel, 'findOneAndUpdate').mockImplementation((filter?: any) => {
+      expect(filter.username).toBeDefined();
+      const query: any = {};
+      query.select = jest
+        .fn()
+        .mockReturnValue(Promise.resolve({ ...safeUpdatedUser, hasSeenWelcomeMessage: true }));
+      return query;
+    });
+
+    const result = await updateUser(user.username, welcomeMessageUpdates);
+
+    if ('username' in result) {
+      expect(result.hasSeenWelcomeMessage).toBe(true);
+    } else {
+      throw new Error('Expected a safe user, got an error object.');
+    }
   });
 });

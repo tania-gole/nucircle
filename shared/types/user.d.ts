@@ -48,6 +48,7 @@ export interface User extends UserSignup {
   socketId?: string | null;
   lastSeen?: Date;
   badges?: Badge[];
+  hasSeenWelcomeMessage?: boolean;
 }
 
 /**

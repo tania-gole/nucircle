@@ -58,12 +58,29 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/api/user/signup').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ ...mockUserJSONResponse, biography: mockReqBody.biography });
+      expect(response.body.user).toEqual({ ...mockUserJSONResponse, biography: mockReqBody.biography });
+      expect(response.body.token).toBeDefined();
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,
         biography: mockReqBody.biography,
         dateJoined: expect.any(Date),
       });
+    });
+
+    it('should return hasSeenWelcomeMessage as false for new users', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        password: mockUser.password,
+        firstName: mockUser.firstName,
+        lastName: mockUser.lastName,
+      };
+
+      saveUserSpy.mockResolvedValueOnce({ ...mockSafeUser, hasSeenWelcomeMessage: false });
+
+      const response = await supertest(app).post('/api/user/signup').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body.user.hasSeenWelcomeMessage).toBe(false);
     });
 
     it('should return 400 for request missing username', async () => {
@@ -450,6 +467,35 @@ describe('Test userController', () => {
       expect(response.status).toBe(500);
       expect(response.text).toContain(
         'Error when updating user biography: Error: Error updating user',
+      );
+    });
+  });
+
+  describe('PATCH /markWelcomeSeen', () => {
+    it('should successfully mark welcome message as seen', async () => {
+      const updatedUser: SafeDatabaseUser = {
+        ...mockSafeUser,
+        hasSeenWelcomeMessage: true,
+      };
+
+      updatedUserSpy.mockResolvedValueOnce(updatedUser);
+
+      const response = await supertest(app).patch('/api/user/markWelcomeSeen').send();
+
+      expect(response.status).toBe(200);
+      expect(response.body.hasSeenWelcomeMessage).toBe(true);
+      expect(updatedUserSpy).toHaveBeenCalledWith('user1', { hasSeenWelcomeMessage: true });
+    });
+
+    it('should return 500 if updateUser returns an error', async () => {
+      // Simulate a DB error
+      updatedUserSpy.mockResolvedValueOnce({ error: 'Error updating user' });
+
+      const response = await supertest(app).patch('/api/user/markWelcomeSeen').send();
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain(
+        'Error when marking welcome message as seen: Error: Error updating user',
       );
     });
   });
