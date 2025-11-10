@@ -136,6 +136,11 @@ export interface UpdateBiographyRequest extends Request {
   };
 }
 
+/**
+ * Represents the authentication response containing the user and JWT token.
+ * - `user`: The authenticated user object without sensitive data.
+ * - `token`: The token for session management includes userId and username.
+ */
 export type AuthResponse = {
   user: SafeDatabaseUser;
   token: string;

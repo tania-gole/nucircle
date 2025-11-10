@@ -11,6 +11,15 @@ import gameController from '../../controllers/game.controller';
 import NimGame from '../../services/games/nim';
 import { MAX_NIM_OBJECTS } from '../../types/constants';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'testuser' };
+    next();
+  },
+}));
+
 const mockGameManager = GameManager.getInstance();
 
 describe('POST /create', () => {

@@ -4,6 +4,15 @@ import { app } from '../../app';
 import * as util from '../../services/user.service';
 import { SafeDatabaseUser, User } from '../../types/types';
 
+// mock jwt auth to always authenticate successfully
+jest.mock('../../middleware/auth', () => ({
+  __esModule: true,
+  default: (req: any, res: any, next: any) => {
+    req.user = { userId: 'test-user-id', username: 'user1' };
+    next();
+  },
+}));
+
 const mockUser: User = {
   username: 'user1',
   password: 'password',
