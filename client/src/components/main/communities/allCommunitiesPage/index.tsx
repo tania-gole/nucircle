@@ -24,15 +24,22 @@ const AllCommunitiesPage = () => {
       </div>
       {error && <p className='community-error'>{error}</p>}
       <div className='communities-list'>
-        {communities
-          .filter(community => community.name.toLowerCase().includes(search))
-          .map(community => (
-            <CommunityCard
-              key={community._id.toString()}
-              community={community}
-              setError={setError}
-            />
-          ))}
+        {communities && communities.length > 0 ? (
+          communities
+            .filter(
+              community =>
+                community && community.name && community.name.toLowerCase().includes(search),
+            )
+            .map(community => (
+              <CommunityCard
+                key={community._id?.toString() || Math.random()}
+                community={community}
+                setError={setError}
+              />
+            ))
+        ) : (
+          <p className='community-empty'>No communities found.</p>
+        )}
       </div>
     </div>
   );

@@ -77,7 +77,8 @@ const userController = (socket: FakeSOSocket) => {
       const token = generateToken({ userId: user._id.toString(), username: user.username });
       res.status(200).json({ user, token });
     } catch (error) {
-      res.status(500).send('Login failed');
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      res.status(500).json({ error: errorMessage });
     }
   };
 

@@ -2,6 +2,18 @@ import { Request } from 'express';
 import { ObjectId } from 'mongodb';
 
 /**
+ * Represents a badge earned by a user.
+ * - `type`: The type of badge (e.g., 'community', 'milestone', 'leaderboard')
+ * - `name`: The name of the badge (e.g., 'Community Member', '50 Questions', 'Top 10')
+ * - `earnedAt`: The date when the badge was earned
+ */
+export interface Badge {
+  type: string;
+  name: string;
+  earnedAt: Date;
+}
+
+/**
  * Represents user credentials for authentication.
  * - `username`: The unique username of the user.
  * - `password`: The user's password.
@@ -35,6 +47,7 @@ export interface User extends UserSignup {
   isOnline?: boolean;
   socketId?: string | null;
   lastSeen?: Date;
+  badges?: Badge[];
 }
 
 /**

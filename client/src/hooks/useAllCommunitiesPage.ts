@@ -25,15 +25,24 @@ const useAllCommunitiesPage = () => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchCommunities = async () => {
       try {
-        setCommunities(await getCommunities());
+        const fetchedCommunities = await getCommunities();
+        if (isMounted) {
+          setCommunities(fetchedCommunities);
+        }
       } catch (err: unknown) {
-        setError('Failed to fetch communities');
+        if (isMounted) {
+          setError('Failed to fetch communities');
+        }
       }
     };
 
     const handleCommunityUpdate = (communityUpdate: CommunityUpdatePayload) => {
+      if (!isMounted) return;
+
       switch (communityUpdate.type) {
         case 'created':
           setCommunities(prev => [communityUpdate.community, ...prev]);
@@ -59,10 +68,19 @@ const useAllCommunitiesPage = () => {
 
     fetchCommunities();
 
-    socket.on('communityUpdate', handleCommunityUpdate);
+    if (socket && socket.connected) {
+      socket.on('communityUpdate', handleCommunityUpdate);
+
+      return () => {
+        isMounted = false;
+        if (socket && socket.connected) {
+          socket.off('communityUpdate', handleCommunityUpdate);
+        }
+      };
+    }
 
     return () => {
-      socket.off('communityUpdate', handleCommunityUpdate);
+      isMounted = false;
     };
   }, [socket]);
 

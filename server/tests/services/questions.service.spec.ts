@@ -21,6 +21,13 @@ import {
   POPULATED_QUESTIONS,
 } from '../mockData.models';
 
+import * as badgeService from '../../services/badge.service';
+
+jest.mock('../../services/badge.service', () => ({
+  countUserQuestions: jest.fn(),
+  checkAndAwardMilestoneBadge: jest.fn(),
+}));
+
 describe('Question model', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -321,9 +328,11 @@ describe('Question model', () => {
 
       jest
         .spyOn(QuestionModel, 'create')
-        .mockResolvedValue({ ...mockQn, _id: mongoose.Types.ObjectId } as unknown as ReturnType<
+        .mockResolvedValue({ ...mockQn, _id: new mongoose.Types.ObjectId() } as unknown as ReturnType<
           typeof QuestionModel.create<DatabaseQuestion>
         >);
+      (badgeService.countUserQuestions as jest.Mock).mockResolvedValue(1);
+      (badgeService.checkAndAwardMilestoneBadge as jest.Mock).mockResolvedValue(undefined);
       const result = (await saveQuestion(mockQn)) as DatabaseQuestion;
 
       expect(result._id).toBeDefined();

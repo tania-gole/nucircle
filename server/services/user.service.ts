@@ -42,6 +42,7 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       lastName: result.lastName,
       dateJoined: result.dateJoined,
       biography: result.biography,
+      badges: result.badges || [],
     };
 
     return safeUser;
@@ -102,17 +103,29 @@ export const loginUser = async (loginCredentials: UserLogin): Promise<UserRespon
   try {
     const user: DatabaseUser | null = await UserModel.findOne({ username });
     if (!user) {
-      throw Error('Authentication failed');
+      throw Error('Invalid username or password');
     }
 
     const isMatch = await bcryptjs.compare(password, user.password);
     if (!isMatch) {
-      throw Error('Authentication failed');
+      throw Error('Invalid username or password');
     }
 
-    return user as UserResponse;
+    // Remove password field from returned object
+    const safeUser: SafeDatabaseUser = {
+      _id: user._id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      dateJoined: user.dateJoined,
+      biography: user.biography,
+      badges: user.badges || [],
+    };
+
+    return safeUser;
   } catch (error) {
-    return { error: `Error occurred when authenticating user: ${error}` };
+    const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+    return { error: errorMessage };
   }
 };
 

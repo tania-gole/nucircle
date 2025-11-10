@@ -63,7 +63,8 @@ const loginUser = async (user: UserLogin): Promise<AuthResponse> => {
     return res.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      throw new Error(`Error while logging in: ${error.response.data}`);
+      const errorMessage = error.response.data?.error || error.response.data || 'Login failed';
+      throw new Error(errorMessage);
     } else {
       throw new Error('Error while logging in');
     }

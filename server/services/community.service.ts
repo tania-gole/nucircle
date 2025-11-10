@@ -1,5 +1,6 @@
 import CommunityModel from '../models/community.model';
 import { Community, CommunityResponse, DatabaseCommunity } from '../types/types';
+import { checkAndAwardCommunityBadge } from './badge.service';
 
 /**
  * Retrieves all communities that a user is a part of
@@ -95,6 +96,11 @@ export const toggleCommunityMembership = async (
         { $addToSet: { participants: username } },
         { new: true },
       );
+
+      // Award community badge when user joins
+      if (updatedCommunity) {
+        await checkAndAwardCommunityBadge(username, communityId);
+      }
     }
 
     return updatedCommunity || { error: 'Failed to update community' };

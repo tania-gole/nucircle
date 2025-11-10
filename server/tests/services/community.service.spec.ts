@@ -10,6 +10,14 @@ import {
 } from '../../services/community.service';
 import { Community, DatabaseCommunity } from '../../types/types';
 
+import * as badgeService from '../../services/badge.service';
+
+jest.mock('../../services/badge.service', () => ({
+  countUserQuestions: jest.fn(),
+  checkAndAwardMilestoneBadge: jest.fn(),
+  checkAndAwardCommunityBadge: jest.fn(),
+}));
+
 describe('Community Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -144,6 +152,7 @@ describe('Community Service', () => {
 
       jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(communityWithoutUser);
       jest.spyOn(CommunityModel, 'findByIdAndUpdate').mockResolvedValueOnce(updatedCommunity);
+      (badgeService.checkAndAwardCommunityBadge as jest.Mock).mockResolvedValue(true);
 
       const result = await toggleCommunityMembership('65e9b58910afe6e94fc6e6dc', 'user3');
 

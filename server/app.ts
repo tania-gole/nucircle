@@ -26,6 +26,8 @@ import collectionController from './controllers/collection.controller';
 import communityController from './controllers/community.controller';
 import { updateUserOnlineStatus } from './services/user.service';
 import communityMessagesController from './controllers/communityMessagesController';
+import badgeController from './controllers/badge.controller';
+// import authMiddleware from './middleware/auth';
 import authMiddleware from './middleware/auth';
 
 const MONGO_URL = `${process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'}/fake_so`;
@@ -174,6 +176,7 @@ app.use('/api/games', gameController(socket));
 app.use('/api/collection', collectionController(socket));
 app.use('/api/community', communityController(socket));
 app.use('/api/community/messages', communityMessagesController(socket));
+app.use('/api/badge', badgeController(socket));
 
 // Export the app instance
 export { app, server, startServer };

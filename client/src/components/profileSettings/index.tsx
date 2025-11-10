@@ -3,10 +3,12 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
+import Badges from '../main/badges';
 
 const ProfileSettings: React.FC = () => {
   const {
     userData,
+    badges,
     loading,
     editBioMode,
     newBio,
@@ -100,6 +102,10 @@ const ProfileSettings: React.FC = () => {
               <strong>Date Joined:</strong>{' '}
               {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
             </p>
+
+            {/* ---- Badges Section ---- */}
+            <h4>Badges</h4>
+            <Badges badges={badges} />
 
             <button className='button button-primary' onClick={handleViewCollectionsPage}>
               View Collections
