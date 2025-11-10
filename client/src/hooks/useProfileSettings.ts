@@ -6,7 +6,7 @@ import {
   resetPassword,
   updateBiography,
 } from '../services/userService';
-import { getUserBadges } from '../services/badgeService';
+import badgeService from "../services/badgeService"
 import { SafeDatabaseUser, Badge } from '../types/types';
 import useUserContext from './useUserContext';
 
@@ -49,7 +49,7 @@ const useProfileSettings = () => {
 
         // Fetch badges for the user
         try {
-          const userBadges = await getUserBadges(username);
+          const userBadges = await badgeService.getUserBadges(username);
           setBadges(userBadges);
         } catch (badgeError) {
           // If badge fetch fails, just set empty array
