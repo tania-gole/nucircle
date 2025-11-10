@@ -137,7 +137,10 @@ describe('Badge Service', () => {
   describe('checkAndAwardMilestoneBadge', () => {
     it('should award 50 Questions badge when count is 50', async () => {
       // the 1st call is for hasBadge & the 2nd call is for awardBadge
-      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser).mockResolvedValueOnce(mockUser);
+      jest
+        .spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(mockUser);
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
         .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);
@@ -148,7 +151,10 @@ describe('Badge Service', () => {
 
     it('should award 100 Questions badge when count is 100', async () => {
       // the 1st call is for hasBadge & the 2nd call is for awardBadge
-      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser).mockResolvedValueOnce(mockUser);
+      jest
+        .spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(mockUser);
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
         .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);
@@ -159,7 +165,10 @@ describe('Badge Service', () => {
 
     it('should award 50 Answers badge when count is 50', async () => {
       // the 1st call is for hasBadge & the 2nd call is for awardBadge
-      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser).mockResolvedValueOnce(mockUser);
+      jest
+        .spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(mockUser);
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
         .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);
@@ -170,7 +179,10 @@ describe('Badge Service', () => {
 
     it('should award 100 Answers badge when count is 100', async () => {
       // the 1st call is for hasBadge & the 2nd call is for awardBadge
-      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser).mockResolvedValueOnce(mockUser);
+      jest
+        .spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(mockUser);
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
         .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);

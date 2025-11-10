@@ -17,7 +17,6 @@ const WelcomePopup = ({ onClose }: { onClose: () => void }) => {
       }
       onClose();
     } catch (error) {
-      console.error('Error marking welcome message as seen:', error);
       onClose();
     }
   };
@@ -50,4 +49,3 @@ const WelcomePopup = ({ onClose }: { onClose: () => void }) => {
 };
 
 export default WelcomePopup;
-

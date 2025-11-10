@@ -58,7 +58,10 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/api/user/signup').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body.user).toEqual({ ...mockUserJSONResponse, biography: mockReqBody.biography });
+      expect(response.body.user).toEqual({
+        ...mockUserJSONResponse,
+        biography: mockReqBody.biography,
+      });
       expect(response.body.token).toBeDefined();
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,

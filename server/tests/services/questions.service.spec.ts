@@ -326,11 +326,10 @@ describe('Question model', () => {
         community: null,
       };
 
-      jest
-        .spyOn(QuestionModel, 'create')
-        .mockResolvedValue({ ...mockQn, _id: new mongoose.Types.ObjectId() } as unknown as ReturnType<
-          typeof QuestionModel.create<DatabaseQuestion>
-        >);
+      jest.spyOn(QuestionModel, 'create').mockResolvedValue({
+        ...mockQn,
+        _id: new mongoose.Types.ObjectId(),
+      } as unknown as ReturnType<typeof QuestionModel.create<DatabaseQuestion>>);
       (badgeService.countUserQuestions as jest.Mock).mockResolvedValue(1);
       (badgeService.checkAndAwardMilestoneBadge as jest.Mock).mockResolvedValue(undefined);
       const result = (await saveQuestion(mockQn)) as DatabaseQuestion;

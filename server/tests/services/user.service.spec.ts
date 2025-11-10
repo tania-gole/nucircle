@@ -33,13 +33,11 @@ describe('User model', () => {
     });
 
     it('should set hasSeenWelcomeMessage to false by default for new users', async () => {
-      jest
-        .spyOn(UserModel, 'create')
-        .mockResolvedValueOnce({
-          ...user,
-          _id: mongoose.Types.ObjectId,
-          hasSeenWelcomeMessage: false,
-        } as unknown as ReturnType<typeof UserModel.create<User>>);
+      jest.spyOn(UserModel, 'create').mockResolvedValueOnce({
+        ...user,
+        _id: mongoose.Types.ObjectId,
+        hasSeenWelcomeMessage: false,
+      } as unknown as ReturnType<typeof UserModel.create<User>>);
 
       const savedUser = (await saveUser(user)) as SafeDatabaseUser;
 
