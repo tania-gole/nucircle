@@ -4,6 +4,12 @@ import QuestionModel from '../../models/questions.model';
 import { saveAnswer, addAnswerToQuestion } from '../../services/answer.service';
 import { DatabaseAnswer, DatabaseQuestion } from '../../types/types';
 import { QUESTIONS, ans1, ans4 } from '../mockData.models';
+import * as badgeService from '../../services/badge.service';
+
+jest.mock('../../services/badge.service', () => ({
+  countUserAnswers: jest.fn(),
+  checkAndAwardMilestoneBadge: jest.fn(),
+}));
 
 describe('Answer model', () => {
   beforeEach(() => {
@@ -26,6 +32,8 @@ describe('Answer model', () => {
       jest
         .spyOn(AnswerModel, 'create')
         .mockResolvedValueOnce(mockDBAnswer as unknown as ReturnType<typeof AnswerModel.create>);
+      (badgeService.countUserAnswers as jest.Mock).mockResolvedValue(1);
+      (badgeService.checkAndAwardMilestoneBadge as jest.Mock).mockResolvedValue(false);
 
       const result = (await saveAnswer(mockAnswer)) as DatabaseAnswer;
 
