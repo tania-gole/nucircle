@@ -6,7 +6,8 @@ import {
   resetPassword,
   updateBiography,
 } from '../services/userService';
-import { SafeDatabaseUser } from '../types/types';
+import { getUserBadges } from '../services/badgeService';
+import { SafeDatabaseUser, Badge } from '../types/types';
 import useUserContext from './useUserContext';
 
 /**
@@ -19,6 +20,7 @@ const useProfileSettings = () => {
 
   // Local state
   const [userData, setUserData] = useState<SafeDatabaseUser | null>(null);
+  const [badges, setBadges] = useState<Badge[]>([]);
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,9 +46,19 @@ const useProfileSettings = () => {
         setLoading(true);
         const data = await getUserByUsername(username);
         setUserData(data);
+
+        // Fetch badges for the user
+        try {
+          const userBadges = await getUserBadges(username);
+          setBadges(userBadges);
+        } catch (badgeError) {
+          // If badge fetch fails, just set empty array
+          setBadges([]);
+        }
       } catch (error) {
         setErrorMessage('Error fetching user profile');
         setUserData(null);
+        setBadges([]);
       } finally {
         setLoading(false);
       }
@@ -146,6 +158,7 @@ const useProfileSettings = () => {
 
   return {
     userData,
+    badges,
     newPassword,
     confirmNewPassword,
     setNewPassword,

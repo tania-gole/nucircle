@@ -9,6 +9,7 @@ import {
 } from '../types/types';
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
+import { checkAndAwardMilestoneBadge, countUserAnswers } from './badge.service';
 
 /**
  * Records the most recent answer time for a given question based on its answers.
@@ -37,6 +38,13 @@ export const getMostRecentAnswerTime = (
 export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
   try {
     const result: DatabaseAnswer = await AnswerModel.create(answer);
+
+    // Check and award milestone badges for answers
+    if (result && answer.ansBy) {
+      const answerCount = await countUserAnswers(answer.ansBy);
+      await checkAndAwardMilestoneBadge(answer.ansBy, 'answer', answerCount);
+    }
+
     return result;
   } catch (error) {
     return { error: 'Error when saving an answer' };

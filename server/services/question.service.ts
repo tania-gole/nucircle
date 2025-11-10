@@ -24,6 +24,7 @@ import {
   sortQuestionsByNewest,
   sortQuestionsByUnanswered,
 } from '../utils/sort.util';
+import { checkAndAwardMilestoneBadge, countUserQuestions } from './badge.service';
 
 /**
  * Checks if keywords exist in a question's title or text.
@@ -163,6 +164,12 @@ export const fetchAndIncrementQuestionViewsById = async (
 export const saveQuestion = async (question: Question): Promise<QuestionResponse> => {
   try {
     const result: DatabaseQuestion = await QuestionModel.create(question);
+
+    // Check and award milestone badges for questions
+    if (result && question.askedBy) {
+      const questionCount = await countUserQuestions(question.askedBy);
+      await checkAndAwardMilestoneBadge(question.askedBy, 'question', questionCount);
+    }
 
     return result;
   } catch (error) {

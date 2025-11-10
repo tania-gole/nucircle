@@ -51,6 +51,23 @@ const userSchema: Schema = new Schema(
       type: Date,
       default: Date.now,
     },
+    badges: [
+      {
+        type: {
+          type: String,
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+        earnedAt: {
+          type: Date,
+          required: true,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { collection: 'User' },
 );
