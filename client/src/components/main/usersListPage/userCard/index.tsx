@@ -10,6 +10,7 @@ import { SafeDatabaseUser } from '../../../../types/types';
 interface UserProps {
   user: SafeDatabaseUser;
   handleUserCardViewClickHandler: (user: SafeDatabaseUser) => void;
+  onChallengeClick: (username: string) => void;
 }
 
 /**
@@ -20,7 +21,7 @@ interface UserProps {
  * @param user - The user object containing user details.
  */
 const UserCardView = (props: UserProps) => {
-  const { user, handleUserCardViewClickHandler } = props;
+  const { user, handleUserCardViewClickHandler, onChallengeClick } = props;
 
   return (
     <div className='user_card' onClick={() => handleUserCardViewClickHandler(user)}>
@@ -36,6 +37,16 @@ const UserCardView = (props: UserProps) => {
 
       <div className='user_card_right'>
         <div className='user_card_joined'>joined {new Date(user.dateJoined).toUTCString()}</div>
+        {user.isOnline && (
+          <button
+            className='challenge-button'
+            onClick={e => {
+              e.stopPropagation();
+              onChallengeClick(user.username);
+            }}>
+            Challenge to Quiz
+          </button>
+        )}
         <svg
           width='20'
           height='32'

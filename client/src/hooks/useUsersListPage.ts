@@ -100,8 +100,20 @@ const useUsersListPage = () => {
     };
   }, [socket]);
 
+  /**
+   * Function to handle challenge user button click.
+   *
+   * @param recipientUsername - the user object requesting the quiz
+   */
+  const handleChallengeClick = (recipientUsername: string) => {
+    if (!socket) {
+      return;
+    }
+    socket.emit('sendQuizInvite', recipientUsername);
+  };
+
   const filteredUserlist = userList.filter(user => user.username.includes(userFilter));
-  return { userList: filteredUserlist, setUserFilter };
+  return { userList: filteredUserlist, setUserFilter, handleChallengeClick };
 };
 
 export default useUsersListPage;
