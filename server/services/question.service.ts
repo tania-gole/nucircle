@@ -25,6 +25,7 @@ import {
   sortQuestionsByUnanswered,
 } from '../utils/sort.util';
 import { checkAndAwardMilestoneBadge, countUserQuestions } from './badge.service';
+import { awardPointsToUser } from './point.service';
 
 /**
  * Checks if keywords exist in a question's title or text.
@@ -165,9 +166,10 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
   try {
     const result: DatabaseQuestion = await QuestionModel.create(question);
 
-    // Check and award milestone badges for questions
+    // Check and award milestone badges, points for questions
     if (result && question.askedBy) {
       const questionCount = await countUserQuestions(question.askedBy);
+      awardPointsToUser(question.askedBy, 10);
       await checkAndAwardMilestoneBadge(question.askedBy, 'question', questionCount);
     }
 

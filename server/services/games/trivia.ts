@@ -126,6 +126,9 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
       }
 
       this.state = { ...this.state, status: 'OVER', winners };
+      // TODO points system
+      // - 10 points - win/tie game
+      // - 2 points - lose game (participation award)
     }
   }
 
