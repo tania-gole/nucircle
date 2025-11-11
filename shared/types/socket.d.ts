@@ -210,4 +210,5 @@ export interface ServerToClientEvents {
   quizInviteReceived: (invite: QuizInvite) => void;
   quizInviteAccepted: (result: QuizInviteResult) => void;
   quizInviteDeclined: (result: QuizInviteResult) => void;
+  error: (payload: { message: string }) => void;
 }
