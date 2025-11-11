@@ -24,11 +24,13 @@ import chatController from './controllers/chat.controller';
 import gameController from './controllers/game.controller';
 import collectionController from './controllers/collection.controller';
 import communityController from './controllers/community.controller';
-import { updateUserOnlineStatus } from './services/user.service';
+import { updateUserOnlineStatus, getUserByUsername } from './services/user.service';
 import communityMessagesController from './controllers/communityMessagesController';
 import badgeController from './controllers/badge.controller';
 // import authMiddleware from './middleware/auth';
 import authMiddleware from './middleware/auth';
+import QuizInvitationManager from './services/invitationManager.service';
+import GameManager from './services/games/gameManager';
 
 const MONGO_URL = `${process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'}/fake_so`;
 const PORT = parseInt(process.env.PORT || '8000');
@@ -85,6 +87,119 @@ socket.on('connection', socket => {
 
     // Notify all connected clients that this user came online
     console.log(`User ${username} is online`);
+  });
+
+  socket.on('sendQuizInvite', async (recipientUsername: string) => {
+    const challengerUsername = socket.data.username;
+
+    if (!challengerUsername) {
+      console.error('Cannot send invite: user not authenticated');
+      return;
+    }
+
+    console.log(`Quiz invite: ${challengerUsername} → ${recipientUsername}`);
+
+    // Check if user is online
+    const recipientUser = await getUserByUsername(recipientUsername);
+    if ('error' in recipientUser) {
+      socket.emit('error', { message: 'Recipient not found' });
+      return;
+    }
+
+    if (!recipientUser.isOnline || !recipientUser.socketId) {
+      socket.emit('error', { message: 'Recipient is not online' });
+      return;
+    }
+
+    const invitationManager = QuizInvitationManager.getInstance();
+
+    // Prevent duplicate invitations
+    if (invitationManager.hasPendingInvitation(recipientUsername, challengerUsername)) {
+      socket.emit('error', { message: 'Invitation already sent' });
+      return;
+    }
+
+    // Create invitation
+    const invite = invitationManager.createInvitation(
+      challengerUsername,
+      socket.id,
+      recipientUsername,
+      recipientUser.socketId,
+    );
+
+    // Send invitation to recipient via their socket
+    socket.to(recipientUser.socketId).emit('quizInviteReceived', invite);
+
+    console.log(`Invitation ${invite.id} sent to ${recipientUsername}`);
+  });
+
+  // Respond to Invitation
+  socket.on('respondToQuizInvite', async (inviteId: string, accepted: boolean) => {
+    console.log(`Invitation ${inviteId} response: ${accepted ? 'ACCEPTED' : 'DECLINED'}`);
+
+    const invitationManager = QuizInvitationManager.getInstance();
+    const invite = invitationManager.getInvitation(inviteId);
+
+    if (!invite) {
+      console.error('Invitation not found:', inviteId);
+      return;
+    }
+
+    const result: {
+      inviteId: string;
+      challengerUsername: string;
+      recipientUsername: string;
+      accepted: boolean;
+      gameId?: string;
+    } = {
+      inviteId: invite.id,
+      challengerUsername: invite.challengerUsername,
+      recipientUsername: invite.recipientUsername,
+      accepted,
+    };
+
+    if (accepted) {
+      // Create a new trivia game
+      const gameManager = GameManager.getInstance();
+      const gameIdResult = await gameManager.addGame('Trivia', invite.challengerUsername);
+
+      if (typeof gameIdResult === 'string') {
+        // Game created successfully
+        const gameId = gameIdResult;
+
+        // Join both players to the game
+        await gameManager.joinGame(gameId, invite.challengerUsername);
+        await gameManager.joinGame(gameId, invite.recipientUsername);
+
+        // Start the game
+        await gameManager.startGame(gameId);
+
+        result.gameId = gameId;
+
+        // Update invitation status
+        invitationManager.updateInvitationStatus(inviteId, 'accepted');
+
+        // Notify both players with gameId
+        socket.to(invite.challengerSocketId).emit('quizInviteAccepted', result);
+        socket.to(invite.recipientSocketId).emit('quizInviteAccepted', result);
+
+        console.log(`Game ${gameId} created and started for invitation ${inviteId}`);
+      } else {
+        console.error('Failed to create game:', gameIdResult.error);
+        socket.emit('error', { message: 'Failed to create game' });
+        return;
+      }
+    } else {
+      // Invitation declined
+      invitationManager.updateInvitationStatus(inviteId, 'declined');
+
+      // Notify both users
+      socket.to(invite.challengerSocketId).emit('quizInviteDeclined', result);
+      socket.to(invite.recipientSocketId).emit('quizInviteDeclined', result);
+    }
+
+    // Clean up invitation from memory
+    invitationManager.removeInvitation(inviteId);
   });
 
   // Listen for disconnect event: when user logs out, closes browser, or loses connection
