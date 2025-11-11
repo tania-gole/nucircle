@@ -1,4 +1,5 @@
 import useCommunityPage from '../../../../hooks/useCommunityPage';
+// import CommunityMessages from '../../communityMessagesPage';
 import QuestionView from '../../questionPage/question';
 import CommunityMembershipButton from '../communityMembershipButton';
 import './index.css';
@@ -21,16 +22,13 @@ const CommunityPage = () => {
         {communityQuestions.map(q => (
           <QuestionView question={q} key={q._id.toString()} />
         ))}
+        {/* <h3 className='section-heading'>Community Chat</h3> */}
+        {/* <CommunityMessages /> */}
       </main>
 
       <div className='community-sidebar'>
         <h2 className='community-title'>{community.name}</h2>
         <p className='community-description'>{community.description}</p>
-        {community.admin === username && (
-          <button className='delete-community-btn' onClick={handleDeleteCommunity}>
-            Delete Community
-          </button>
-        )}
         <CommunityMembershipButton community={community} />
 
         <div className='community-members'>
@@ -43,6 +41,11 @@ const CommunityPage = () => {
             ))}
           </ul>
         </div>
+        {community.admin === username && (
+          <button className='delete-community-btn' onClick={handleDeleteCommunity}>
+            Delete Community
+          </button>
+        )}
       </div>
     </div>
   );
