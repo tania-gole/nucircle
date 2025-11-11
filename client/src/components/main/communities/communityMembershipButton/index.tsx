@@ -8,13 +8,14 @@ import './index.css';
  */
 const CommunityMembershipButton = ({ community }: { community: DatabaseCommunity }) => {
   const { username, handleCommunityMembership, error } = useCommunityMembershipButton();
+  const isMember = community.participants.includes(username);
 
   return (
     <>
       <button
-        className='btn-action-community'
+        className={`btn-action-community ${isMember ? 'btn-leave' : 'btn-join'}`}
         onClick={() => handleCommunityMembership(community._id)}>
-        {!community.participants.includes(username) ? 'Join' : 'Leave'}
+        {isMember ? 'Leave' : 'Join'}
       </button>
       {error && <p className='community-error'>{error}</p>}
     </>

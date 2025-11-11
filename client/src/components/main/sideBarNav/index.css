@@ -25,6 +25,7 @@
   display: flex;
   justify-content: flex-start;
   padding-left: 15px;
+  position: relative;
 }
 
 .menu_button:hover {
@@ -42,20 +43,53 @@
 }
 
 /* Additional options inside Messages */
-.additional-options {
+.messaging-wrapper {
+  position: relative;
+  width: 75%;
+  display: flex;
+  justify-self: flex-start;
+  margin-top: 20px;
+}
+
+.messaging-wrapper .menu_button {
+  width: 100%;
+  margin-top: 0;
+}
+
+.messaging-main {
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.messaging-dropdown {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  padding: 0;
-  align-items: center;
+  width: 190px;
+  padding: 10px 0;
+  z-index: 10;
 }
 
-.message-options {
-  /* width: max-content; */
-  width: 110%;
-  margin-top: 10px;
+.message-option {
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #484848;
+  transition: background-color 0.2s, color 0.2s;
 }
 
-/* .message-option-selected {
-  background: #ffd9d9;
-  color: #FF6B6B;
-} */
+.message-option:hover {
+  background-color: #f3f3f3;
+  font-weight: 500;
+}
+
+.message-option-selected {
+  background-color: #fff0f0;
+  color: #ff6b6b;
+  font-weight: 500;
+}

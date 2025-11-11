@@ -37,7 +37,7 @@ const Input = ({ title, hint, id, mandatory = true, val, setState, err }: InputP
   <>
     <div className='input_title'>
       {title}
-      {mandatory ? '*' : ''}
+      {mandatory && <span className='mandatory'>*</span>}
     </div>
     {hint && <div className='input_hint'>{hint}</div>}
     <input

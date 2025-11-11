@@ -37,7 +37,7 @@ const TextArea = ({ title, mandatory = true, hint, id, val, setState, err }: Tex
   <>
     <div className='input_title'>
       {title}
-      {mandatory ? '*' : ''}
+      {mandatory && <span className='mandatory'>*</span>}
     </div>
     {hint && <div className='input_hint'>{hint}</div>}
     <textarea

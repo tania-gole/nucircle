@@ -11,18 +11,20 @@ const TagPage = () => {
   const { tlist, clickTag } = useTagPage();
 
   return (
-    <>
-      <div className='space_between right_padding'>
-        <div className='bold_title'>{tlist.length} Tags</div>
-        <div className='bold_title'>All Tags</div>
+    <div className='tags-page'>
+      <div className='tags-header'>
+        <div className='tags-header-left'>
+          <div className='tags-title'>All Tags</div>
+          <div className='tag-count-circle'>{tlist.length}</div>
+        </div>
         <AskQuestionButton />
       </div>
-      <div className='tag_list right_padding'>
+      <div className='tag_list'>
         {tlist.map(t => (
           <TagView key={t.name} t={t} clickTag={clickTag} />
         ))}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -39,17 +39,18 @@
   margin-right: 5px;
 }
 
-.message-input {
+.gloabl-message-input {
   display: flex;
   padding: 15px;
   /* border-top: 1px solid #ddd; */
   background-color: #fff;
 }
-.message-textbox {
+
+.global-message-textbox {
   flex: 1;
   padding: 10px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-right: 10px;
   width: 100%;
   resize: none;
@@ -58,7 +59,7 @@
   margin-left: 10px;
 }
 
-.message-textbook:focus {
+.global-message-textbox:focus {
   outline: none;
   box-shadow: 0 0 8px -2px rgba(172, 172, 172, 0.481);
 }

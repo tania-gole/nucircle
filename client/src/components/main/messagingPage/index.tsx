@@ -20,12 +20,13 @@ const MessagingPage = () => {
           <MessageCard key={String(message._id)} message={message} currentUser={user.username} />
         ))}
       </div>
-      <div className='message-input'>
-        <textarea
-          className='message-textbox'
+      <div className='gloabl-message-input'>
+        <input
+          className='global-message-textbox'
           placeholder='Type your message here'
           value={newMessage}
           onChange={e => setNewMessage(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
         />
         <div className='message-actions'>
           <button type='button' className='send-button' onClick={handleSendMessage}>

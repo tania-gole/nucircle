@@ -8,7 +8,7 @@
 }
 
 .chats-column {
-  position: relative;
+  /* position: relative; */
   width: 30%;
   background-color: white;
   border-radius: 15px;
@@ -19,23 +19,7 @@
   padding: 0;
   padding-top: 25px;
   box-sizing: border-box;
-  /* overflow: hidden; */
-}
-
-/* Chat list styles */
-.chats-list {
-  flex: 1;
   overflow-y: auto;
-}
-
-.chats-list h2 {
-  font-size: 18px;
-  margin-bottom: 16px;
-  color: #555;
-}
-
-.chats-list-card:hover {
-  background-color: #eaeaea;
 }
 
 .create-chat-icon {
@@ -48,13 +32,74 @@
   justify-content: flex-end;
 }
 
+.chat-right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
 .users-list-panel {
   display: flex;
   flex-direction: column;
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   height: 100%;
-  position: relative;
+  flex: 1;
+  gap: 16px;
 }
 
+.users-list-panel > .users-list-page {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.users-list-page {
+  background-color: #FFF9F9;
+  border-radius: 10px;
+  border: 1px solid #efefef;
+}
+
+.users-panel-header {
+  margin: 0px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selected-user-text {
+  font-size: 20px;
+  margin-left: 10px;
+  margin-top: 20px;
+}
+
+.selected-user {
+  font-weight: 600;
+  color: #FF6B6B;
+}
+
+.close-button {
+  background: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  box-shadow:0px 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.close-button:hover {
+  background: #e55a5a;
+}
+
+.create-chat-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* Chat panel styles */
 .chat-container {
@@ -66,7 +111,6 @@
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
 }
 
 .chat-container h2 {
@@ -78,12 +122,12 @@
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  /* border: 1px solid #ddd; */
+  border: 1px solid #efefef;
   border-radius: 6px;
-  padding: 10px 0;
+  padding: 20px 5px;
   margin-bottom: 16px;
-  background-color: #fefefe;
-  max-height: 400px;
+  background-color: #fdf8f8;
+  max-height: 500px;
 }
 
 .message-input {

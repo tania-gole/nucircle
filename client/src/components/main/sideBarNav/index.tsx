@@ -10,15 +10,13 @@ import useUserContext from '../../../hooks/useUserContext';
  */
 const SideBarNav = () => {
   const { user } = useUserContext();
-  const [showOptions, setShowOptions] = useState<boolean>(false);
+  const [hovered, setHovered] = useState<boolean>(false);
   const location = useLocation();
-
-  const toggleOptions = () => {
-    setShowOptions(!showOptions);
-  };
 
   const isActiveOption = (path: string) =>
     location.pathname === path ? 'message-option-selected ' : '';
+
+  const isMessagingActive = location.pathname.startsWith('/messaging');
 
   return (
     <div id='sideBarNav' className='sideBarNav'>
@@ -34,32 +32,34 @@ const SideBarNav = () => {
         className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
         Tags
       </NavLink>
-      <NavLink
-        to='/messaging/direct-message'
-        id='menu_messaging'
-        className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}
-        onClick={toggleOptions}>
-        Messaging
-      </NavLink>
-      {showOptions && (
-        <div className='additional-options'>
-          <NavLink
-            to='/messaging/direct-message'
-            className={`menu_button message-options ${isActiveOption('/messaging/direct-message')}`}>
-            Direct Messages
-          </NavLink>
-          <NavLink
-            to='/messaging/community-messages'
-            className={`menu_button message-options ${isActiveOption('/messaging/community-message')}`}>
-            Community Messages
-          </NavLink>
-          <NavLink
-            to='/messaging'
-            className={`menu_button message-options ${isActiveOption('/messaging')}`}>
-            Global Messages
-          </NavLink>
-        </div>
-      )}
+      <div
+        className='messaging-wrapper'
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}>
+        <NavLink
+          to='/messaging/direct-message'
+          id='menu_messaging'
+          className={`menu_button ${isMessagingActive ? 'menu_selected' : ''}`}>
+          Messaging
+        </NavLink>
+        {hovered && (
+          <div className='messaging-dropdown'>
+            <NavLink
+              to='/messaging/direct-message'
+              className={`message-option ${isActiveOption('/messaging/direct-message')}`}>
+              Direct Messages
+            </NavLink>
+            <NavLink
+              to='/messaging/community-messages'
+              className={`message-option ${isActiveOption('/messaging/community-messages')}`}>
+              Community Messages
+            </NavLink>
+            <NavLink to='/messaging' className={`message-option ${isActiveOption('/messaging')}`}>
+              Global Messages
+            </NavLink>
+          </div>
+        )}
+      </div>
       <NavLink
         to='/users'
         id='menu_users'

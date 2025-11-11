@@ -50,16 +50,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
+  /* padding: 10px 12px; */
   border-radius: 16px;
   margin-top: auto;
 }
 
-.message-textbox {
+.community-message-textbox {
   flex: 1;
-  padding: 13px;
+  padding: 15px 15px;
+  border: none;
   border-radius: 12px;
   resize: none;
   outline: none;
+  font-size: 16px;
+  background-color: #FFF0F0;
   font-size: 16px;
 }

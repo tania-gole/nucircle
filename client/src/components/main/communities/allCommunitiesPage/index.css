@@ -1,43 +1,71 @@
 .community-page {
-  padding: 2rem;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  padding: 35px;
+  box-sizing: border-box;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 24px;
 }
 
-.community-title {
-  font-size: 2rem;
-  color: #333;
+.community-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.communities-title {
+  font-size: 40px;
+  font-weight: 500;
+  color: #2c3849;
+  margin: 0;
+  margin-right: 40px;
 }
 
 .community-controls {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  justify-content: flex-end;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.community-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 60%;
+  max-width: 500px;
 }
 
 .community-search {
-  flex: 1;
-  min-width: 250px;
-  max-width: 400px;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding-left: 45px;
+  border-radius: 25px;
+  background-color: #FFFFFF;
+  width: 100%;
+  border: 1px solid #e2e2e2;
+  font-size: 16px;
+  color: #9CA3AF;
+  height: 45px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: auto;
+  box-sizing: border-box;
+}
+
+.community-search:focus {
+  outline: none;
+  box-shadow: 0 0 8px -2px rgba(172, 172, 172, 0.481);
 }
 
 .communities-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  grid-gap: 50px 40px;
 }
 
 .community-error {
-  color: red;
-  margin-top: 1rem;
+  color: #ff4d4d;
+  font-weight: 500;
+  margin: 0;
 }
