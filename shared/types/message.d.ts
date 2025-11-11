@@ -7,6 +7,7 @@ import { Request } from 'express';
  * - `msgFrom`: The username of the user sending the message.
  * - `msgDateTime`: The date and time when the message was sent.
  * - `type`: The type of the message, either 'global' or 'direct'.
+ *  - `reactions`: Object containing emoji reactions and counts.
  */
 export interface Message {
   msg: string;
@@ -14,6 +15,27 @@ export interface Message {
   msgDateTime: Date;
   type: 'global' | 'direct' | 'community';
   communityId?: string;
+  reactions?: MessageReactions;
+}
+
+/**
+ * Represents the shape of emoji reactions attached to a message.
+ * - `users`: usernames of who reacted.
+ * - `count`: number of reactions to the message.
+ */
+export interface MessageReactionsBucket {
+  users: string[];
+  count: number;
+}
+
+/**
+ * Represents the shape of emoji reactions attached to a message.
+ * - `love`: user has loved the message.
+ * - `like`: user has liked the message.
+ */
+export interface MessageReactions {
+  love: MessageReactionsBucket;
+  like: MessageReactionsBucket;
 }
 
 /**
