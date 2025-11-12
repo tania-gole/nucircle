@@ -1,5 +1,4 @@
-/* eslint no-console: "off" */
-
+/* eslint-disable no-console */
 // The server should run on localhost port 8000.
 // This is where you should start writing server-side code for this application.
 // startServer() is a function that starts the server
@@ -204,29 +203,53 @@ io.on('connection', socket => {
 
   // Listen for disconnect event: when user logs out, closes browser, or loses connection
   socket.on('disconnect', async () => {
-    console.log('User disconnected');
-
-    // Same username stored above - retrieve this
     const username = socket.data.username;
 
     if (username) {
-      console.log(`User ${username} disconnecting...`);
+      const gameManager = GameManager.getInstance();
+      const userGames = await gameManager.getGamesByPlayer(username);
+
+      for (const game of userGames) {
+        if (game.state.status === 'IN_PROGRESS' || game.state.status === 'WAITING_TO_START') {
+          const otherPlayer = game.players.find(p => p !== username);
+
+          if (otherPlayer) {
+            await gameManager.endGameByDisconnect(game.gameID, username, otherPlayer);
+
+            const otherUser = await getUserByUsername(otherPlayer);
+            if (!('error' in otherUser) && otherUser.socketId) {
+              // Get updated game state
+              const updatedGame = gameManager.getGame(game.gameID);
+
+              // Emit game update to show game over screen
+              if (updatedGame) {
+                io.to(otherUser.socketId).emit('gameUpdate', {
+                  gameInstance: updatedGame.toModel(),
+                });
+              }
+
+              // Also send disconnect notification (optional - for additional context)
+              io.to(otherUser.socketId).emit('opponentDisconnected', {
+                gameId: game.gameID,
+                disconnectedPlayer: username,
+                winner: otherPlayer,
+                message: `${username} disconnected. You win by default!`,
+              });
+            }
+          }
+        }
+      }
 
       const result = await updateUserOnlineStatus(username, false, null);
-
       if ('error' in result) {
-        console.error('Error updating user status:', result.error);
         return;
       }
 
-      // Notify all connected clients that this user went offline
       socket.broadcast.emit('userStatusUpdate', {
         username,
         isOnline: false,
         lastSeen: new Date(),
       });
-
-      console.log(`User ${username} is offline`);
     }
   });
 });

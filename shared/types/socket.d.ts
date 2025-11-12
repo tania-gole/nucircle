@@ -192,6 +192,7 @@ export interface ClientToServerEvents {
  * - `quizInviteReceived`: Server sends updated quiz invitation status.
  * - `quizInviteAccepted`: Server sends updated quiz invitation status.
  * - `quizInviteDeclined`: Server sends updated quiz invitation status.
+ * - `opponentDisconnected`: Server sends updated opponent status.
  */
 export interface ServerToClientEvents {
   questionUpdate: (question: PopulatedDatabaseQuestion) => void;
@@ -210,5 +211,11 @@ export interface ServerToClientEvents {
   quizInviteReceived: (invite: QuizInvite) => void;
   quizInviteAccepted: (result: QuizInviteResult) => void;
   quizInviteDeclined: (result: QuizInviteResult) => void;
+  opponentDisconnected: (payload: {
+    gameId: string;
+    disconnectedPlayer: string;
+    winner: string;
+    message: string;
+  }) => void;
   error: (payload: { message: string }) => void;
 }
