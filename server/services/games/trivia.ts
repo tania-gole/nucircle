@@ -1,6 +1,7 @@
 import { GameMove, TriviaGameState, TriviaAnswer } from '../../types/types';
 import Game from './game';
 import TriviaQuestionModel from '../../models/triviaQuestion.model';
+import { awardPointsToUser } from '../point.service';
 
 /**
  * TRIVIA FEATURE: Core Game Logic - TriviaGame Class
@@ -119,16 +120,23 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
 
       if (player1Score > player2Score && player1) {
         winners = [player1];
+        awardPointsToUser(player1, 10);
+        if (player2) {
+          awardPointsToUser(player2!, 2);
+        }
       } else if (player2Score > player1Score && player2) {
         winners = [player2];
+        awardPointsToUser(player2, 10);
+        if (player1) {
+          awardPointsToUser(player1!, 2);
+        }
       } else if (player1 && player2) {
         winners = [player1, player2];
+        awardPointsToUser(player1, 10);
+        awardPointsToUser(player2, 10);
       }
 
       this.state = { ...this.state, status: 'OVER', winners };
-      // TODO points system
-      // - 10 points - win/tie game
-      // - 2 points - lose game (participation award)
     }
   }
 
