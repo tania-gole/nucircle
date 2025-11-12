@@ -41,4 +41,30 @@ const getMessages = async (): Promise<DatabaseMessage[]> => {
   return res.data;
 };
 
-export { addMessage, getMessages };
+/**
+ * Toggles a love/like reaction for a given message.
+ *
+ * @param messageId - The ID of the message to react to.
+ * @param reactionType - The type of reaction ('love' | 'like').
+ * @param username - The username of the person reacting.
+ * @throws Error if the request fails or the response status is not 200.
+ */
+const toggleReaction = async (
+  messageId: string,
+  reactionType: 'love' | 'like',
+  username: string,
+): Promise<DatabaseMessage> => {
+  const res = await api.post(`${MESSAGE_API_URL}/toggleReaction`, {
+    messageId,
+    reactionType,
+    username,
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Error while toggling reaction');
+  }
+
+  return res.data;
+};
+
+export { addMessage, getMessages, toggleReaction };

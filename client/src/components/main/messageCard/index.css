@@ -38,3 +38,34 @@
   line-height: 1;
   word-wrap: break-word;
 }
+
+.message-reactions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.reaction-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.7;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.reaction-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.reaction-btn.active {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.error-text {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-top: 4px;
+}

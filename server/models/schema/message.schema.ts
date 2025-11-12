@@ -9,6 +9,7 @@ import { Schema } from 'mongoose';
  * - `msgFrom`: The username of the user sending the message.
  * - `msgDateTime`: The date and time the message was sent.
  * - `type`: The type of message, either 'global' or 'direct'.
+ * - `reaction`: Object containing emoji reactions and counts.
  */
 const messageSchema: Schema = new Schema(
   {
@@ -29,6 +30,16 @@ const messageSchema: Schema = new Schema(
       type: String,
       ref: 'Community',
       default: null,
+    },
+    reactions: {
+      love: {
+        users: { type: [String], default: [] }, // usernames who tapped love
+        count: { type: Number, default: 0 },
+      },
+      like: {
+        users: { type: [String], default: [] }, // usernames who tapped like
+        count: { type: Number, default: 0 },
+      },
     },
   },
   { collection: 'Message' },

@@ -192,6 +192,7 @@ export interface ClientToServerEvents {
  * - `quizInviteReceived`: Server sends updated quiz invitation status.
  * - `quizInviteAccepted`: Server sends updated quiz invitation status.
  * - `quizInviteDeclined`: Server sends updated quiz invitation status.
+ * - `reactionUpdated`: Server sends updated chat reaction.
  * - `opponentDisconnected`: Server sends updated opponent status.
  */
 export interface ServerToClientEvents {
@@ -211,6 +212,13 @@ export interface ServerToClientEvents {
   quizInviteReceived: (invite: QuizInvite) => void;
   quizInviteAccepted: (result: QuizInviteResult) => void;
   quizInviteDeclined: (result: QuizInviteResult) => void;
+  reactionUpdated: (payload: {
+    messageId: string;
+    reactions: {
+      love: { users: string[]; count: number };
+      like: { users: string[]; count: number };
+    };
+  }) => void;
   opponentDisconnected: (payload: {
     gameId: string;
     disconnectedPlayer: string;

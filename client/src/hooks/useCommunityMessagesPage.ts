@@ -52,15 +52,33 @@ const useCommunityMessagesPage = () => {
 
   useEffect(() => {
     if (!socket) return;
-    const handleMessageUpdate = async (data: MessageUpdatePayload) => {
-      setMessages([...messages, data.msg]);
+
+    // handle new message
+    const handleMessageUpdate = (data: MessageUpdatePayload) => {
+      setMessages(prev => [...prev, data.msg]);
+    };
+
+    // handle reaction updates
+    const handleReactionUpdated = ({
+      messageId,
+      reactions,
+    }: {
+      messageId: string;
+      reactions: DatabaseMessage['reactions'];
+    }) => {
+      setMessages(prev =>
+        prev.map(msg => (msg._id.toString() === messageId ? { ...msg, reactions } : msg)),
+      );
     };
 
     socket.on('messageUpdate', handleMessageUpdate);
+    socket.on('reactionUpdated', handleReactionUpdated);
+
     return () => {
       socket.off('messageUpdate', handleMessageUpdate);
+      socket.off('reactionUpdated', handleReactionUpdated);
     };
-  }, [socket, selectedCommunity, messages]);
+  }, [socket, selectedCommunity]);
 
   // handle sending a new message
   const handleSendMessage = async () => {
