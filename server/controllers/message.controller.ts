@@ -43,9 +43,70 @@ const messageController = (socket: FakeSOSocket) => {
     res.json(messages);
   };
 
+  /**
+   * Toggle a love/like reaction for a given message.
+   * @param req The request object containing messageId, reactionType, and username in the body.
+   * @param res The HTTP response object used to send back the updated reactions.
+   * @returns A Promise that resolves to void.
+   */
+  const toggleReactionRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { messageId, reactionType, username } = req.body;
+
+      if (!['love', 'like'].includes(reactionType)) {
+        res.status(400).json({ error: 'Invalid reaction type' });
+        return;
+      }
+
+      const MessageModel = (await import('../models/messages.model')).default;
+      const message = await MessageModel.findById(messageId);
+      if (!message) {
+        res.status(404).json({ error: 'Message not found' });
+        return;
+      }
+
+      // Ensure reactions object exists
+      if (!message.reactions) {
+        message.reactions = {
+          love: { users: [], count: 0 },
+          like: { users: [], count: 0 },
+        };
+      }
+
+      const group = message.reactions[reactionType as 'love' | 'like'];
+      const users = group.users || [];
+      const hasReacted = users.includes(username);
+
+      if (hasReacted) {
+        group.users = users.filter((u: string) => u !== username);
+        group.count = Math.max(0, group.count - 1);
+      } else {
+        group.users.push(username);
+        group.count = group.count + 1;
+      }
+
+      message.reactions[reactionType as 'love' | 'like'] = group;
+      await message.save();
+
+      // Emit live update
+      socket.emit('reactionUpdated', {
+        messageId,
+        reactions: message.reactions,
+      });
+
+      res.json({
+        messageId,
+        reactions: message.reactions,
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to toggle reaction' });
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router
   router.post('/addMessage', addMessageRoute);
   router.get('/getMessages', getMessagesRoute);
+  router.post('/toggleReaction', toggleReactionRoute);
 
   return router;
 };
