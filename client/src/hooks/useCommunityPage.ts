@@ -83,7 +83,7 @@ const useCommunityPage = () => {
     };
   }, [communityID, socket]);
 
-  return { community, communityQuestions, username: user.username, handleDeleteCommunity };
+  return { community, communityQuestions, user, handleDeleteCommunity };
 };
 
 export default useCommunityPage;

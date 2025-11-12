@@ -1,5 +1,12 @@
 import { Schema } from 'mongoose';
 
+const userVisitDataSchema = new Schema({
+  username: { type: String, required: true },
+  lastVisitDate: { type: Date, required: true },
+  currentStreak: { type: Number, required: true, default: 1 },
+  longestStreak: { type: Number, required: true, default: 1 },
+});
+
 /**
  * Mongoose schema for the Community collection.
  *
@@ -37,6 +44,10 @@ const communitySchema = new Schema(
     admin: {
       type: String,
       required: true,
+    },
+    visitStreaks: {
+      type: [userVisitDataSchema],
+      default: [],
     },
   },
   {

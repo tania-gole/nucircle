@@ -14,7 +14,8 @@
       "jsdeveloper"
     ],
     "visibility": "PUBLIC",
-    "admin": "reactexpert"
+    "admin": "reactexpert",
+    "visitStreaks": []
   },
   "community2": {
     "name": "Backend Masters",
@@ -29,27 +30,31 @@
       "edgecaseexpert"
     ],
     "visibility": "PUBLIC",
-    "admin": "nodejsdev"
+    "admin": "nodejsdev",
+    "visitStreaks": []
   },
   "community3": {
     "name": "Data Science Hub",
     "description": "Connect with fellow data scientists and ML engineers. Share insights on Python data processing, visualization, machine learning algorithms, and best practices for handling large datasets.",
     "participants": ["datascientist", "pythonuser", "user456", "perfoptimizer"],
     "visibility": "PUBLIC",
-    "admin": "datascientist"
+    "admin": "datascientist",
+    "visitStreaks": []
   },
   "community4": {
     "name": "DevOps Specialists",
     "description": "A space for DevOps engineers to discuss containerization, CI/CD pipelines, infrastructure as code, and cloud deployment strategies. Share your Docker and Kubernetes expertise.",
     "participants": ["devopsengineer", "dockerbeginner", "user234", "user101"],
     "visibility": "PUBLIC",
-    "admin": "devopsengineer"
+    "admin": "devopsengineer",
+    "visitStreaks": []
   },
   "community5": {
     "name": "TypeScript Champions",
     "description": "Private community for TypeScript experts to discuss advanced type systems, compiler optimizations, and enterprise-level TypeScript architecture. By invitation only.",
     "participants": ["typescriptfan", "reactexpert", "edgecaseexpert", "user345", "webpackwizard"],
     "visibility": "PRIVATE",
-    "admin": "typescriptfan"
+    "admin": "typescriptfan",
+    "visitStreaks": []
   }
 }

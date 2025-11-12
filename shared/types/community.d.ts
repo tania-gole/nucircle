@@ -2,6 +2,16 @@ import { ObjectId } from 'mongodb';
 import { Request } from 'express';
 
 /**
+ * Represents a single user's visit data for a community
+ */
+export interface UserVisitData {
+  username: string;
+  lastVisitDate: Date;
+  currentStreak: number;
+  longestStreak: number;
+}
+
+/**
  * Represents a Community (unpopulated).
  * - `participants`: Array of usernames representing the chat participants.
  * - `name`: name of the community.
@@ -16,6 +26,7 @@ export interface Community {
   visibility: string;
   participants: string[];
   admin: string;
+  visitStreaks?: UserVisitData[];
 }
 
 /**
