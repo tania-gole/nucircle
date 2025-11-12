@@ -1,5 +1,4 @@
-/* eslint no-console: "off" */
-
+/* eslint-disable no-console */
 // The server should run on localhost port 8000.
 // This is where you should start writing server-side code for this application.
 // startServer() is a function that starts the server
@@ -38,7 +37,7 @@ const PORT = parseInt(process.env.PORT || '8000');
 const app = express();
 const server = http.createServer(app);
 // allow requests from the local dev client or the production client only
-const socket: FakeSOSocket = new Server(server, {
+const io: FakeSOSocket = new Server(server, {
   path: '/socket.io',
   cors: {
     origin: process.env.CLIENT_URL || [
@@ -62,7 +61,7 @@ function startServer() {
 }
 
 // CODE CHANGE
-socket.on('connection', socket => {
+io.on('connection', socket => {
   console.log('A user connected ->', socket.id);
 
   // Listen for userConnect event: client sends this after successful login
@@ -180,8 +179,8 @@ socket.on('connection', socket => {
         invitationManager.updateInvitationStatus(inviteId, 'accepted');
 
         // Notify both players with gameId
-        socket.to(invite.challengerSocketId).emit('quizInviteAccepted', result);
-        socket.to(invite.recipientSocketId).emit('quizInviteAccepted', result);
+        io.to(invite.challengerSocketId).emit('quizInviteAccepted', result);
+        io.to(invite.recipientSocketId).emit('quizInviteAccepted', result);
 
         console.log(`Game ${gameId} created and started for invitation ${inviteId}`);
       } else {
@@ -194,8 +193,8 @@ socket.on('connection', socket => {
       invitationManager.updateInvitationStatus(inviteId, 'declined');
 
       // Notify both users
-      socket.to(invite.challengerSocketId).emit('quizInviteDeclined', result);
-      socket.to(invite.recipientSocketId).emit('quizInviteDeclined', result);
+      io.to(invite.challengerSocketId).emit('quizInviteDeclined', result);
+      io.to(invite.recipientSocketId).emit('quizInviteDeclined', result);
     }
 
     // Clean up invitation from memory
@@ -204,36 +203,60 @@ socket.on('connection', socket => {
 
   // Listen for disconnect event: when user logs out, closes browser, or loses connection
   socket.on('disconnect', async () => {
-    console.log('User disconnected');
-
-    // Same username stored above - retrieve this
     const username = socket.data.username;
 
     if (username) {
-      console.log(`User ${username} disconnecting...`);
+      const gameManager = GameManager.getInstance();
+      const userGames = await gameManager.getGamesByPlayer(username);
+
+      for (const game of userGames) {
+        if (game.state.status === 'IN_PROGRESS' || game.state.status === 'WAITING_TO_START') {
+          const otherPlayer = game.players.find(p => p !== username);
+
+          if (otherPlayer) {
+            await gameManager.endGameByDisconnect(game.gameID, username, otherPlayer);
+
+            const otherUser = await getUserByUsername(otherPlayer);
+            if (!('error' in otherUser) && otherUser.socketId) {
+              // Get updated game state
+              const updatedGame = gameManager.getGame(game.gameID);
+
+              // Emit game update to show game over screen
+              if (updatedGame) {
+                io.to(otherUser.socketId).emit('gameUpdate', {
+                  gameInstance: updatedGame.toModel(),
+                });
+              }
+
+              // Also send disconnect notification (optional - for additional context)
+              io.to(otherUser.socketId).emit('opponentDisconnected', {
+                gameId: game.gameID,
+                disconnectedPlayer: username,
+                winner: otherPlayer,
+                message: `${username} disconnected. You win by default!`,
+              });
+            }
+          }
+        }
+      }
 
       const result = await updateUserOnlineStatus(username, false, null);
-
       if ('error' in result) {
-        console.error('Error updating user status:', result.error);
         return;
       }
 
-      // Notify all connected clients that this user went offline
       socket.broadcast.emit('userStatusUpdate', {
         username,
         isOnline: false,
         lastSeen: new Date(),
       });
-
-      console.log(`User ${username} is offline`);
     }
   });
 });
 
 process.on('SIGINT', async () => {
   await mongoose.disconnect();
-  socket.close();
+  io.close();
 
   server.close(() => {
     console.log('Server closed.');
@@ -273,7 +296,7 @@ try {
   console.error('Failed to load or initialize OpenAPI Validator:', e);
 }
 
-app.use('/api/user', userController(socket));
+app.use('/api/user', userController(io));
 
 const openApiDocument = yaml.parse(fs.readFileSync('./openapi.yaml', 'utf8'));
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
@@ -281,17 +304,17 @@ console.log('Swagger UI is available at /api/docs');
 
 app.use(authMiddleware); // Protect routes below this line
 
-app.use('/api/question', questionController(socket));
+app.use('/api/question', questionController(io));
 app.use('/api/tags', tagController());
-app.use('/api/answer', answerController(socket));
-app.use('/api/comment', commentController(socket));
-app.use('/api/message', messageController(socket));
-app.use('/api/chat', chatController(socket));
-app.use('/api/games', gameController(socket));
-app.use('/api/collection', collectionController(socket));
-app.use('/api/community', communityController(socket));
-app.use('/api/community/messages', communityMessagesController(socket));
-app.use('/api/badge', badgeController(socket));
+app.use('/api/answer', answerController(io));
+app.use('/api/comment', commentController(io));
+app.use('/api/message', messageController(io));
+app.use('/api/chat', chatController(io));
+app.use('/api/games', gameController(io));
+app.use('/api/collection', collectionController(io));
+app.use('/api/community', communityController(io));
+app.use('/api/community/messages', communityMessagesController(io));
+app.use('/api/badge', badgeController(io));
 
 // Export the app instance
 export { app, server, startServer };

@@ -330,6 +330,76 @@ class GameManager {
   public static resetInstance(): void {
     GameManager._instance = undefined;
   }
+
+  /**
+   * Gets all games a player is currently in.
+   * @param playerID The username of the player.
+   * @returns An array of game instances the player is in.
+   */
+  public async getGamesByPlayer(playerID: string): Promise<GameInstance<GameState>[]> {
+    const activeGames = this.getActiveGameInstances();
+    const playerGames: GameInstance<GameState>[] = [];
+
+    for (const game of activeGames) {
+      const state = game.state as GameWithPlayerState;
+      if (state?.player1 === playerID || state?.player2 === playerID) {
+        playerGames.push(game.toModel());
+      }
+    }
+
+    // Also check database for games not in memory
+    try {
+      const dbGames = await GameModel.find({
+        '$or': [{ 'state.player1': playerID }, { 'state.player2': playerID }],
+        'state.status': { $in: ['WAITING_TO_START', 'IN_PROGRESS'] },
+      }).lean();
+
+      for (const dbGame of dbGames) {
+        // Only add if not already in activeGames
+        if (!playerGames.some(g => g.gameID === dbGame.gameID)) {
+          playerGames.push(dbGame as GameInstance<GameState>);
+        }
+      }
+    } catch (error) {
+      // Silent error - return what we have from memory
+    }
+
+    return playerGames;
+  }
+
+  /**
+   * Ends a game due to player disconnect, awarding win to remaining player.
+   * @param gameID The ID of the game.
+   * @param disconnectedPlayer The player who disconnected.
+   * @param winnerPlayer The player who wins by default.
+   */
+  public async endGameByDisconnect(
+    gameID: GameInstanceID,
+    disconnectedPlayer: string,
+    winnerPlayer: string,
+  ): Promise<void> {
+    try {
+      let game = this.getGame(gameID);
+
+      if (!game) {
+        game = await this._loadGameFromDatabase(gameID);
+      }
+
+      if (!game) {
+        return;
+      }
+
+      // Update game state to OVER with winner
+      const state = game.state as GameWithPlayerState & { winner?: string };
+      state.status = 'OVER';
+      state.winner = winnerPlayer;
+
+      await game.saveGameState();
+      this.removeGame(gameID);
+    } catch (error) {
+      // Silent error
+    }
+  }
 }
 
 export default GameManager;

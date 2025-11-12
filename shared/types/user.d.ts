@@ -40,6 +40,9 @@ export interface UserSignup {
  * - `isOnline`: A boolean value indicating if the user is currently connected to the platform.
  * - `socketId`: The Socket.IO connection ID for real-time communication (null when offline).
  * - `lastSeen`: The timestamp of when the user was last active or disconnected.
+ * - `badges`: An array of badges earned by the user.
+ * - `hasSeenWelcomeMessage`: A boolean indicating if the user has seen the welcome message.
+ * - `points`: The total points accumulated by the user through platform activities.
  */
 export interface User extends UserSignup {
   dateJoined: Date;
@@ -49,6 +52,7 @@ export interface User extends UserSignup {
   lastSeen?: Date;
   badges?: Badge[];
   hasSeenWelcomeMessage?: boolean;
+  points?: number;
 }
 
 /**

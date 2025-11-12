@@ -4,6 +4,7 @@ import UserCardView from './userCard';
 import UsersListHeader from './header';
 import useUsersListPage from '../../../hooks/useUsersListPage';
 import { SafeDatabaseUser } from '../../../types/types';
+import useUserContext from '../../../hooks/useUserContext';
 
 /**
  * Interface representing the props for the UsersListPage component.
@@ -21,6 +22,7 @@ interface UserListPageProps {
 const UsersListPage = (props: UserListPageProps) => {
   const { userList, setUserFilter, handleChallengeClick } = useUsersListPage();
   const { handleUserSelect = null } = props;
+  const { user: currentUser } = useUserContext();
   const navigate = useNavigate();
 
   /**
@@ -45,6 +47,7 @@ const UsersListPage = (props: UserListPageProps) => {
             user={user}
             handleUserCardViewClickHandler={handleUserCardViewClickHandler}
             onChallengeClick={handleChallengeClick}
+            currentUsername={currentUser?.username || ''}
           />
         ))}
       </div>

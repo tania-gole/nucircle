@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useEffect, useState } from 'react';
 import useUserContext from './useUserContext';
 import { SafeDatabaseUser, UserUpdatePayload } from '../types/types';
@@ -105,10 +106,21 @@ const useUsersListPage = () => {
    *
    * @param recipientUsername - the user object requesting the quiz
    */
+  // const handleChallengeClick = (recipientUsername: string) => {
+  //   if (!socket) {
+  //     return;
+  //   }
+  //   socket.emit('sendQuizInvite', recipientUsername);
+  // };
   const handleChallengeClick = (recipientUsername: string) => {
     if (!socket) {
+      console.error('Socket not connected');
       return;
     }
+
+    console.log('[DEBUG] Socket ID:', socket.id); // ← ADD THIS
+    console.log('[DEBUG] Socket connected:', socket.connected); // ← ADD THIS
+    console.log(`Sending quiz invite to ${recipientUsername}`);
     socket.emit('sendQuizInvite', recipientUsername);
   };
 

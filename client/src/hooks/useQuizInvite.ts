@@ -9,8 +9,9 @@ import useUserContext from './useUserContext';
  */
 const useQuizInvite = () => {
   const [pendingInvitation, setPendingInvite] = useState<QuizInvite | null>(null);
+  const [isResponding, setIsResponding] = useState(false);
   const navigate = useNavigate();
-  const { socket } = useUserContext();
+  const { socket, user } = useUserContext();
 
   useEffect(() => {
     if (!socket) return;
@@ -18,6 +19,7 @@ const useQuizInvite = () => {
     // Function for handling quiz invitations when incoming
     const handleRecievedInvite = (invite: QuizInvite) => {
       setPendingInvite(invite);
+      setIsResponding(false);
     };
 
     // Function for handling when invitation is accepted
@@ -29,6 +31,7 @@ const useQuizInvite = () => {
       gameId?: string;
     }) => {
       setPendingInvite(null);
+      setIsResponding(false);
       if (result.gameId) {
         // Navigate to the game page
         navigate(`/games/${result.gameId}`);
@@ -43,6 +46,11 @@ const useQuizInvite = () => {
       accepted: boolean;
     }) => {
       setPendingInvite(null);
+      setIsResponding(false);
+
+      if (user?.username === result.challengerUsername) {
+        alert(`${result.recipientUsername} declined your quiz challenge.`);
+      }
     };
 
     // Register socket listeners
@@ -55,32 +63,30 @@ const useQuizInvite = () => {
       socket.off('quizInviteAccepted', handleAcceptedInvite);
       socket.off('quizInviteDeclined', handleDeclinedInvite);
     };
-  }, [socket, navigate]);
+  }, [socket, navigate, user]);
 
   // Handle the pending invitation
   const handlePendingAccept = () => {
-    if (!socket || !pendingInvitation) return;
-
-    // Modal will close when we received 'quizInviteAccepted' event
+    if (!socket || !pendingInvitation || isResponding) return;
+    setIsResponding(true);
     socket.emit('respondToQuizInvite', pendingInvitation.id, true);
+    // Modal will close when we receive 'quizInviteAccepted' event
   };
 
-  /**
-   * Decline the pending invitation
-   * Emits response to server and closes modal
-   */
+  // Function for handling when invitation is declined
   const handlePendingDecline = () => {
-    if (!socket || !pendingInvitation) return;
-
-    // Modal will close when received 'quizInviteAccepted' event
+    if (!socket || !pendingInvitation || isResponding) return;
+    setIsResponding(true);
     socket.emit('respondToQuizInvite', pendingInvitation.id, false);
     setPendingInvite(null);
+    setIsResponding(false);
   };
 
   return {
     pendingInvitation,
     handlePendingAccept,
     handlePendingDecline,
+    isResponding,
   };
 };
 
