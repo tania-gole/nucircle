@@ -108,14 +108,26 @@ const useGamePage = () => {
       }
     };
 
+    const handleOpponentDisconnect = (payload: {
+      gameId: string;
+      disconnectedPlayer: string;
+      winner: string;
+      message: string;
+    }) => {
+      alert(`${payload.disconnectedPlayer} disconnected!`);
+      navigate('/games');
+    };
+
     socket.on('gameUpdate', handleGameUpdate);
     socket.on('gameError', handleGameError);
+    socket.on('opponentDisconnected', handleOpponentDisconnect);
 
     return () => {
       socket.off('gameUpdate', handleGameUpdate);
       socket.off('gameError', handleGameError);
+      socket.off('opponentDisconnected', handleOpponentDisconnect);
     };
-  }, [gameID, socket, user.username, gameInstance, joinedGameID]);
+  }, [gameID, socket, user.username, gameInstance, joinedGameID, navigate]);
 
   return {
     gameInstance,

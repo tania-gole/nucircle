@@ -10,6 +10,8 @@ import { SafeDatabaseUser } from '../../../../types/types';
 interface UserProps {
   user: SafeDatabaseUser;
   handleUserCardViewClickHandler: (user: SafeDatabaseUser) => void;
+  onChallengeClick: (username: string) => void;
+  currentUsername: string;
 }
 
 /**
@@ -20,10 +22,10 @@ interface UserProps {
  * @param user - The user object containing user details.
  */
 const UserCardView = (props: UserProps) => {
-  const { user, handleUserCardViewClickHandler } = props;
+  const { user, handleUserCardViewClickHandler, onChallengeClick, currentUsername } = props;
 
   return (
-    <div className='user_card' onClick={() => handleUserCardViewClickHandler(user)}>
+    <div className='user_card'>
       <div className='user_card_left'>
         <div className='user_card_name'>
           {user.firstName} {user.lastName}
@@ -36,12 +38,27 @@ const UserCardView = (props: UserProps) => {
 
       <div className='user_card_right'>
         <div className='user_card_joined'>joined {new Date(user.dateJoined).toUTCString()}</div>
+
+        {/* Only show if online AND not current user */}
+        {user.isOnline &&
+          user.username !== currentUsername && ( // ← CHANGE THIS
+            <button
+              className='challenge-button'
+              onClick={e => {
+                e.stopPropagation();
+                onChallengeClick(user.username);
+              }}>
+              Challenge to Quiz
+            </button>
+          )}
+
         <svg
           width='20'
           height='32'
           viewBox='0 0 20 32'
           fill='none'
-          xmlns='http://www.w3.org/2000/svg'>
+          xmlns='http://www.w3.org/2000/svg'
+          onClick={() => handleUserCardViewClickHandler(user)}>
           <path
             d='M12.2667 16L6.60261e-05 3.73333L3.7334 0L19.7334 16L3.7334 32L6.60261e-05 28.2667L12.2667 16Z'
             fill='#FF6B6B'

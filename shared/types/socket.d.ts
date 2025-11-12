@@ -116,6 +116,42 @@ export interface CollectionUpdatePayload {
 }
 
 /**
+ * Interface representing a quiz invitation between two users.
+ * - `id`: Unique identifier for this invitation (UUID)
+ * - `challengerUsername`: Username of the user sending the invitation
+ * - `challengerSocketId`: Socket ID of the challenger (for real-time communication)
+ * - `recipientUsername`: Username of the user receiving the invitation
+ * - `recipientSocketId`: Socket ID of the recipient (for real-time communication)
+ * - `timestamp`: When the invitation was created (used for 30-second timeout)
+ * - `status`: Current state of the invitation (`'pending'`, `'accepted'`, `'declined'`, `'expired'`).
+ */
+export interface QuizInvite {
+  id: string;
+  challengerUsername: string;
+  challengerSocketId: string;
+  recipientUsername: string;
+  recipientSocketId: string;
+  timestamp: Date;
+  status: 'pending' | 'accepted' | 'declined' | 'expired';
+}
+
+/**
+ * Interface representing the result after responding to a quiz invitation.
+ * - `inviteId`: ID of the original invitation
+ * - `challengerUsername`: Username of the user who sent the invitation
+ * - `recipientUsername`: Username of the user who received the invitation
+ * - `accepted`: Whether the invitation was accepted (true) or declined (false)
+ * - `gameId`: (Optional) The game ID if accepted - both users navigate to this game
+ */
+export interface QuizInviteResult {
+  inviteId: string;
+  challengerUsername: string;
+  recipientUsername: string;
+  accepted: boolean;
+  gameId?: string;
+}
+
+/**
  * Interface representing the events the client can emit to the server.
  * - `makeMove`: Client can emit a move in the game.
  * - `joinGame`: Client can join a game.
@@ -123,7 +159,8 @@ export interface CollectionUpdatePayload {
  * - `joinChat`: Client can join a chat.
  * - `leaveChat`: Client can leave a chat.
  * - `userConnect`: Client has connected to server.
- * - `userDisconnect`: Client has disconnected from server.
+ * - `sendQuizInvite`: Client has sent a quiz invite.
+ * - `respondToQuizInvite`: Client has responded to quiz invite.
  */
 export interface ClientToServerEvents {
   makeMove: (move: GameMovePayload) => void;
@@ -133,6 +170,8 @@ export interface ClientToServerEvents {
   leaveChat: (chatID: string | undefined) => void;
   userConnect: (username: string) => void;
   userDisconnect: () => void;
+  sendQuizInvite: (recipientUsername: string) => void;
+  respondToQuizInvite: (inviteId: string, accepted: boolean) => void;
 }
 
 /**
@@ -150,6 +189,10 @@ export interface ClientToServerEvents {
  * - `communityUpdate`: Server sends updated community.
  * - `collectionUpdate`: Server sends updated collection.
  * - `userStatusUpdate`: Server sends updated user status.
+ * - `quizInviteReceived`: Server sends updated quiz invitation status.
+ * - `quizInviteAccepted`: Server sends updated quiz invitation status.
+ * - `quizInviteDeclined`: Server sends updated quiz invitation status.
+ * - `opponentDisconnected`: Server sends updated opponent status.
  */
 export interface ServerToClientEvents {
   questionUpdate: (question: PopulatedDatabaseQuestion) => void;
@@ -165,4 +208,14 @@ export interface ServerToClientEvents {
   communityUpdate: (community: CommunityUpdatePayload) => void;
   collectionUpdate: (community: CollectionUpdatePayload) => void;
   userStatusUpdate: (payload: { username: string; isOnline: boolean; lastSeen?: Date }) => void;
+  quizInviteReceived: (invite: QuizInvite) => void;
+  quizInviteAccepted: (result: QuizInviteResult) => void;
+  quizInviteDeclined: (result: QuizInviteResult) => void;
+  opponentDisconnected: (payload: {
+    gameId: string;
+    disconnectedPlayer: string;
+    winner: string;
+    message: string;
+  }) => void;
+  error: (payload: { message: string }) => void;
 }

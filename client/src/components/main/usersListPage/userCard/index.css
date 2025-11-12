@@ -58,3 +58,25 @@
   font-size: 12px;
   align-self: flex-start;
 }
+
+.challenge-button {
+  padding: 8px 16px;
+  background-color: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.challenge-button:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.challenge-button:active {
+  transform: translateY(0);
+}
