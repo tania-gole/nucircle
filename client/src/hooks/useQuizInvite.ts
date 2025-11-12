@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QuizInvite } from '../types/types';
@@ -9,8 +10,9 @@ import useUserContext from './useUserContext';
  */
 const useQuizInvite = () => {
   const [pendingInvitation, setPendingInvite] = useState<QuizInvite | null>(null);
+  const [isResponding, setIsResponding] = useState(false);
   const navigate = useNavigate();
-  const { socket } = useUserContext();
+  const { socket, user } = useUserContext();
 
   useEffect(() => {
     if (!socket) return;
@@ -18,6 +20,7 @@ const useQuizInvite = () => {
     // Function for handling quiz invitations when incoming
     const handleRecievedInvite = (invite: QuizInvite) => {
       setPendingInvite(invite);
+      setIsResponding(false);
     };
 
     // Function for handling when invitation is accepted
@@ -29,6 +32,7 @@ const useQuizInvite = () => {
       gameId?: string;
     }) => {
       setPendingInvite(null);
+      setIsResponding(false);
       if (result.gameId) {
         // Navigate to the game page
         navigate(`/games/${result.gameId}`);
@@ -36,13 +40,18 @@ const useQuizInvite = () => {
     };
 
     // Function for handling when invitation is declined
-    const handleDeclinedInvite = (_result: {
+    const handleDeclinedInvite = (result: {
       inviteId: string;
       challengerUsername: string;
       recipientUsername: string;
       accepted: boolean;
     }) => {
       setPendingInvite(null);
+      setIsResponding(false);
+
+      if (user?.username === result.challengerUsername) {
+        alert(`${result.recipientUsername} declined your quiz challenge.`);
+      }
     };
 
     // Register socket listeners
@@ -55,32 +64,50 @@ const useQuizInvite = () => {
       socket.off('quizInviteAccepted', handleAcceptedInvite);
       socket.off('quizInviteDeclined', handleDeclinedInvite);
     };
-  }, [socket, navigate]);
+  }, [socket, navigate, user]);
 
   // Handle the pending invitation
   const handlePendingAccept = () => {
-    if (!socket || !pendingInvitation) return;
-
-    // Modal will close when we received 'quizInviteAccepted' event
+    if (!socket || !pendingInvitation || isResponding) return;
+    setIsResponding(true);
     socket.emit('respondToQuizInvite', pendingInvitation.id, true);
+    // Modal will close when we receive 'quizInviteAccepted' event
   };
 
   /**
    * Decline the pending invitation
    * Emits response to server and closes modal
    */
-  const handlePendingDecline = () => {
-    if (!socket || !pendingInvitation) return;
+  // Function for handling when invitation is declined
+  const handlePendingDecline = (result: {
+    inviteId: string;
+    challengerUsername: string;
+    recipientUsername: string;
+    accepted: boolean;
+  }) => {
+    console.log('[DEBUG] Decline received:', {
+      currentUser: user?.username,
+      challenger: result.challengerUsername,
+      recipient: result.recipientUsername,
+    }); // ← ADD THIS DEBUG
 
-    // Modal will close when received 'quizInviteAccepted' event
-    socket.emit('respondToQuizInvite', pendingInvitation.id, false);
     setPendingInvite(null);
+    setIsResponding(false);
+
+    // Show alert ONLY if current user is the challenger (NOT the recipient)
+    if (user?.username === result.challengerUsername) {
+      console.log('[DEBUG] Showing alert to challenger'); // ← ADD THIS
+      alert(`${result.recipientUsername} declined your quiz challenge.`);
+    } else {
+      console.log('[DEBUG] Not showing alert (not challenger)'); // ← ADD THIS
+    }
   };
 
   return {
     pendingInvitation,
     handlePendingAccept,
     handlePendingDecline,
+    isResponding,
   };
 };
 
