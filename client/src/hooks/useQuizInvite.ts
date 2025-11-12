@@ -10,7 +10,7 @@ import useUserContext from './useUserContext';
 const useQuizInvite = () => {
   const [pendingInvitation, setPendingInvite] = useState<QuizInvite | null>(null);
   const navigate = useNavigate();
-  const socket = useUserContext();
+  const { socket } = useUserContext();
 
   useEffect(() => {
     if (!socket) return;
@@ -36,7 +36,7 @@ const useQuizInvite = () => {
     };
 
     // Function for handling when invitation is declined
-    const handleDeclinedInvite = (result: {
+    const handleDeclinedInvite = (_result: {
       inviteId: string;
       challengerUsername: string;
       recipientUsername: string;
