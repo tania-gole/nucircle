@@ -39,7 +39,7 @@ const useQuizInvite = () => {
     };
 
     // Function for handling when invitation is declined
-    const handleDeclinedInvite = (_result: {
+    const handleDeclinedInvite = (result: {
       inviteId: string;
       challengerUsername: string;
       recipientUsername: string;
