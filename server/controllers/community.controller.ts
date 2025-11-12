@@ -13,6 +13,7 @@ import {
   toggleCommunityMembership,
   createCommunity,
   deleteCommunity,
+  // recordCommunityVisit,
 } from '../services/community.service';
 
 /**
@@ -58,14 +59,15 @@ const communityController = (socket: FakeSOSocket) => {
    */
   const getCommunityRoute = async (req: CommunityIdRequest, res: Response): Promise<void> => {
     const { communityId } = req.params;
-    const username = req.query?.username;
-    if (typeof username !== 'string') {
-      res.status(401).send('Invalid username query parameter');
-      return;
-    }
+    // const username = req.query?.username;
+    // if (typeof username !== 'string') {
+    //   res.status(401).send('Invalid username query parameter');
+    //   return;
+    // }
 
     try {
       const foundCommunity = await getCommunity(communityId);
+      // recordCommunityVisit(communityId, username);
 
       if ('error' in foundCommunity) {
         throw new Error(foundCommunity.error);

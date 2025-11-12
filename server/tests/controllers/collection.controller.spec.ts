@@ -9,7 +9,14 @@ import { DatabaseCollection, PopulatedDatabaseCollection } from '../../types/typ
 jest.mock('../../middleware/auth', () => ({
   __esModule: true,
   default: (req: any, res: any, next: any) => {
-    req.user = { userId: 'test-user-id', username: 'testuser' };
+    // Prioritize params.username, then body.username, then query.username or currentUsername
+    const username =
+      req.params?.username ||
+      req.body?.username ||
+      req.query?.username ||
+      req.query?.currentUsername || // This might be overriding
+      'test_user';
+    req.user = { userId: 'test-user-id', username: username };
     next();
   },
 }));
@@ -56,6 +63,7 @@ const populateDocumentSpy = jest.spyOn(databaseUtil, 'populateDocument');
 
 describe('Collection Controller', () => {
   beforeEach(() => {
+    jest.resetAllMocks();
     jest.clearAllMocks();
   });
 

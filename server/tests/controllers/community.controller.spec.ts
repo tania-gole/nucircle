@@ -8,7 +8,14 @@ import { DatabaseCommunity } from '../../types/types';
 jest.mock('../../middleware/auth', () => ({
   __esModule: true,
   default: (req: any, res: any, next: any) => {
-    req.user = { userId: 'test-user-id', username: 'testuser' };
+    // Extract username from request params, body (username or admin), or query for testing
+    const username =
+      req.params?.username ||
+      req.body?.username ||
+      req.body?.admin ||
+      req.query?.username ||
+      'test_user';
+    req.user = { userId: 'test-user-id', username: username };
     next();
   },
 }));

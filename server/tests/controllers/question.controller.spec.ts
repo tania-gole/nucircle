@@ -19,7 +19,14 @@ import {
 jest.mock('../../middleware/auth', () => ({
   __esModule: true,
   default: (req: any, res: any, next: any) => {
-    req.user = { userId: 'test-user-id', username: 'testuser' };
+    // Extract username from request params, body (including askedBy), or query for testing
+    const username =
+      req.params?.username ||
+      req.body?.username ||
+      req.body?.askedBy ||
+      req.query?.username ||
+      'test_user';
+    req.user = { userId: 'test-user-id', username: username };
     next();
   },
 }));

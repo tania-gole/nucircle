@@ -15,7 +15,9 @@ import chatController from '../../controllers/chat.controller';
 jest.mock('../../middleware/auth', () => ({
   __esModule: true,
   default: (req: any, res: any, next: any) => {
-    req.user = { userId: 'test-user-id', username: 'testuser' };
+    // Extract username from request params, body, or query for testing
+    const username = req.params?.username || req.body?.username || req.query?.username || 'user1';
+    req.user = { userId: 'test-user-id', username: username };
     next();
   },
 }));
