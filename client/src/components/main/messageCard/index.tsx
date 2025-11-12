@@ -65,17 +65,20 @@ const MessageCard = ({ message, currentUser }: MessageCardProps) => {
         <Markdown remarkPlugins={[remarkGfm]}>{message.msg}</Markdown>
       </div>
 
-      <div className='message-reactions'>
-        <button
-          className={`reaction-btn ${reactions.like.users.includes(currentUser) ? 'active' : ''}`}
-          onClick={() => handleReaction('like')}>
-          👍 {reactions.like.count > 0 && reactions.like.count}
-        </button>
-        <button
-          className={`reaction-btn ${reactions.love.users.includes(currentUser) ? 'active' : ''}`}
-          onClick={() => handleReaction('love')}>
-          ❤️ {reactions.love.count > 0 && reactions.love.count}
-        </button>
+      {/* Reactions are now right under the timestamp (aligned left) */}
+      <div className='message-footer'>
+        <div className='message-reactions'>
+          <button
+            className={`reaction-btn ${reactions.like.users.includes(currentUser) ? 'active' : ''}`}
+            onClick={() => handleReaction('like')}>
+            👍 {reactions.like.count > 0 && reactions.like.count}
+          </button>
+          <button
+            className={`reaction-btn ${reactions.love.users.includes(currentUser) ? 'active' : ''}`}
+            onClick={() => handleReaction('love')}>
+            ❤️ {reactions.love.count > 0 && reactions.love.count}
+          </button>
+        </div>
         {error && <p className='error-text'>{error}</p>}
       </div>
     </div>
