@@ -9,11 +9,15 @@ import './index.css';
  * members, and questions.
  */
 const CommunityPage = () => {
-  const { community, communityQuestions, user, handleDeleteCommunity } = useCommunityPage();
-
+  const { community, communityQuestions, user, handleDeleteCommunity, membersOnlineStatus } =
+    useCommunityPage();
   if (!community) {
     return <div className='loading'>Loading...</div>;
   }
+
+  const onlineCount = community.participants.filter(
+    username => membersOnlineStatus[username]?.isOnline === true,
+  ).length;
 
   return (
     <div className='community-page-layout'>
@@ -38,13 +42,17 @@ const CommunityPage = () => {
         <CommunityMembershipButton community={community} />
 
         <div className='community-members'>
-          <h3 className='section-heading'>Members</h3>
+          <h3 className='section-heading'>Members ({onlineCount} online)</h3>
           <ul className='members-list'>
-            {community?.participants.map(username => (
-              <li key={username} className='member-item'>
-                {username}
-              </li>
-            ))}
+            {community?.participants.map(username => {
+              const memberStatus = membersOnlineStatus[username];
+              return (
+                <li key={username} className='member-item'>
+                  {memberStatus?.isOnline && <span className='online-indicator'></span>}
+                  {username}
+                </li>
+              );
+            })}
           </ul>
         </div>
         {community.admin === user.username && (
