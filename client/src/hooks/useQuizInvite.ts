@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QuizInvite } from '../types/types';
@@ -85,21 +84,11 @@ const useQuizInvite = () => {
     recipientUsername: string;
     accepted: boolean;
   }) => {
-    console.log('[DEBUG] Decline received:', {
-      currentUser: user?.username,
-      challenger: result.challengerUsername,
-      recipient: result.recipientUsername,
-    }); // ← ADD THIS DEBUG
-
     setPendingInvite(null);
     setIsResponding(false);
 
-    // Show alert ONLY if current user is the challenger (NOT the recipient)
     if (user?.username === result.challengerUsername) {
-      console.log('[DEBUG] Showing alert to challenger'); // ← ADD THIS
       alert(`${result.recipientUsername} declined your quiz challenge.`);
-    } else {
-      console.log('[DEBUG] Not showing alert (not challenger)'); // ← ADD THIS
     }
   };
 
