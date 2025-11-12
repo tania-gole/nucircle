@@ -33,6 +33,10 @@ const collectionController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     try {
       const { name, description, questions, username, isPrivate } = req.body;
+      if (username !== req.user!.username) {
+        res.status(401).send('Invalid username parameter');
+        return;
+      }
       const collection = await createCollection({
         name,
         description,
@@ -73,6 +77,10 @@ const collectionController = (socket: FakeSOSocket) => {
     try {
       const { collectionId } = req.params;
       const { username } = req.query;
+      if (username !== req.user!.username) {
+        res.status(401).send('Invalid username parameter');
+        return;
+      }
 
       const collection = await deleteCollection(collectionId, username);
 
@@ -109,6 +117,10 @@ const collectionController = (socket: FakeSOSocket) => {
 
     try {
       const { collectionId, questionId, username } = req.body;
+      if (username !== req.user!.username) {
+        res.status(401).send('Invalid username parameter');
+        return;
+      }
 
       const updatedCollection = await toggleSaveQuestionToCollection(
         collectionId,
@@ -150,6 +162,10 @@ const collectionController = (socket: FakeSOSocket) => {
 
     const { username: usernameToView } = req.params;
     const { currentUsername } = req.query;
+    if (currentUsername !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
 
     try {
       const collections = await getCollectionsByUsername(usernameToView, currentUsername);
@@ -190,6 +206,10 @@ const collectionController = (socket: FakeSOSocket) => {
   const getCollectionByIdRoute = async (req: CollectionRequest, res: Response): Promise<void> => {
     const { collectionId } = req.params;
     const { username } = req.query;
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
 
     try {
       const collection = await getCollectionById(collectionId, username);
