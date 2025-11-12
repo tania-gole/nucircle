@@ -73,23 +73,13 @@ const useQuizInvite = () => {
     // Modal will close when we receive 'quizInviteAccepted' event
   };
 
-  /**
-   * Decline the pending invitation
-   * Emits response to server and closes modal
-   */
   // Function for handling when invitation is declined
-  const handlePendingDecline = (result: {
-    inviteId: string;
-    challengerUsername: string;
-    recipientUsername: string;
-    accepted: boolean;
-  }) => {
+  const handlePendingDecline = () => {
+    if (!socket || !pendingInvitation || isResponding) return;
+    setIsResponding(true);
+    socket.emit('respondToQuizInvite', pendingInvitation.id, false);
     setPendingInvite(null);
     setIsResponding(false);
-
-    if (user?.username === result.challengerUsername) {
-      alert(`${result.recipientUsername} declined your quiz challenge.`);
-    }
   };
 
   return {
