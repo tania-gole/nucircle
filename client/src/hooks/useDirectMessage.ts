@@ -119,6 +119,40 @@ const useDirectMessage = () => {
     };
   }, [user.username, socket, selectedChat?._id]);
 
+  useEffect(() => {
+    if (!socket || !selectedChat) return;
+
+    // Handle reaction updates for direct messages
+    const handleReactionUpdated = ({
+      messageId,
+      reactions,
+    }: {
+      messageId: string;
+      reactions: {
+        love: { users: string[]; count: number };
+        like: { users: string[]; count: number };
+      };
+    }) => {
+      // Update the selected chat's messages
+      setSelectedChat(prevChat => {
+        if (!prevChat) return null;
+
+        return {
+          ...prevChat,
+          messages: prevChat.messages.map(msg =>
+            msg._id.toString() === messageId ? { ...msg, reactions } : msg,
+          ),
+        };
+      });
+    };
+
+    socket.on('reactionUpdated', handleReactionUpdated);
+
+    return () => {
+      socket.off('reactionUpdated', handleReactionUpdated);
+    };
+  }, [socket, selectedChat]);
+
   return {
     selectedChat,
     chatToCreate,
