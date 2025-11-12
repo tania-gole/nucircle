@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import useUserContext from './useUserContext';
 import { DatabaseCommunity } from '../types/types';
+import { recordCommunityVisit } from '../services/communityService';
 
 /**
  * Custom hook to manage the logic for viewing a community card.
@@ -12,7 +13,10 @@ const useCommunityCard = (community: DatabaseCommunity, setError: (err: string |
   const navigate = useNavigate();
   const { user } = useUserContext();
 
-  const handleViewCommunity = () => {
+  const handleViewCommunity = async () => {
+    if (community.participants.includes(user.username)) {
+      await recordCommunityVisit(community._id.toString(), user.username);
+    }
     if (community.visibility === 'PUBLIC') {
       navigate(`/communities/${community._id}`);
       return;

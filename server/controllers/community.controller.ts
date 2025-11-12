@@ -13,7 +13,7 @@ import {
   toggleCommunityMembership,
   createCommunity,
   deleteCommunity,
-  // recordCommunityVisit,
+  recordCommunityVisit,
 } from '../services/community.service';
 
 /**
@@ -59,15 +59,9 @@ const communityController = (socket: FakeSOSocket) => {
    */
   const getCommunityRoute = async (req: CommunityIdRequest, res: Response): Promise<void> => {
     const { communityId } = req.params;
-    // const username = req.query?.username;
-    // if (typeof username !== 'string') {
-    //   res.status(401).send('Invalid username query parameter');
-    //   return;
-    // }
 
     try {
       const foundCommunity = await getCommunity(communityId);
-      // recordCommunityVisit(communityId, username);
 
       if ('error' in foundCommunity) {
         throw new Error(foundCommunity.error);
@@ -232,6 +226,23 @@ const communityController = (socket: FakeSOSocket) => {
     }
   };
 
+  const recordVisitRoute = async (req: express.Request, res: Response): Promise<void> => {
+    const { communityId } = req.params;
+    const { username } = req.body;
+
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
+
+    try {
+      await recordCommunityVisit(communityId, username);
+      res.status(200).json({ message: 'Visit recorded' });
+    } catch (err: unknown) {
+      res.status(500).send(`Error recording visit: ${(err as Error).message}`);
+    }
+  };
+
   // Registering routes
   router.get('/getCommunity/:communityId', getCommunityRoute);
   router.get('/getAllCommunities', getAllCommunitiesRoute);
@@ -239,6 +250,7 @@ const communityController = (socket: FakeSOSocket) => {
   router.post('/toggleMembership', toggleMembershipRoute);
   router.post('/create', createCommunityRoute);
   router.delete('/delete/:communityId', deleteCommunityRoute);
+  router.post('/:communityId/visit', recordVisitRoute);
 
   return router;
 };

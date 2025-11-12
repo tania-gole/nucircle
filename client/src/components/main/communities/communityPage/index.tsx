@@ -9,7 +9,7 @@ import './index.css';
  * members, and questions.
  */
 const CommunityPage = () => {
-  const { community, communityQuestions, username, handleDeleteCommunity } = useCommunityPage();
+  const { community, communityQuestions, user, handleDeleteCommunity } = useCommunityPage();
 
   if (!community) {
     return <div className='loading'>Loading...</div>;
@@ -29,6 +29,12 @@ const CommunityPage = () => {
       <div className='community-sidebar'>
         <h2 className='community-title'>{community.name}</h2>
         <p className='community-description'>{community.description}</p>
+        <h4>Daily Streak</h4>
+        <p>
+          Community visited{' '}
+          {community.visitStreaks?.find(v => v.username === user.username)?.currentStreak || 0} days
+          in a row
+        </p>
         <CommunityMembershipButton community={community} />
 
         <div className='community-members'>
@@ -41,7 +47,7 @@ const CommunityPage = () => {
             ))}
           </ul>
         </div>
-        {community.admin === username && (
+        {community.admin === user.username && (
           <button className='delete-community-btn' onClick={handleDeleteCommunity}>
             Delete Community
           </button>

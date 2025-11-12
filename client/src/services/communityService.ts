@@ -106,6 +106,19 @@ const deleteCommunity = async (communityId: string, username: string): Promise<v
   return res.data;
 };
 
+/**
+ * Records a user's visit to a community and updates their streak
+ * @param communityId - The community ID
+ * @param username - The visiting user's username
+ */
+const recordCommunityVisit = async (communityId: string, username: string): Promise<void> => {
+  const res = await api.post(`${COMMUNITIES_API_URL}/${communityId}/visit`, { username });
+
+  if (res.status !== 200) {
+    throw new Error('Error recording visit');
+  }
+};
+
 export {
   getUserCommunities,
   changeCommunityMembership,
@@ -113,4 +126,5 @@ export {
   createCommunity,
   getCommunityById,
   deleteCommunity,
+  recordCommunityVisit,
 };
