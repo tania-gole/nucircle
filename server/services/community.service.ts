@@ -1,6 +1,7 @@
 import CommunityModel from '../models/community.model';
 import { Community, CommunityResponse, DatabaseCommunity } from '../types/types';
 import { checkAndAwardCommunityBadge } from './badge.service';
+import { awardPointsToUser } from './point.service';
 
 /**
  * Retrieves all communities that a user is a part of
@@ -97,8 +98,9 @@ export const toggleCommunityMembership = async (
         { new: true },
       );
 
-      // Award community badge when user joins
+      // Award community badge, points when user joins
       if (updatedCommunity) {
+        awardPointsToUser(username, 5);
         await checkAndAwardCommunityBadge(username, communityId);
       }
     }

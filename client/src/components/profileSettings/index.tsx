@@ -103,6 +103,11 @@ const ProfileSettings: React.FC = () => {
               {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
             </p>
 
+            {/* ---- Points Section ---- */}
+            <p>
+              <strong>Points Earned:</strong> {userData.points ? userData.points : '0'}
+            </p>
+
             {/* ---- Badges Section ---- */}
             <h4>Badges</h4>
             <Badges badges={badges} />
