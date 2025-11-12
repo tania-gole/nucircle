@@ -173,3 +173,55 @@ export const deleteCommunity = async (
     return { error: (err as Error).message };
   }
 };
+
+export const recordCommunityVisit = async (
+  communityId: string,
+  username: string,
+): Promise<void> => {
+  const community = await CommunityModel.findById(communityId);
+  if (!community) return;
+
+  // Initialize visitStreaks if it doesn't exist
+  if (!community.visitStreaks) {
+    community.visitStreaks = [];
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of day
+
+  // Find user's existing visit data
+  const userVisit = community.visitStreaks.find(v => v.username === username);
+
+  if (!userVisit) {
+    // First visit - initialize
+    community.visitStreaks.push({
+      username,
+      lastVisitDate: today,
+      currentStreak: 1,
+      longestStreak: 1,
+    });
+  } else {
+    const lastVisit = new Date(userVisit.lastVisitDate);
+    lastVisit.setHours(0, 0, 0, 0);
+
+    const daysDifference = Math.floor(
+      (today.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (daysDifference === 0) {
+      // Same day - no update needed
+      return;
+    } else if (daysDifference === 1) {
+      // Consecutive day - increment streak
+      userVisit.currentStreak += 1;
+      userVisit.longestStreak = Math.max(userVisit.longestStreak, userVisit.currentStreak);
+      userVisit.lastVisitDate = today;
+    } else {
+      // Streak broken - reset
+      userVisit.currentStreak = 1;
+      userVisit.lastVisitDate = today;
+    }
+  }
+
+  await community.save(); // CRITICAL: Save to database
+};
