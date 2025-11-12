@@ -14,6 +14,11 @@ const badgeController = (socket: FakeSOSocket) => {
   const getUserBadgesRoute = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
     const { username } = req.params;
 
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
+
     try {
       const badges = await getUserBadges(username);
       res.json(badges);

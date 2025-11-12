@@ -141,6 +141,11 @@ const chatController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     const { username } = req.params;
 
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
+
     try {
       const chats = await getChatsByParticipants([username]);
 
@@ -171,6 +176,11 @@ const chatController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     const { chatId } = req.params;
     const { username: userId } = req.body;
+
+    if (userId !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
 
     try {
       const updatedChat = await addParticipantToChat(chatId, userId);

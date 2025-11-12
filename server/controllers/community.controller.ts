@@ -13,6 +13,7 @@ import {
   toggleCommunityMembership,
   createCommunity,
   deleteCommunity,
+  // recordCommunityVisit,
 } from '../services/community.service';
 
 /**
@@ -31,6 +32,10 @@ const communityController = (socket: FakeSOSocket) => {
    */
   const getCommunitiesByUserRoute = async (req: express.Request, res: Response): Promise<void> => {
     const { username } = req.params;
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
 
     try {
       const communities = await getCommunitiesByUser(username);
@@ -54,9 +59,15 @@ const communityController = (socket: FakeSOSocket) => {
    */
   const getCommunityRoute = async (req: CommunityIdRequest, res: Response): Promise<void> => {
     const { communityId } = req.params;
+    // const username = req.query?.username;
+    // if (typeof username !== 'string') {
+    //   res.status(401).send('Invalid username query parameter');
+    //   return;
+    // }
 
     try {
       const foundCommunity = await getCommunity(communityId);
+      // recordCommunityVisit(communityId, username);
 
       if ('error' in foundCommunity) {
         throw new Error(foundCommunity.error);
@@ -101,6 +112,10 @@ const communityController = (socket: FakeSOSocket) => {
     res: Response,
   ): Promise<void> => {
     const { communityId, username } = req.body;
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
 
     try {
       const result = await toggleCommunityMembership(communityId, username);
@@ -142,6 +157,10 @@ const communityController = (socket: FakeSOSocket) => {
     res: Response,
   ): Promise<void> => {
     const { name, description, admin, visibility = 'PUBLIC', participants = [] } = req.body;
+    if (admin !== req.user!.username) {
+      res.status(401).send('Invalid admin parameter');
+      return;
+    }
     // Ensure admin is included in participants list
     const allParticipants = participants.includes(admin) ? participants : [...participants, admin];
 
@@ -182,6 +201,10 @@ const communityController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     const { communityId } = req.params;
     const { username } = req.body;
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
 
     try {
       const result = await deleteCommunity(communityId, username);

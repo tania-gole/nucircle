@@ -72,6 +72,11 @@ const questionController = (socket: FakeSOSocket) => {
     const { qid } = req.params;
     const { username } = req.query;
 
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
+
     if (!ObjectId.isValid(qid)) {
       res.status(400).send('Invalid ID format');
       return;
@@ -106,6 +111,11 @@ const questionController = (socket: FakeSOSocket) => {
    */
   const addQuestion = async (req: AddQuestionRequest, res: Response): Promise<void> => {
     const question: Question = req.body;
+
+    if (question.askedBy !== req.user!.username) {
+      res.status(401).send('Invalid request body');
+      return;
+    }
 
     try {
       const questionswithtags = {
@@ -156,6 +166,11 @@ const questionController = (socket: FakeSOSocket) => {
     type: 'upvote' | 'downvote',
   ): Promise<void> => {
     const { qid, username } = req.body;
+
+    if (username !== req.user!.username) {
+      res.status(401).send('Invalid username parameter');
+      return;
+    }
 
     try {
       let status;
