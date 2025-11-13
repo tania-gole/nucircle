@@ -66,6 +66,8 @@ const useCommunityMessagesPage = () => {
       messageId: string;
       reactions: DatabaseMessage['reactions'];
     }) => {
+      // eslint-disable-next-line no-console
+      console.log('[DEBUG] Reaction update received:', { messageId, reactions });
       setMessages(prev =>
         prev.map(msg => (msg._id.toString() === messageId ? { ...msg, reactions } : msg)),
       );

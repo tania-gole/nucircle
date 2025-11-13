@@ -101,3 +101,18 @@
 .delete-community-btn:active {
   background-color: #991b1b; /* Red-800 */
 }
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.online-indicator {
+  width: 10px;
+  height: 10px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  display: inline-block;
+}

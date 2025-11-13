@@ -8,6 +8,7 @@ import {
 import useUserContext from './useUserContext';
 import { deleteCommunity, getCommunityById } from '../services/communityService';
 import { getCommunityQuestionsById } from '../services/questionService';
+import { getUserByUsername } from '../services/userService';
 
 /**
  * Custom hook to manage the state and logic for the community page, including
@@ -23,7 +24,9 @@ const useCommunityPage = () => {
   const { user, socket } = useUserContext();
   const [community, setCommunity] = useState<DatabaseCommunity | null>(null);
   const [communityQuestions, setCommunityQuestions] = useState<PopulatedDatabaseQuestion[]>([]);
-
+  const [membersOnlineStatus, setMembersOnlineStatus] = useState<
+    Record<string, { isOnline: boolean }>
+  >({});
   const navigate = useNavigate();
 
   const { communityID } = useParams();
@@ -35,6 +38,23 @@ const useCommunityPage = () => {
   const fetchCommunityQuestions = async (communityId: string) => {
     const questions = await getCommunityQuestionsById(communityId);
     setCommunityQuestions(questions);
+  };
+
+  const fetchMembersOnlineStatus = async (members: string[]) => {
+    const statusMap: Record<string, { isOnline: boolean }> = {};
+
+    for (const username of members) {
+      try {
+        const userInfo = await getUserByUsername(username);
+        if (!('error' in userInfo)) {
+          statusMap[username] = { isOnline: userInfo.isOnline ?? false };
+        }
+      } catch (error) {
+        statusMap[username] = { isOnline: false };
+      }
+    }
+
+    setMembersOnlineStatus(statusMap);
   };
 
   const handleDeleteCommunity = async () => {
@@ -56,6 +76,7 @@ const useCommunityPage = () => {
         communityUpdate.community._id.toString() === communityID
       ) {
         setCommunity(communityUpdate.community);
+        fetchMembersOnlineStatus(communityUpdate.community.participants);
       }
     };
 
@@ -74,16 +95,35 @@ const useCommunityPage = () => {
       });
     };
 
+    const handleUserStatusUpdate = (payload: {
+      username: string;
+      isOnline: boolean;
+      lastSeen?: Date;
+    }) => {
+      setMembersOnlineStatus(prev => ({
+        ...prev,
+        [payload.username]: { isOnline: payload.isOnline },
+      }));
+    };
+
     socket.on('communityUpdate', handleCommunityUpdate);
     socket.on('questionUpdate', handleQuestionUpdate);
+    socket.on('userStatusUpdate', handleUserStatusUpdate);
 
     return () => {
       socket.off('communityUpdate', handleCommunityUpdate);
       socket.off('questionUpdate', handleQuestionUpdate);
+      socket.off('userStatusUpdate', handleUserStatusUpdate);
     };
   }, [communityID, socket]);
 
-  return { community, communityQuestions, user, handleDeleteCommunity };
+  useEffect(() => {
+    if (community?.participants) {
+      fetchMembersOnlineStatus(community.participants);
+    }
+  }, [community?.participants]);
+
+  return { community, communityQuestions, user, handleDeleteCommunity, membersOnlineStatus };
 };
 
 export default useCommunityPage;

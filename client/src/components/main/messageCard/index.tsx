@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './index.css';
@@ -27,6 +27,12 @@ const MessageCard = ({ message, currentUser }: MessageCardProps) => {
   );
 
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (message.reactions) {
+      setReactions(message.reactions);
+    }
+  }, [message.reactions]);
 
   const handleReaction = async (reactionType: 'love' | 'like') => {
     try {
