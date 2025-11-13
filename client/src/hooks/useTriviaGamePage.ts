@@ -28,9 +28,20 @@ const useTriviaGamePage = (gameInstance: GameInstance<TriviaGameState>) => {
     ? gameInstance.state.player1Answers
     : gameInstance.state.player2Answers;
 
-  const hasAnswered = playerAnswers.length > gameInstance.state.currentQuestionIndex;
+  // TIEBREAKER FEATURE: Checks if the game is currently in tiebreaker mode & if the player has answered the tiebreaker question
+  const isTiebreaker = gameInstance.state.isTiebreaker || false;
+  const hasAnsweredTiebreaker = isTiebreaker
+    ? isPlayer1
+      ? gameInstance.state.tiebreakerPlayer1Answer !== undefined
+      : gameInstance.state.tiebreakerPlayer2Answer !== undefined
+    : false;
+
+  const hasAnswered = isTiebreaker
+    ? hasAnsweredTiebreaker
+    : playerAnswers.length > gameInstance.state.currentQuestionIndex;
 
   const handleAnswerSelect = (answerIndex: number) => {
+    // TIEBREAKER FEATURE
     if (!hasAnswered && gameInstance.state.status === 'IN_PROGRESS') {
       setSelectedAnswer(answerIndex);
     }
@@ -43,11 +54,15 @@ const useTriviaGamePage = (gameInstance: GameInstance<TriviaGameState>) => {
    * - gameID: current game ID
    * - move: { questionId, answerIndex }
    * Then emits the 'makeMove' socket event to server, which processes it via the playMove handler
+   * TIEBREAKER FEATURE: For the tiebreaker, it uses the last question in the questions array
    */
   const handleSubmitAnswer = () => {
     if (selectedAnswer === null || hasAnswered) return;
 
-    const currentQuestion = gameInstance.state.questions[gameInstance.state.currentQuestionIndex];
+    // TIEBREAKER FEATURE: Gets the correct question (based on if it's the tiebreaker or not)
+    const currentQuestion = isTiebreaker
+      ? gameInstance.state.questions[gameInstance.state.questions.length - 1]
+      : gameInstance.state.questions[gameInstance.state.currentQuestionIndex];
 
     const triviaMove: GameMove<TriviaAnswer> = {
       playerID: user.username,

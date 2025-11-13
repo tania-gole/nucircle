@@ -1,4 +1,5 @@
 import './index.css';
+import { useState, useEffect } from 'react';
 import { GameInstance, TriviaGameState } from '../../../../types/types';
 import useTriviaGamePage from '../../../../hooks/useTriviaGamePage';
 
@@ -23,22 +24,67 @@ const TriviaGamePage = ({ gameInstance }: { gameInstance: GameInstance<TriviaGam
   const { user, selectedAnswer, handleAnswerSelect, handleSubmitAnswer, hasAnswered } =
     useTriviaGamePage(gameInstance);
 
-  const currentQuestion =
-    gameInstance.state.currentQuestionIndex < gameInstance.state.questions.length
+  // TIEBREAKER FEATURE: Tracks the timer for the tiebreaker question
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const isTiebreaker = gameInstance.state.isTiebreaker || false;
+
+  // TIEBREAKER FEATURE: Calculates the time remaining for the tiebreaker timer
+  useEffect(() => {
+    if (isTiebreaker && gameInstance.state.tiebreakerStartTime) {
+      const updateTimer = () => {
+        const elapsed = Date.now() - gameInstance.state.tiebreakerStartTime!;
+        const remaining = Math.max(0, 10000 - elapsed);
+        setTimeRemaining(remaining);
+
+        if (remaining <= 0) {
+          setTimeRemaining(0);
+        }
+      };
+
+      updateTimer();
+      const interval = setInterval(updateTimer, 100);
+
+      return () => clearInterval(interval);
+    } else {
+      setTimeRemaining(null);
+    }
+  }, [isTiebreaker, gameInstance.state.tiebreakerStartTime]);
+
+  // Gets the current question
+  // For the tiebreaker, it uses the last question in the array
+  const currentQuestion = isTiebreaker
+    ? gameInstance.state.questions[gameInstance.state.questions.length - 1]
+    : gameInstance.state.currentQuestionIndex < gameInstance.state.questions.length
       ? gameInstance.state.questions[gameInstance.state.currentQuestionIndex]
       : null;
 
   const isPlayer1 = user.username === gameInstance.state.player1;
-  const otherPlayerAnswered = isPlayer1
-    ? gameInstance.state.player2Answers.length > gameInstance.state.currentQuestionIndex
-    : gameInstance.state.player1Answers.length > gameInstance.state.currentQuestionIndex;
+
+  // TIEBREAKER FEATURE: Checks if the player has answered the tiebreaker question
+  const hasAnsweredTiebreaker = isTiebreaker
+    ? isPlayer1
+      ? gameInstance.state.tiebreakerPlayer1Answer !== undefined
+      : gameInstance.state.tiebreakerPlayer2Answer !== undefined
+    : false;
+
+  const otherPlayerAnswered = isTiebreaker
+    ? isPlayer1
+      ? gameInstance.state.tiebreakerPlayer2Answer !== undefined
+      : gameInstance.state.tiebreakerPlayer1Answer !== undefined
+    : isPlayer1
+      ? gameInstance.state.player2Answers.length > gameInstance.state.currentQuestionIndex
+      : gameInstance.state.player1Answers.length > gameInstance.state.currentQuestionIndex;
 
   return (
     <div className='trivia-game-container'>
       <div className='trivia-game-header'>
         <h2>Trivia Quiz Battle</h2>
         <div className='trivia-progress'>
-          Question {Math.min(gameInstance.state.currentQuestionIndex + 1, 10)} of 10
+          {isTiebreaker ? (
+            <span>Tiebreaker Question</span>
+          ) : (
+            <span>Question {Math.min(gameInstance.state.currentQuestionIndex + 1, 10)} of 10</span>
+          )}
         </div>
       </div>
 
@@ -69,6 +115,36 @@ const TriviaGamePage = ({ gameInstance }: { gameInstance: GameInstance<TriviaGam
 
       {gameInstance.state.status === 'IN_PROGRESS' && currentQuestion && (
         <div className='trivia-question-section'>
+          {/* TIEBREAKER FEATURE: Shows the tiebreaker header & timer */}
+          {isTiebreaker && (
+            <div className='trivia-tiebreaker-header'>
+              <h3 style={{ color: '#ff6b6b', marginBottom: '10px' }}>🏆 TIEBREAKER QUESTION 🏆</h3>
+              {timeRemaining !== null && timeRemaining > 0 && (
+                <div
+                  className='trivia-timer'
+                  style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: timeRemaining <= 3000 ? '#ff6b6b' : '#4ecdc4',
+                    marginBottom: '15px',
+                  }}>
+                  Time: {Math.ceil(timeRemaining / 1000)}s
+                </div>
+              )}
+              {timeRemaining === 0 && (
+                <div
+                  className='trivia-timer-expired'
+                  style={{
+                    fontSize: '18px',
+                    color: '#ff6b6b',
+                    marginBottom: '15px',
+                  }}>
+                  ⏱️ Time's up!
+                </div>
+              )}
+            </div>
+          )}
+
           <div className='trivia-question'>
             <h3>{currentQuestion.question}</h3>
           </div>
@@ -78,28 +154,43 @@ const TriviaGamePage = ({ gameInstance }: { gameInstance: GameInstance<TriviaGam
               <button
                 key={index}
                 className={`trivia-option ${selectedAnswer === index ? 'selected' : ''} ${
-                  hasAnswered ? 'disabled' : ''
+                  (isTiebreaker ? hasAnsweredTiebreaker : hasAnswered) || timeRemaining === 0
+                    ? 'disabled'
+                    : ''
                 }`}
                 onClick={() => handleAnswerSelect(index)}
-                disabled={hasAnswered}>
+                disabled={
+                  (isTiebreaker ? hasAnsweredTiebreaker : hasAnswered) || timeRemaining === 0
+                }>
                 <span className='option-letter'>{String.fromCharCode(65 + index)}.</span>
                 <span className='option-text'>{option}</span>
               </button>
             ))}
           </div>
 
-          {hasAnswered ? (
+          {/* TIEBREAKER FEATURE: Shows the different messages for the tiebreaker */}
+          {(isTiebreaker ? hasAnsweredTiebreaker : hasAnswered) ? (
             <div className='trivia-status'>
               <p className='waiting-message'>
                 ✓ Answer submitted!{' '}
-                {otherPlayerAnswered ? 'Moving to next question...' : 'Waiting for other player...'}
+                {otherPlayerAnswered
+                  ? isTiebreaker
+                    ? 'Determining winner...'
+                    : 'Moving to next question...'
+                  : 'Waiting for other player...'}
+              </p>
+            </div>
+          ) : timeRemaining === 0 ? (
+            <div className='trivia-status'>
+              <p className='waiting-message' style={{ color: '#ff6b6b' }}>
+                ⏱️ Time expired. Waiting for game result...
               </p>
             </div>
           ) : (
             <button
               className='trivia-submit-btn'
               onClick={handleSubmitAnswer}
-              disabled={selectedAnswer === null}>
+              disabled={selectedAnswer === null || timeRemaining === 0}>
               Submit Answer
             </button>
           )}

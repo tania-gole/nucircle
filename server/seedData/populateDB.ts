@@ -74,10 +74,8 @@ console.log('Using computed import order:', IMPORT_ORDER);
  * @throws {Error} - If MongoDB URI is not set or if there's an error during processing.
  */
 async function main(args: string[]) {
-  const mongoURL = process.env.MONGODB_URI || args[0];
-  if (!mongoURL) {
-    throw new Error('MONGODB_URI not set in environment variables');
-  }
+  // Use MONGODB_URI from environment, command line argument, or fallback to default local MongoDB
+  const mongoURL = process.env.MONGODB_URI || args[0] || 'mongodb://127.0.0.1:27017';
 
   if (!mongoURL.startsWith('mongodb')) {
     throw new Error('ERROR: You need to specify a valid MongoDB URL as the first argument');
