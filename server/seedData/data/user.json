@@ -19,7 +19,7 @@
     "firstName": "Mike",
     "lastName": "Wheeler",
     "username": "m.wheeler",
-    "password": "P@ssw0rd345",
+    "password": "$2y$10$S5Qu1M/a1q3fYwnwu6cukO2Mzsb5ehIYvXRRKQ2ivPvwFukLRAyOK",
     "dateJoined": "2024-09-10T09:12:55Z",
     "biography": "Loyal friend and leader of the group. Always ready to face supernatural dangers to protect his friends."
   },
@@ -27,7 +27,7 @@
     "firstName": "Dustin",
     "lastName": "Henderson",
     "username": "d.henderson",
-    "password": "C0mplexP@ss456",
+    "password": "$2y$10$ImZs6ncbvlI/yxJpxHMoB.6SQvRFWE75jPiN3N/6Qa10rGM3ZxQTC",
     "dateJoined": "2024-10-05T11:47:33Z",
     "biography": "Energetic and clever. Loves science, science fairs, and uncovering mysteries with his friends."
   },
@@ -35,7 +35,7 @@
     "firstName": "Eddie",
     "lastName": "Munson",
     "username": "e.munson",
-    "password": "Sup3rS3cure567!",
+    "password": "$2y$10$LLBZEeVbFdpGV6Fq1j54dOXCYpKaBQcAW.kWY9OQrdrBLGO1THn4O",
     "dateJoined": "2024-11-12T15:28:09Z",
     "biography": "Fun-loving and rebellious. Plays in a metal band and stands up for what he believes in."
   },
@@ -43,7 +43,7 @@
     "firstName": "Vecna",
     "lastName": "One",
     "username": "vecna",
-    "password": "P@ssw0rd678!",
+    "password": "$2y$10$7WfoPgS8uYK3B/Tlz0747.GR7EfnYFuV7IgP3M2xxsGOXeSCsxgt.",
     "dateJoined": "2024-12-03T17:52:21Z",
     "biography": "Mysterious and sinister entity from the Upside Down, feared by all who know of him."
   },
@@ -51,7 +51,7 @@
     "firstName": "Billy",
     "lastName": "Hargrove",
     "username": "b.hargrove",
-    "password": "SecretP@ss789",
+    "password": "$2y$10$/H1IybtXVOv5Q1wXyUJHQ.KOXLRGOOP.wDEVwWIx6sHTZscOmxiKa",
     "dateJoined": "2025-01-18T20:14:39Z",
     "biography": "Cocky and athletic. Has a tough exterior but a complicated family life."
   },
@@ -59,7 +59,7 @@
     "firstName": "Steve",
     "lastName": "Harrington",
     "username": "s.harrington",
-    "password": "S3cureP@ss101",
+    "password": "$2y$10$2E0yRq/tbRACjinD213ld.psZxza0B6vgKLU3MMBgHQZrDmeyEg36",
     "dateJoined": "2024-06-30T10:42:18Z",
     "biography": "From a former high school heartthrob to a loyal babysitter and friend, wielding a baseball bat against monsters."
   },
@@ -67,7 +67,7 @@
     "firstName": "Max",
     "lastName": "Mayfield",
     "username": "m.mayfield",
-    "password": "C0mplexP@ss202!",
+    "password": "$2y$10$MF/HKGELwfYc8XuwzR6NoOfKUJsckbd/bO31VOyoQ41sTrEYoCwtm",
     "dateJoined": "2024-08-08T16:37:52Z",
     "biography": "Skater girl with a sharp wit. Brave and resourceful when it comes to supernatural threats."
   },
@@ -75,7 +75,7 @@
     "firstName": "Nancy",
     "lastName": "Wheeler",
     "username": "n.wheeler",
-    "password": "JavaScr1pt!23",
+    "password": "$2y$10$3bHLtRMYH7SaRB2WNMH6Xe0.x6kGLQtzib4N29j8OmGLfkNEJsIRu",
     "dateJoined": "2024-05-15T08:24:13Z",
     "biography": "Curious and determined. Investigates mysteries and isn’t afraid to stand up to danger."
   },
@@ -83,7 +83,7 @@
     "firstName": "Jim",
     "lastName": "Hopper",
     "username": "jim.hopper",
-    "password": "R3@ctHooks!",
+    "password": "$2y$10$BMljSyhItyuxzw0mUxDci.gZJQAmvmPP0ayh3Z0aUtGXmhj2piXy.",
     "dateJoined": "2024-06-18T14:36:42Z",
     "biography": "Hawkins’ chief of police. Stern but caring, always trying to protect the town from supernatural threats."
   },
@@ -91,7 +91,7 @@
     "firstName": "Lucas",
     "lastName": "Sinclair",
     "username": "l.sinclair",
-    "password": "Bundl3M@ster!",
+    "password": "$2y$10$phA2klqJMd6p3d0kYm.9KeyMKqkT5FHTATyb08ycj3XnfxuNZLUci",
     "dateJoined": "2024-07-20T09:12:55Z",
     "biography": "Brave and resourceful. Skilled with strategy and makes tough choices to help his friends."
   },
@@ -99,7 +99,7 @@
     "firstName": "Joey",
     "lastName": "Tribbiani",
     "username": "j.tribbiani",
-    "password": "Typ3S@fety!",
+    "password": "$2y$10$MpUXnmMEtkPpZP3Q4UcY/uMbxSgI6h24Trh5cMRyHAmbUkAHEn7gu",
     "dateJoined": "2024-08-22T11:47:33Z",
     "biography": "Charming and goofy. Loves food and friends, often providing comic relief in tense moments."
   },
@@ -107,7 +107,7 @@
     "firstName": "Rachel",
     "lastName": "Green",
     "username": "r.green",
-    "password": "F@stL0ad!ng",
+    "password": "$2y$10$r1mCNRSQc2NGidcsVVBvVuvNuApX3doKiLT0FItTAfNG5cxrfo.yy",
     "dateJoined": "2024-09-25T15:28:09Z",
     "biography": "Fashion-forward and ambitious. Cares deeply for her friends and navigates life with style and grace."
   },
@@ -115,7 +115,7 @@
     "firstName": "Chandler",
     "lastName": "Bing",
     "username": "c.bing",
-    "password": "ReadTh3D0cs!",
+    "password": "$2y$10$PctnA5D7XPcnk8WaomhYPuLdVkJ0Re9ojTp.IJgt/f73xVlUDKekW",
     "dateJoined": "2024-10-27T17:52:21Z",
     "biography": "Sarcastic and witty. Uses humor to navigate awkward situations and support friends through tough times."
   },
@@ -123,7 +123,7 @@
     "firstName": "Phoebe",
     "lastName": "Buffay",
     "username": "p.buffay",
-    "password": "Qu3ryN1nja!",
+    "password": "$2y$10$EQw1SwlF4tnUM43eRz9oNO6rngdtIha0ihZWErRRSKSBJ.VgR6AMu",
     "dateJoined": "2024-11-30T20:14:39Z",
     "biography": "Eccentric and musical. Believes in spirits and mystical things, with a heart full of compassion."
   },
@@ -131,7 +131,7 @@
     "firstName": "Ross",
     "lastName": "Geller",
     "username": "r.geller",
-    "password": "H@ndleAllC@ses!",
+    "password": "$2y$10$2ObFKPxUqIkYDhbaGhMnn.NSNWWJfc5vXQOvl26XutKAKP3sYK3NO",
     "dateJoined": "2024-12-02T13:09:27Z",
     "biography": "Intelligent and a bit neurotic. Obsessed with paleontology and the details of everyday life."
   },
@@ -139,7 +139,7 @@
     "firstName": "Monica",
     "lastName": "Geller",
     "username": "m.geller",
-    "password": "CSSm@ster!",
+    "password": "$2y$10$U74MeU/cGoKlPwNbOrXIDOrhNxa963jfWR/38bXYK3AOThnl/pnCi",
     "dateJoined": "2025-01-05T10:42:18Z",
     "biography": "Competitive and perfectionist. Loves cooking and cleaning, always striving to be the best."
   },
