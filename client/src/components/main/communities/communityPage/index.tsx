@@ -1,3 +1,4 @@
+import { DatabaseCommunity } from '@fake-stack-overflow/shared';
 import useCommunityPage from '../../../../hooks/useCommunityPage';
 // import CommunityMessages from '../../communityMessagesPage';
 import QuestionView from '../../questionPage/question';
@@ -14,6 +15,25 @@ const CommunityPage = () => {
   if (!community) {
     return <div className='loading'>Loading...</div>;
   }
+
+  const getLongestStreakUser = (community: DatabaseCommunity): React.ReactNode => {
+    if (!community.visitStreaks || community.visitStreaks.length === 0) {
+      return <span>No streaks yet</span>;
+    }
+
+    const topStreaker = community.visitStreaks.reduce((max, current) =>
+      current.longestStreak > max.longestStreak ? current : max,
+    );
+
+    const days = topStreaker.longestStreak === 1 ? 'day' : 'days';
+
+    return (
+      <>
+        <strong>{topStreaker.username}</strong> holds the record with{' '}
+        <strong>{topStreaker.longestStreak}</strong> {days}
+      </>
+    );
+  };
 
   return (
     <div className='community-page-layout'>
@@ -32,9 +52,17 @@ const CommunityPage = () => {
         <h4>Daily Streak</h4>
         <p>
           Community visited{' '}
-          {community.visitStreaks?.find(v => v.username === user.username)?.currentStreak || 0} days
+          {(() => {
+            // If user leaves community and rejoins within the same day, their streak is maintained
+            const streak = community.participants.includes(user.username)
+              ? community.visitStreaks?.find(v => v.username === user.username)?.currentStreak || 0
+              : 0;
+            return `${streak} ${streak === 1 ? 'day' : 'days'}`;
+          })()}{' '}
           in a row
         </p>
+        <h4>Longest Streak</h4>
+        <p>{getLongestStreakUser(community)}</p>
         <CommunityMembershipButton community={community} />
 
         <div className='community-members'>

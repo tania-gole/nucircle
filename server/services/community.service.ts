@@ -187,7 +187,7 @@ export const recordCommunityVisit = async (
   }
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Normalize to start of day
+  today.setHours(0, 0, 0, 0); // Disregard time
 
   // Find user's existing visit data
   const userVisit = community.visitStreaks.find(v => v.username === username);
@@ -201,16 +201,17 @@ export const recordCommunityVisit = async (
       longestStreak: 1,
     });
   } else {
+    // Not the first visit - update streaks
     const lastVisit = new Date(userVisit.lastVisitDate);
     lastVisit.setHours(0, 0, 0, 0);
 
+    // Only count by days, not hours
     const daysDifference = Math.floor(
       (today.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     if (daysDifference === 0) {
-      // Same day - no update needed
-      return;
+      return; // Same day, no update needed
     } else if (daysDifference === 1) {
       // Consecutive day - increment streak
       userVisit.currentStreak += 1;
@@ -223,5 +224,5 @@ export const recordCommunityVisit = async (
     }
   }
 
-  await community.save(); // CRITICAL: Save to database
+  await community.save();
 };
