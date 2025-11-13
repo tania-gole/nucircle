@@ -1,274 +1,266 @@
 {
-  "user123": {
-    "firstName": "user123",
-    "lastName": "Smith",
-    "username": "user123",
-    "password": "securePass123!",
+  "eleven": {
+    "firstName": "Eleven",
+    "lastName": "Hopper",
+    "username": "e.hopper",
+    "password": "$2y$10$DrtQWiSkqj2I8eGOGIVSg.frCEVPI3ZfWWSIPP3oJ3MFAVGDOKYOO",
     "dateJoined": "2024-07-15T08:24:13Z",
-    "biography": "Full-stack developer with 5 years of experience. Passionate about React, Node.js, and building scalable web applications."
+    "biography": "Has telekinetic powers and a mysterious past. Loves Eggo waffles and protecting her friends from the Upside Down."
   },
-  "user234": {
-    "firstName": "user234",
-    "lastName": "Smith",
-    "username": "user234",
-    "password": "strongP@ss234",
+  "will": {
+    "firstName": "Will",
+    "lastName": "Byers",
+    "username": "w.byers",
+    "password": "$2y$10$vMeCjoR5GYbzFdFN./Ns/./pQQNfF5v26KzdEmv0s84XhHIHFXBB.",
     "dateJoined": "2024-08-22T14:36:42Z",
-    "biography": ""
+    "biography": "Experienced the horrors of the Upside Down. Often quiet and thoughtful, and has a knack for survival."
   },
-  "user345": {
-    "firstName": "user345",
-    "lastName": "Smith",
-    "username": "user345",
+  "mike": {
+    "firstName": "Mike",
+    "lastName": "Wheeler",
+    "username": "m.wheeler",
     "password": "P@ssw0rd345",
     "dateJoined": "2024-09-10T09:12:55Z",
-    "biography": "Frontend developer focusing on React and TypeScript. Always looking to improve UI/UX and performance."
+    "biography": "Loyal friend and leader of the group. Always ready to face supernatural dangers to protect his friends."
   },
-  "user456": {
-    "firstName": "user456",
-    "lastName": "Smith",
-    "username": "user456",
+  "dustin": {
+    "firstName": "Dustin",
+    "lastName": "Henderson",
+    "username": "d.henderson",
     "password": "C0mplexP@ss456",
     "dateJoined": "2024-10-05T11:47:33Z",
-    "biography": "Data scientist with a background in Python and machine learning. I enjoy solving complex problems with data."
+    "biography": "Energetic and clever. Loves science, science fairs, and uncovering mysteries with his friends."
   },
-  "user567": {
-    "firstName": "user567",
-    "lastName": "Smith",
-    "username": "user567",
+  "eddie": {
+    "firstName": "Eddie",
+    "lastName": "Munson",
+    "username": "e.munson",
     "password": "Sup3rS3cure567!",
     "dateJoined": "2024-11-12T15:28:09Z",
-    "biography": "Backend developer specializing in microservices architecture. Java enthusiast and open source contributor."
+    "biography": "Fun-loving and rebellious. Plays in a metal band and stands up for what he believes in."
   },
-  "user678": {
-    "firstName": "user678",
-    "lastName": "Smith",
-    "username": "user678",
+  "vecna": {
+    "firstName": "Vecna",
+    "lastName": "One",
+    "username": "vecna",
     "password": "P@ssw0rd678!",
     "dateJoined": "2024-12-03T17:52:21Z",
-    "biography": ""
+    "biography": "Mysterious and sinister entity from the Upside Down, feared by all who know of him."
   },
-  "user789": {
-    "firstName": "user789",
-    "lastName": "Smith",
-    "username": "user789",
+  "billy": {
+    "firstName": "Billy",
+    "lastName": "Hargrove",
+    "username": "b.hargrove",
     "password": "SecretP@ss789",
     "dateJoined": "2025-01-18T20:14:39Z",
-    "biography": "Mobile app developer working with React Native. Creating cross-platform experiences is my passion."
+    "biography": "Cocky and athletic. Has a tough exterior but a complicated family life."
   },
-  "user890": {
-    "firstName": "user890",
-    "lastName": "Smith",
-    "username": "user890",
-    "password": "P@ssword890!",
-    "dateJoined": "2025-02-07T13:09:27Z",
-    "biography": "Database administrator with extensive experience in PostgreSQL and MySQL optimization. Performance tuning expert."
-  },
-  "user101": {
-    "firstName": "user101",
-    "lastName": "Smith",
-    "username": "user101",
+  "steve": {
+    "firstName": "Steve",
+    "lastName": "Harrington",
+    "username": "s.harrington",
     "password": "S3cureP@ss101",
     "dateJoined": "2024-06-30T10:42:18Z",
-    "biography": "Cloud architect specializing in multi-cloud deployments. AWS certified and passionate about serverless technologies."
+    "biography": "From a former high school heartthrob to a loyal babysitter and friend, wielding a baseball bat against monsters."
   },
-  "user202": {
-    "firstName": "user202",
-    "lastName": "Smith",
-    "username": "user202",
+  "max": {
+    "firstName": "Max",
+    "lastName": "Mayfield",
+    "username": "m.mayfield",
     "password": "C0mplexP@ss202!",
     "dateJoined": "2024-08-08T16:37:52Z",
-    "biography": "Security engineer focusing on application security and penetration testing. Bug bounty hunter in spare time."
+    "biography": "Skater girl with a sharp wit. Brave and resourceful when it comes to supernatural threats."
   },
-  "jsdev123": {
-    "firstName": "jsdev123",
-    "lastName": "Smith",
-    "username": "jsdev123",
+  "nancy": {
+    "firstName": "Nancy",
+    "lastName": "Wheeler",
+    "username": "n.wheeler",
     "password": "JavaScr1pt!23",
     "dateJoined": "2024-05-15T08:24:13Z",
-    "biography": "JavaScript developer with a focus on modern ES6+ features and async programming patterns. I love helping others level up their JS skills."
+    "biography": "Curious and determined. Investigates mysteries and isn’t afraid to stand up to danger."
   },
-  "reactninja": {
-    "firstName": "reactninja",
-    "lastName": "Smith",
-    "username": "reactninja",
+  "jim": {
+    "firstName": "Jim",
+    "lastName": "Hopper",
+    "username": "jim.hopper",
     "password": "R3@ctHooks!",
     "dateJoined": "2024-06-18T14:36:42Z",
-    "biography": "React specialist with 6 years of experience. Core contributor to several popular React libraries and passionate about component design."
+    "biography": "Hawkins’ chief of police. Stern but caring, always trying to protect the town from supernatural threats."
   },
-  "webpackwizard": {
-    "firstName": "webpackwizard",
-    "lastName": "Smith",
-    "username": "webpackwizard",
+  "lucas": {
+    "firstName": "Lucas",
+    "lastName": "Sinclair",
+    "username": "l.sinclair",
     "password": "Bundl3M@ster!",
     "dateJoined": "2024-07-20T09:12:55Z",
-    "biography": "Frontend tooling expert specializing in webpack, babel, and modern build pipelines. I help teams optimize their build processes."
+    "biography": "Brave and resourceful. Skilled with strategy and makes tough choices to help his friends."
   },
-  "typescriptfan": {
-    "firstName": "typescriptfan",
-    "lastName": "Smith",
-    "username": "typescriptfan",
+  "joey": {
+    "firstName": "Joey",
+    "lastName": "Tribbiani",
+    "username": "j.tribbiani",
     "password": "Typ3S@fety!",
     "dateJoined": "2024-08-22T11:47:33Z",
-    "biography": "TypeScript evangelist and static typing enthusiast. I believe in catching errors at compile time, not runtime."
+    "biography": "Charming and goofy. Loves food and friends, often providing comic relief in tense moments."
   },
-  "perfoptimizer": {
-    "firstName": "perfoptimizer",
-    "lastName": "Smith",
-    "username": "perfoptimizer",
+  "rachel": {
+    "firstName": "Rachel",
+    "lastName": "Green",
+    "username": "r.green",
     "password": "F@stL0ad!ng",
     "dateJoined": "2024-09-25T15:28:09Z",
-    "biography": "Web performance specialist focusing on core web vitals and page speed optimization. Every millisecond counts!"
+    "biography": "Fashion-forward and ambitious. Cares deeply for her friends and navigates life with style and grace."
   },
-  "docreader": {
-    "firstName": "docreader",
-    "lastName": "Smith",
-    "username": "docreader",
+  "chandler": {
+    "firstName": "Chandler",
+    "lastName": "Bing",
+    "username": "c.bing",
     "password": "ReadTh3D0cs!",
     "dateJoined": "2024-10-27T17:52:21Z",
-    "biography": "Software engineer who believes in thoroughly reading documentation before asking questions. I enjoy helping others understand complex APIs."
+    "biography": "Sarcastic and witty. Uses humor to navigate awkward situations and support friends through tough times."
   },
-  "dbmaster": {
-    "firstName": "dbmaster",
-    "lastName": "Smith",
-    "username": "dbmaster",
+  "phoebe": {
+    "firstName": "Phoebe",
+    "lastName": "Buffay",
+    "username": "p.buffay",
     "password": "Qu3ryN1nja!",
     "dateJoined": "2024-11-30T20:14:39Z",
-    "biography": "Database performance tuning expert with 12 years of experience across SQL and NoSQL technologies. I optimize queries for a living."
+    "biography": "Eccentric and musical. Believes in spirits and mystical things, with a heart full of compassion."
   },
-  "edgecaseexpert": {
-    "firstName": "edgecaseexpert",
-    "lastName": "Smith",
-    "username": "edgecaseexpert",
+  "ross": {
+    "firstName": "Ross",
+    "lastName": "Geller",
+    "username": "r.geller",
     "password": "H@ndleAllC@ses!",
     "dateJoined": "2024-12-02T13:09:27Z",
-    "biography": "Software engineer obsessed with robustness and handling all possible edge cases. If there's a way code can break, I'll find it."
+    "biography": "Intelligent and a bit neurotic. Obsessed with paleontology and the details of everyday life."
   },
-  "frontenddev": {
-    "firstName": "frontenddev",
-    "lastName": "Smith",
-    "username": "frontenddev",
+  "monica": {
+    "firstName": "Monica",
+    "lastName": "Geller",
+    "username": "m.geller",
     "password": "CSSm@ster!",
     "dateJoined": "2025-01-05T10:42:18Z",
-    "biography": "Frontend developer specializing in responsive design and cross-browser compatibility. I make websites look good on all devices."
+    "biography": "Competitive and perfectionist. Loves cooking and cleaning, always striving to be the best."
   },
-  "cleancodefan": {
-    "firstName": "cleancodefan",
-    "lastName": "Smith",
-    "username": "cleancodefan",
+  "leslie": {
+    "firstName": "Leslie",
+    "lastName": "Knope",
+    "username": "l.knope",
     "password": "R3factor!ng",
     "dateJoined": "2025-02-08T16:37:52Z",
-    "biography": "Software engineer passionate about clean code, SOLID principles, and maintainable architecture. Code quality advocate."
+    "biography": "Ambitious and organized. Passionate about public service and making her community better."
   },
-  "newbiereactdev": {
-    "firstName": "newbiereactdev",
-    "lastName": "Smith",
-    "username": "newbiereactdev",
+  "ron": {
+    "firstName": "Ron",
+    "lastName": "Swanson",
+    "username": "r.swanson",
     "password": "L3arningR3act!",
     "dateJoined": "2024-12-15T07:42:18Z",
-    "biography": "Junior developer learning React and modern frontend development. Eager to learn and improve my skills through the community."
+    "biography": "Stoic and private. Loves woodworking, breakfast meats, and avoiding unnecessary bureaucracy."
   },
-  "serverdev": {
-    "firstName": "serverdev",
-    "lastName": "Smith",
-    "username": "serverdev",
+  "april": {
+    "firstName": "April",
+    "lastName": "Ludgate",
+    "username": "a.ludgate",
     "password": "B@ckendPr0!",
     "dateJoined": "2024-11-18T11:19:44Z",
-    "biography": "Backend developer working with Node.js and Express. Focusing on building scalable and reliable API services."
+    "biography": "Deadpan and sarcastic. Prefers to keep people at a distance but is fiercely loyal to those she trusts."
   },
-  "webpacknewbie": {
-    "firstName": "webpacknewbie",
-    "lastName": "Smith",
-    "username": "webpacknewbie",
+  "andy": {
+    "firstName": "Andy",
+    "lastName": "Dwyer",
+    "username": "a.dwyer",
     "password": "C0nfigH3lp!",
     "dateJoined": "2024-12-20T08:36:51Z",
-    "biography": "Frontend developer struggling with webpack configuration. Learning build tools and modern JavaScript development."
+    "biography": "Goofy and fun-loving. Has a big heart and a love for music, despite not always being competent."
   },
-  "dbnovice": {
-    "firstName": "dbnovice",
-    "lastName": "Smith",
-    "username": "dbnovice",
+  "ben": {
+    "firstName": "Ben",
+    "lastName": "Wyatt",
+    "username": "b.wyatt",
     "password": "L3arnSQL!",
     "dateJoined": "2025-01-30T15:21:38Z",
-    "biography": "Software developer getting into database optimization. Currently working on improving my SQL skills and query performance."
+    "biography": "Responsible and practical. Often the voice of reason in his social circle, with a love for rules and order."
   },
-  "jsdeveloper": {
-    "firstName": "jsdeveloper",
-    "lastName": "Smith",
-    "username": "jsdeveloper",
+  "ann": {
+    "firstName": "Ann",
+    "lastName": "Perkins",
+    "username": "a.perkins",
     "password": "JavaScr1pt!",
     "dateJoined": "2025-01-02T09:18:27Z",
-    "biography": "JavaScript developer with a focus on functional programming and clean code practices. I enjoy solving complex problems with elegant solutions."
+    "biography": "Friendly and caring. Devoted to helping friends and keeping relationships strong."
   },
-  "frontendnewbie": {
-    "firstName": "frontendnewbie",
-    "lastName": "Smith",
-    "username": "frontendnewbie",
+  "tom": {
+    "firstName": "Tom",
+    "lastName": "Haverford",
+    "username": "t.haverford",
     "password": "L3arnCSS!",
     "dateJoined": "2025-02-05T08:15:44Z",
-    "biography": "Junior frontend developer learning the ropes of modern web development. React enthusiast and CSS battler."
+    "biography": "Charismatic and ambitious. Loves the spotlight and has a knack for entrepreneurship."
   },
-  "pythonuser": {
-    "firstName": "pythonuser",
-    "lastName": "Smith",
-    "username": "pythonuser",
+  "jerry": {
+    "firstName": "Jerry",
+    "lastName": "Gergich",
+    "username": "j.gergich",
     "password": "Pyth0nR0cks!",
     "dateJoined": "2025-02-08T13:47:22Z",
-    "biography": "Python developer working with data processing and analysis. Always looking for ways to optimize my code."
+    "biography": "Kind-hearted but bumbling. Often the target of jokes, but always tries his best."
   },
-  "dockerbeginner": {
-    "firstName": "dockerbeginner",
-    "lastName": "Smith",
-    "username": "dockerbeginner",
+  "donna": {
+    "firstName": "Donna",
+    "lastName": "Meagle",
+    "username": "d.meagle",
     "password": "C0ntainer!ze",
     "dateJoined": "2025-03-10T10:22:36Z",
-    "biography": "Developer new to containerization and Docker. Learning how to build and deploy applications using containers."
+    "biography": "Confident and stylish. Enjoys luxury and the finer things in life, while keeping friends entertained."
   },
-  "promisenovice": {
-    "firstName": "promisenovice",
-    "lastName": "Smith",
-    "username": "promisenovice",
+  "chris": {
+    "firstName": "Chris",
+    "lastName": "Traeger",
+    "username": "c.traeger",
     "password": "AsyncAw@it!",
     "dateJoined": "2025-03-14T09:38:52Z",
-    "biography": "JavaScript developer learning the nuances of asynchronous programming. Looking to master promises and async/await."
+    "biography": "Overly enthusiastic and extremely positive. Tries to motivate everyone around him with energy and optimism."
   },
-  "reactlearner": {
-    "firstName": "reactlearner",
-    "lastName": "Smith",
-    "username": "reactlearner",
+  "eleanor": {
+    "firstName": "Eleanor",
+    "lastName": "Shellstrop",
+    "username": "e.shellstrop",
     "password": "H00ksL3arner!",
     "dateJoined": "2025-03-17T11:27:09Z",
-    "biography": "Developer learning React and component lifecycle management. Trying to understand hooks and prevent memory leaks."
+    "biography": "Self-centered but gradually learns empathy. Finds herself in morally complex situations but grows over time."
   },
-  "reactexpert": {
-    "firstName": "reactexpert",
-    "lastName": "Smith",
-    "username": "reactexpert",
+  "chidi": {
+    "firstName": "Chidi",
+    "lastName": "Anagonye",
+    "username": "c.anagonye",
     "password": "R3@ctM@ster!",
     "dateJoined": "2023-06-16T10:45:32Z",
-    "biography": "Senior React developer with 8+ years of experience. Specializing in performance optimization and state management solutions."
+    "biography": "Ethical and indecisive. Constantly agonizes over making the right choice, often overthinking everything."
   },
-  "nodejsdev": {
-    "firstName": "nodejsdev",
-    "lastName": "Smith",
-    "username": "nodejsdev",
+  "tahani": {
+    "firstName": "Tahani",
+    "lastName": "Al-Jamil",
+    "username": "t.aljamil",
     "password": "N0d3Exper7!",
     "dateJoined": "2023-08-19T13:27:56Z",
-    "biography": "Node.js developer focusing on scalable backend architecture. Experienced in handling high-traffic applications and microservices."
+    "biography": "Elegant and glamorous. Loves hosting and being admired, but secretly craves genuine connection."
   },
-  "datascientist": {
-    "firstName": "datascientist",
-    "lastName": "Smith",
-    "username": "datascientist",
+  "jason": {
+    "firstName": "Jason",
+    "lastName": "Mendoza",
+    "username": "j.mendoza",
     "password": "D@taAn@lyst!",
     "dateJoined": "2023-11-09T12:03:19Z",
-    "biography": "Data scientist with expertise in Python, NumPy, and pandas. I help companies make sense of their data through efficient algorithms."
+    "biography": "Energetic and confident. Often makes mistakes but is always learning from them."
   },
-  "devopsengineer": {
-    "firstName": "devopsengineer",
-    "lastName": "Smith",
-    "username": "devopsengineer",
+  "michael": {
+    "firstName": "Michael",
+    "lastName": "Demon",
+    "username": "demon",
     "password": "C1CD@ut0mat3!",
     "dateJoined": "2024-01-11T16:44:37Z",
-    "biography": "DevOps engineer specializing in containerization, orchestration, and infrastructure as code. Making deployment smooth and reliable."
+    "biography": "Meticulous and rule-focused. Strives to do everything perfectly, often acting as a voice of reason."
   }
 }

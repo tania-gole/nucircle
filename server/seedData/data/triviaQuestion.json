@@ -148,5 +148,25 @@
             "Green and White"
         ],
         "correctAnswer": 2
+    }, 
+    "q16": {
+        "question": "Which of the following is NOT a Northeastern University campus location?",
+        "options": [
+            "Boston, MA",
+            "San Francisco, CA",
+            "Toronto, Canada",
+            "Miami, FL"
+        ],
+        "correctAnswer": 3
+    },
+    "q17": {
+        "question": "What is the name of Northeastern University's student newspaper?",
+        "options": [
+            "The Northeastern Times",
+            "The Daily Northeastern",
+            "The Huntington News",
+            "The Terrier Tribune"
+        ],
+        "correctAnswer": 2
     }
 }
