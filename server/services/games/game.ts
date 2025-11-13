@@ -61,7 +61,7 @@ abstract class Game<StateType extends GameState, MoveType> {
    * Abstract method to apply a move to the game state.
    * @param move The move to apply.
    */
-  public abstract applyMove(move: GameMove<MoveType>): void;
+  public abstract applyMove(move: GameMove<MoveType>): void | Promise<void>;
 
   /**
    * Abstract method for handling a player joining the game.

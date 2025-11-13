@@ -1,14 +1,10 @@
 /* eslint no-console: "off" */
 
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import 'dotenv/config';
 
-dotenv.config();
-
-const MONGO_URL = process.env.MONGODB_URI;
-if (!MONGO_URL) {
-  throw new Error('MONGODB_URI not set in environment variables');
-}
+// Use MONGODB_URI from environment or fallback to default local MongoDB
+const MONGO_URL = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
 
 mongoose.connect(`${MONGO_URL}/fake_so`);
 

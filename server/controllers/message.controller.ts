@@ -93,7 +93,7 @@ const messageController = (socket: FakeSOSocket) => {
       console.log('[DEBUG] Emitting reactionUpdated:', { messageId, reactions: message.reactions });
       // eslint-disable-next-line no-console
       console.log('[DEBUG] Broadcasting reactionUpdated to all clients');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       socket.emit('reactionUpdated', {
         messageId,
         reactions: message.reactions,

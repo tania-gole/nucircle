@@ -26,7 +26,6 @@ const useUsersListPage = () => {
         const res = await getUsers();
         setUserList(res || []);
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.log(error);
       }
     };

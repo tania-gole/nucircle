@@ -25,6 +25,7 @@ export type GameStatus = 'IN_PROGRESS' | 'WAITING_TO_START' | 'OVER';
  */
 export interface GameState {
   status: GameStatus;
+  tiebreakerStartTime?: number;
 }
 
 /**
@@ -117,6 +118,10 @@ export interface TriviaAnswer extends BaseMove {
  * player2Answers: Array of player 2's answer indices
  * player1Score: Player 1's current score
  * player2Score: Player 2's current score
+ * isTiebreaker: Whether it's currently tiebreaker mode in the Trivia game
+ * tiebreakerStartTime: The timestamp of when the tiebreaker question started
+ * tiebreakerPlayer1Answer: Player 1's tiebreaker answer
+ * tiebreakerPlayer2Answer: Player 2's tiebreaker answer
  */
 export interface TriviaGameState extends WinnableGameState {
   player1?: string;
@@ -127,6 +132,10 @@ export interface TriviaGameState extends WinnableGameState {
   player2Answers: ReadonlyArray<number>;
   player1Score: number;
   player2Score: number;
+  isTiebreaker?: boolean;
+  tiebreakerStartTime?: number;
+  tiebreakerPlayer1Answer?: number;
+  tiebreakerPlayer2Answer?: number;
 }
 
 /**

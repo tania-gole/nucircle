@@ -6,14 +6,22 @@ import {
   GameRequest,
   GetGamesRequest,
   GameState,
+  TriviaGameState,
 } from '../types/types';
 import findGames from '../services/game.service';
 import GameManager from '../services/games/gameManager';
 import GameModel from '../models/games.model';
+import TriviaGame from '../services/games/trivia';
+import Game from '../services/games/game';
 
 interface GameWithPlayerState extends GameState {
   player1?: string;
   player2?: string;
+}
+
+// Type guard to check if a game is a TriviaGame instance
+function isTriviaGame(game: Game<GameState, unknown>): game is TriviaGame {
+  return game.gameType === 'Trivia';
 }
 
 /**
@@ -250,10 +258,40 @@ const gameController = (socket: FakeSOSocket) => {
         throw new Error('Game requested does not exist');
       }
 
-      game.applyMove(move);
+      // TIEBREAKER FEATURE: The applyMove method is now async to handle the tiebreaker question fetching
+      await game.applyMove(move);
       socket.in(gameID).emit('gameUpdate', { gameInstance: game.toModel() });
 
       await game.saveGameState();
+
+      // TIEBREAKER FEATURE: Sets up a 10-second timer for the tiebreaker if it just started
+      if (isTriviaGame(game)) {
+        if (game.shouldSetTiebreakerTimer()) {
+          const triviaState = game.state as TriviaGameState;
+          const startTime = triviaState.tiebreakerStartTime;
+          if (startTime !== undefined) {
+            const elapsed = Date.now() - startTime;
+            const timeRemaining = Math.max(0, 10000 - elapsed);
+
+            // Marks the timer as set to avoid multiple timers
+            game.markTiebreakerTimerSet();
+
+            // Sets the timer to check & emit update when it finishes
+            setTimeout(async () => {
+              const currentGame = GameManager.getInstance().getGame(gameID);
+              if (currentGame && isTriviaGame(currentGame)) {
+                if (currentGame.checkTiebreakerTimer()) {
+                  await currentGame.saveGameState();
+                  socket.in(gameID).emit('gameUpdate', { gameInstance: currentGame.toModel() });
+                  if (currentGame.state.status === 'OVER') {
+                    GameManager.getInstance().removeGame(gameID);
+                  }
+                }
+              }
+            }, timeRemaining);
+          }
+        }
+      }
 
       if (game.state.status === 'OVER') {
         GameManager.getInstance().removeGame(gameID);
