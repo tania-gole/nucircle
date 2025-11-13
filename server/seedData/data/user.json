@@ -147,7 +147,7 @@
     "firstName": "Leslie",
     "lastName": "Knope",
     "username": "l.knope",
-    "password": "R3factor!ng",
+    "password": "$2y$10$CNKp8BD/7aUOWF1biseDzeKI6JzStFX6yKnTKvIKLz0BJ08DKt4Mm",
     "dateJoined": "2025-02-08T16:37:52Z",
     "biography": "Ambitious and organized. Passionate about public service and making her community better."
   },
@@ -155,7 +155,7 @@
     "firstName": "Ron",
     "lastName": "Swanson",
     "username": "r.swanson",
-    "password": "L3arningR3act!",
+    "password": "$2y$10$UifzSspcCvPgd0vwPQcf9.amfvYC2b2Zuvln3g9l3KxvrgckInPTW",
     "dateJoined": "2024-12-15T07:42:18Z",
     "biography": "Stoic and private. Loves woodworking, breakfast meats, and avoiding unnecessary bureaucracy."
   },
@@ -163,7 +163,7 @@
     "firstName": "April",
     "lastName": "Ludgate",
     "username": "a.ludgate",
-    "password": "B@ckendPr0!",
+    "password": "$2y$10$KbAtmlIYTrGJ5yYSMODnqORiPshBgKJdAERFTJ0mdLR18tGQURsay",
     "dateJoined": "2024-11-18T11:19:44Z",
     "biography": "Deadpan and sarcastic. Prefers to keep people at a distance but is fiercely loyal to those she trusts."
   },
@@ -171,7 +171,7 @@
     "firstName": "Andy",
     "lastName": "Dwyer",
     "username": "a.dwyer",
-    "password": "C0nfigH3lp!",
+    "password": "$2y$10$Pi3YGic4ewglt4bSwH8xxOUFw86T2U/eEvMIh1Mf.W4JsuOAwwoEm",
     "dateJoined": "2024-12-20T08:36:51Z",
     "biography": "Goofy and fun-loving. Has a big heart and a love for music, despite not always being competent."
   },
@@ -179,7 +179,7 @@
     "firstName": "Ben",
     "lastName": "Wyatt",
     "username": "b.wyatt",
-    "password": "L3arnSQL!",
+    "password": "$2y$10$CXVXe88PCe/1k61sf7GhTO0ReMT1PDsyBO/1HygZps1ynwQvJ7SKy",
     "dateJoined": "2025-01-30T15:21:38Z",
     "biography": "Responsible and practical. Often the voice of reason in his social circle, with a love for rules and order."
   },
@@ -187,7 +187,7 @@
     "firstName": "Ann",
     "lastName": "Perkins",
     "username": "a.perkins",
-    "password": "JavaScr1pt!",
+    "password": "$2y$10$kxvXvEsdFTZ23H26z2jEb.vfgDo8E96hMnhwHxKFps7/uQPENMsqC",
     "dateJoined": "2025-01-02T09:18:27Z",
     "biography": "Friendly and caring. Devoted to helping friends and keeping relationships strong."
   },
@@ -195,7 +195,7 @@
     "firstName": "Tom",
     "lastName": "Haverford",
     "username": "t.haverford",
-    "password": "L3arnCSS!",
+    "password": "$2y$10$Tff6D5.4Kz6BJgv0RE3UguHVOj7ZVqmZOY5NH//xSGn6vlv.EMkDG",
     "dateJoined": "2025-02-05T08:15:44Z",
     "biography": "Charismatic and ambitious. Loves the spotlight and has a knack for entrepreneurship."
   },
@@ -203,7 +203,7 @@
     "firstName": "Jerry",
     "lastName": "Gergich",
     "username": "j.gergich",
-    "password": "Pyth0nR0cks!",
+    "password": "$2y$10$DGL2hTHGdhCBcFee.6qSRuPvw2Iu4z7Cs/ZRshl8CBx8/5/c/W8ru",
     "dateJoined": "2025-02-08T13:47:22Z",
     "biography": "Kind-hearted but bumbling. Often the target of jokes, but always tries his best."
   },
@@ -211,7 +211,7 @@
     "firstName": "Donna",
     "lastName": "Meagle",
     "username": "d.meagle",
-    "password": "C0ntainer!ze",
+    "password": "$2y$10$GkZA2s10bHT7C7qd6thsn.pXJzZ8hKW0jHg4e2R8jnVU1InVWjfpG",
     "dateJoined": "2025-03-10T10:22:36Z",
     "biography": "Confident and stylish. Enjoys luxury and the finer things in life, while keeping friends entertained."
   },
@@ -219,7 +219,7 @@
     "firstName": "Chris",
     "lastName": "Traeger",
     "username": "c.traeger",
-    "password": "AsyncAw@it!",
+    "password": "$2y$10$dpa4HQqht87JN5.d6UQNfuBg8x8pMS1NcFEwUw9ks5coTQgRan6PK",
     "dateJoined": "2025-03-14T09:38:52Z",
     "biography": "Overly enthusiastic and extremely positive. Tries to motivate everyone around him with energy and optimism."
   },
@@ -227,7 +227,7 @@
     "firstName": "Eleanor",
     "lastName": "Shellstrop",
     "username": "e.shellstrop",
-    "password": "H00ksL3arner!",
+    "password": "$2y$10$1Sf1mqWJ9W/3xX2MJ2VJOuLcaGMzLwv5MkS4IOewhWv4HarD97q4G",
     "dateJoined": "2025-03-17T11:27:09Z",
     "biography": "Self-centered but gradually learns empathy. Finds herself in morally complex situations but grows over time."
   },
@@ -235,7 +235,7 @@
     "firstName": "Chidi",
     "lastName": "Anagonye",
     "username": "c.anagonye",
-    "password": "R3@ctM@ster!",
+    "password": "$2y$10$1uLPvvjq3MRPBDSBeQip3OV..p8rHoP3a.e97MEzWS2u8T6DJxslW",
     "dateJoined": "2023-06-16T10:45:32Z",
     "biography": "Ethical and indecisive. Constantly agonizes over making the right choice, often overthinking everything."
   },
@@ -243,7 +243,7 @@
     "firstName": "Tahani",
     "lastName": "Al-Jamil",
     "username": "t.aljamil",
-    "password": "N0d3Exper7!",
+    "password": "$2y$10$nMwRJwPXjAToGtexj4Q1cOgzNw8sJDUtbRkPplgUk182KbWxNGeW.",
     "dateJoined": "2023-08-19T13:27:56Z",
     "biography": "Elegant and glamorous. Loves hosting and being admired, but secretly craves genuine connection."
   },
@@ -251,7 +251,7 @@
     "firstName": "Jason",
     "lastName": "Mendoza",
     "username": "j.mendoza",
-    "password": "D@taAn@lyst!",
+    "password": "$2y$10$qMzF5oK2w70RCTXrJYbLs.QKEOla6F3FFB1y.yvpY0xjGGNCPFD3m",
     "dateJoined": "2023-11-09T12:03:19Z",
     "biography": "Energetic and confident. Often makes mistakes but is always learning from them."
   },
@@ -259,7 +259,7 @@
     "firstName": "Michael",
     "lastName": "Demon",
     "username": "demon",
-    "password": "C1CD@ut0mat3!",
+    "password": "$2y$10$iCJ9dldS6H5w1Shbqa2rcujCDEBblghCf/Y/oZ04hIt/WY7UgKi8C",
     "dateJoined": "2024-01-11T16:44:37Z",
     "biography": "Meticulous and rule-focused. Strives to do everything perfectly, often acting as a voice of reason."
   }
