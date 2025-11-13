@@ -1,61 +1,61 @@
 {
   "message1": {
-    "msg": "Hey everyone! What's the best way to handle state in a large React application? Context API or Redux?",
-    "msgFrom": "newbiereactdev",
+    "msg": "Hey everyone! Does anyone have tips for preparing for the Morgan Stanley co-op interviews?",
+    "msgFrom": "e.hopper",
     "msgDateTime": "2025-04-22T14:30:15Z",
     "type": "global"
   },
   "message2": {
-    "msg": "It really depends on the complexity. For simpler apps, Context is enough. But once you have complex state management needs, Redux gives you more control with middlewares, etc.",
-    "msgFrom": "reactexpert",
+    "msg": "I found that practicing behavioral questions with a friend helped me a lot. Also, research the company culture beforehand.",
+    "msgFrom": "w.byers",
     "msgDateTime": "2025-04-22T14:32:28Z",
     "type": "global"
   },
   "message3": {
-    "msg": "I've been using Zustand lately and it's a great middle ground. Much simpler than Redux but more powerful than just Context.",
-    "msgFrom": "reactninja",
+    "msg": "For technical interviews, definitely brush up on data structures and algorithms. LeetCode is your friend!",
+    "msgFrom": "m.wheeler",
     "msgDateTime": "2025-04-22T14:34:52Z",
     "type": "global"
   },
   "message4": {
-    "msg": "Speaking of state management, has anyone tried the new Server Components in React? How does that change the approach to state?",
-    "msgFrom": "jsdeveloper",
+    "msg": "Has anyone gotten offers from HubSpot? How competitive is the application process for their co-op program?",
+    "msgFrom": "d.henderson",
     "msgDateTime": "2025-04-22T14:38:17Z",
     "type": "global"
   },
   "message5": {
-    "msg": "Server Components are game-changing! They can access databases and APIs directly without client-side fetching. But you still need client state for interactive elements.",
-    "msgFrom": "frontenddev",
+    "msg": "HubSpot was really friendly in my experience. They value cultural fit a lot, so show enthusiasm and teamwork skills!",
+    "msgFrom": "e.munson",
     "msgDateTime": "2025-04-22T14:41:05Z",
     "type": "global"
   },
   "message6": {
-    "msg": "Any Python devs here? I'm trying to optimize a data processing pipeline that's taking forever to run on large datasets.",
-    "msgFrom": "pythonuser",
+    "msg": "Quick question: Does anyone know if we can list freelance projects on our Northeastern co-op profile?",
+    "msgFrom": "vecna",
     "msgDateTime": "2025-04-22T14:45:33Z",
     "type": "global"
   },
   "message7": {
-    "msg": "Have you tried NumPy's vectorized operations? They're way faster than Python loops. Also look into Dask for parallel processing if your dataset doesn't fit in memory.",
-    "msgFrom": "datascientist",
+    "msg": "Yes, you can! Just make sure to highlight the skills and outcomes relevant to co-op roles.",
+    "msgFrom": "b.hargrove",
     "msgDateTime": "2025-04-22T14:48:22Z",
     "type": "global"
   },
   "message8": {
-    "msg": "Quick question for anyone using Docker: what's your preferred way to handle secrets in production? Environment variables or Docker secrets?",
-    "msgFrom": "dockerbeginner",
+    "msg": "Anyone interested in doing a mock interview session this weekend? Could help prep for multiple companies.",
+    "msgFrom": "s.harrington",
     "msgDateTime": "2025-04-22T14:52:40Z",
     "type": "global"
   },
   "message9": {
-    "msg": "Definitely Docker secrets for anything sensitive in production. Env vars can be leaked through logs or error messages. For Kubernetes, use their secrets system instead.",
-    "msgFrom": "devopsengineer",
+    "msg": "I’m in! We could split into pairs and rotate questions. Should we use Zoom or Teams?",
+    "msgFrom": "m.mayfield",
     "msgDateTime": "2025-04-22T14:55:18Z",
     "type": "global"
   },
   "message10": {
-    "msg": "Just a heads up to everyone - we're organizing a virtual meetup next Friday to discuss web performance optimization techniques. Drop me a DM if you're interested in joining or presenting!",
-    "msgFrom": "perfoptimizer",
+    "msg": "Heads up: I just uploaded a new set of co-op tips to the community board. Check it out and comment if you have feedback!",
+    "msgFrom": "n.wheeler",
     "msgDateTime": "2025-04-22T15:01:47Z",
     "type": "global"
   }
