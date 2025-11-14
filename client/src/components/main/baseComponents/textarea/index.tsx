@@ -42,7 +42,7 @@ const TextArea = ({ title, mandatory = true, hint, id, val, setState, err }: Tex
     {hint && <div className='input_hint'>{hint}</div>}
     <textarea
       id={id}
-      className='input_input'
+      className='input_input_textarea'
       value={val}
       onChange={e => {
         setState(e.currentTarget.value);

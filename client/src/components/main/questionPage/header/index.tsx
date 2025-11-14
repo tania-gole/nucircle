@@ -50,7 +50,7 @@ const QuestionHeader = ({
         ))}
       </div>
       <div className='question-count'>
-        <span className='count-number'>{qcnt}</span> Questions
+        <span className='count-number'>{qcnt}</span> {qcnt === 1 ? 'Question' : 'Questions'}
       </div>
     </div>
   </div>

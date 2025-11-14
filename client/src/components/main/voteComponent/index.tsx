@@ -46,14 +46,40 @@ const VoteComponent = ({ question }: VoteComponentProps) => {
       <button
         className={`vote-button ${voted === 1 ? 'vote-button-upvoted' : ''}`}
         onClick={() => handleVote('upvote')}>
-        Upvote
+        <svg
+          width='35'
+          height='35'
+          viewBox='0 0 35 35'
+          fill='none'
+          xmlns='http://www.w3.org/2000/svg'>
+          <path
+            d='M17.5 7.29163L26.25 16.0416M17.5 7.29163L8.75 16.0416M17.5 7.29163V27.7083'
+            stroke='#4B5563'
+            stroke-width='3'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+          />
+        </svg>
       </button>
+      <span className='vote-count'>{count}</span>
       <button
         className={`vote-button ${voted === -1 ? 'vote-button-downvoted' : ''}`}
         onClick={() => handleVote('downvote')}>
-        Downvote
+        <svg
+          width='35'
+          height='35'
+          viewBox='0 0 35 35'
+          fill='none'
+          xmlns='http://www.w3.org/2000/svg'>
+          <path
+            d='M17.5 27.7084L26.25 18.9584M17.5 27.7084L8.75 18.9584M17.5 27.7084V7.29171'
+            stroke='#4B5563'
+            stroke-width='3'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+          />
+        </svg>
       </button>
-      <span className='vote-count'>{count}</span>
     </div>
   );
 };

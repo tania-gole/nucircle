@@ -1,5 +1,3 @@
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import CommentSection from '../../commentSection';
 import './index.css';
 import { Comment, DatabaseComment } from '../../../../types/types';
@@ -32,14 +30,12 @@ interface AnswerProps {
  * @param handleAddComment Function to handle adding a new comment.
  */
 const AnswerView = ({ text, ansBy, meta, comments, handleAddComment }: AnswerProps) => (
-  <div className='answer right_padding'>
-    <div id='answerText' className='answerText'>
-      {<Markdown remarkPlugins={[remarkGfm]}>{text}</Markdown>}
+  <div className='answer-card'>
+    <div className='answer-header'>
+      <div className='answer-author'>{ansBy}</div>
+      <div className='answer-meta'>{meta}</div>
     </div>
-    <div className='answerAuthor'>
-      <div className='answer_author'>{ansBy}</div>
-      <div className='answer_question_meta'>{meta}</div>
-    </div>
+    <div className='answer-text'>{text}</div>
     <CommentSection comments={comments} handleAddComment={handleAddComment} />
   </div>
 );

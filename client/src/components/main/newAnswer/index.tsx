@@ -18,9 +18,6 @@ const NewAnswerPage = () => {
         setState={setText}
         err={textErr}
       />
-      <h5>
-        <i>Markdown formatting is supported.</i>
-      </h5>
       <div className='btn_indicator_container'>
         <button className='form_postBtn' onClick={postAnswer}>
           Post Answer

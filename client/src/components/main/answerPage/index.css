@@ -1,7 +1,11 @@
-.answer_question_meta {
-  color: #bbbbbb;
+.answer-page-container {
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.ansButton {
-  margin: 2% 0 2% 2%;
+.ask-question-button-container {
+  display: flex;
+  justify-content: flex-end;
 }
