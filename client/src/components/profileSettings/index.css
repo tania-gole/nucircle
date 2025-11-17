@@ -14,21 +14,44 @@
   --font-lg: 1.5rem;
 
   background-color: var(--color-bg);
-  padding: 2rem;
+  padding: 32px;
   display: flex;
   justify-content: center;
   min-height: 100vh;
   color: #484848;
 }
 
-.profile-settings .profile-card {
-  background: var(--color-card-bg);
+.profile-settings {
+  display: flex;
+  gap: 32px;
+  padding: 30px;
+  /* background: var(--color-card-bg);
   padding: 2rem;
   border-radius: var(--radius);
   max-width: 700px;
   width: 100%;
-  box-shadow: 0 4px 15px rgba(72, 72, 72, 0.1);
+  box-shadow: 0 4px 15px rgba(72, 72, 72, 0.1); */
 }
+
+.profile-left-column {
+  flex: 1;
+  min-width: 320px;
+  max-width: 380px;
+  background-color: white;
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.profile-right-column {
+  flex: 2;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+
+
 
 .profile-settings h2 {
   font-size: 32px;
@@ -44,7 +67,7 @@
   font-weight: 600;
 }
 
-.profile-settings .input-text {
+/* .profile-settings .input-text {
   display: block;
   width: 100%;
   padding: 12px 20px;
@@ -56,7 +79,7 @@
   font-size: var(--font-md);
   color: #323232;
   box-sizing: border-box;
-}
+} */
 
 .profile-settings .input-text:focus {
   outline: none;

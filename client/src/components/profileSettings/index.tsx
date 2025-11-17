@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import Badges from '../main/badges';
+import WorkExperienceList from '../main/workExperience';
 
 const ProfileSettings: React.FC = () => {
   const {
@@ -42,144 +43,150 @@ const ProfileSettings: React.FC = () => {
     );
   }
 
+  if (!userData) {
+    return (
+      <div className='profile-settings'>
+        <div className='profile-card'>
+          <h2>No user data found. Make sure the username parameter is correct.</h2>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='profile-settings'>
-      <div className='profile-card'>
-        <h2>Profile</h2>
+      {/* Left column: general info */}
+      <div className='profile-left-column'>
+        <div className='profile-card'>
+          <h2>Profile</h2>
 
-        {successMessage && <p className='success-message'>{successMessage}</p>}
-        {errorMessage && <p className='error-message'>{errorMessage}</p>}
+          {successMessage && <p className='success-message'>{successMessage}</p>}
+          {errorMessage && <p className='error-message'>{errorMessage}</p>}
+          <h4>General Information</h4>
+          <p>
+            <strong>Username:</strong> {userData.username}
+          </p>
 
-        {userData ? (
-          <>
-            <h4>General Information</h4>
-            <p>
-              <strong>Username:</strong> {userData.username}
-            </p>
-
-            {/* ---- Biography Section ---- */}
-            <p>
-              <strong>Biography:</strong>
-            </p>
-            <div className='bio-section'>
-              {!editBioMode && (
-                <>
-                  <Markdown remarkPlugins={[remarkGfm]}>
-                    {userData.biography || 'No biography yet.'}
-                  </Markdown>
-                  {canEditProfile && (
-                    <button
-                      className='button button-primary'
-                      onClick={() => {
-                        setEditBioMode(true);
-                        setNewBio(userData.biography || '');
-                      }}>
-                      Edit
-                    </button>
-                  )}
-                </>
-              )}
-
-              {editBioMode && canEditProfile && (
-                <div className='bio-edit'>
-                  <input
-                    className='input-text'
-                    type='text'
-                    value={newBio}
-                    onChange={e => setNewBio(e.target.value)}
-                  />
-                  <button className='button button-primary' onClick={handleUpdateBiography}>
-                    Save
+          {/* ---- Biography Section ---- */}
+          <div className='bio-section'>
+            <strong>Biography:</strong>
+            {!editBioMode && (
+              <div>
+                <Markdown remarkPlugins={[remarkGfm]}>
+                  {userData.biography || 'No biography yet.'}
+                </Markdown>
+                {canEditProfile && (
+                  <button
+                    className='button button-primary'
+                    onClick={() => {
+                      setEditBioMode(true);
+                      setNewBio(userData.biography || '');
+                    }}>
+                    Edit
                   </button>
-                  <button className='button button-danger' onClick={() => setEditBioMode(false)}>
-                    Cancel
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <p>
-              <strong>Date Joined:</strong>{' '}
-              {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
-            </p>
-
-            {/* ---- Points Section ---- */}
-            <p>
-              <strong>Points Earned:</strong> {userData.points ? userData.points : '0'}
-            </p>
-
-            {/* ---- Badges Section ---- */}
-            <h4>Badges</h4>
-            <Badges badges={badges} />
-
-            <button className='button button-primary' onClick={handleViewCollectionsPage}>
-              View Collections
-            </button>
-
-            {/* ---- Reset Password Section ---- */}
-            {canEditProfile && (
-              <>
-                <h4>Reset Password</h4>
-                <input
-                  className='input-text'
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder='New Password'
-                  value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                />
-                <input
-                  className='input-text'
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder='Confirm New Password'
-                  value={confirmNewPassword}
-                  onChange={e => setConfirmNewPassword(e.target.value)}
-                />
-                <div className='password-actions'>
-                  <button className='button button-secondary' onClick={togglePasswordVisibility}>
-                    {showPassword ? 'Hide Passwords' : 'Show Passwords'}
-                  </button>
-                  <button className='button button-primary' onClick={handleResetPassword}>
-                    Reset
-                  </button>
-                </div>
-              </>
+                )}
+              </div>
             )}
 
-            {/* ---- Danger Zone (Delete User) ---- */}
-            {canEditProfile && (
-              <>
-                <h4>Danger Zone</h4>
-                <button className='button button-danger' onClick={handleDeleteUser}>
-                  Delete This User
+            {editBioMode && canEditProfile && (
+              <div className='bio-edit'>
+                <input
+                  className='input-text'
+                  type='text'
+                  value={newBio}
+                  onChange={e => setNewBio(e.target.value)}
+                />
+                <button className='button button-primary' onClick={handleUpdateBiography}>
+                  Save
                 </button>
-              </>
-            )}
-          </>
-        ) : (
-          <p>No user data found. Make sure the username parameter is correct.</p>
-        )}
-
-        {/* ---- Confirmation Modal for Delete ---- */}
-        {showConfirmation && (
-          <div className='modal'>
-            <div className='modal-content'>
-              <p>
-                Are you sure you want to delete user <strong>{userData?.username}</strong>? This
-                action cannot be undone.
-              </p>
-              <div className='modal-actions'>
-                <button className='button button-danger' onClick={() => pendingAction?.()}>
-                  Confirm
-                </button>
-                <button
-                  className='button button-secondary'
-                  onClick={() => setShowConfirmation(false)}>
+                <button className='button button-danger' onClick={() => setEditBioMode(false)}>
                   Cancel
                 </button>
               </div>
-            </div>
+            )}
           </div>
-        )}
+
+          <p>
+            <strong>Date Joined:</strong>{' '}
+            {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
+          </p>
+
+          {/* ---- Points Section ---- */}
+          <p>
+            <strong>Points Earned:</strong> {userData.points ? userData.points : '0'}
+          </p>
+          <button className='button button-primary' onClick={handleViewCollectionsPage}>
+            View Collections
+          </button>
+          {/* ---- Reset Password Section ---- */}
+          {canEditProfile && (
+            <>
+              <h4>Reset Password</h4>
+              <input
+                className='input-text'
+                type={showPassword ? 'text' : 'password'}
+                placeholder='New Password'
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+              />
+              <input
+                className='input-text'
+                type={showPassword ? 'text' : 'password'}
+                placeholder='Confirm New Password'
+                value={confirmNewPassword}
+                onChange={e => setConfirmNewPassword(e.target.value)}
+              />
+              <div className='password-actions'>
+                <button className='button button-secondary' onClick={togglePasswordVisibility}>
+                  {showPassword ? 'Hide Passwords' : 'Show Passwords'}
+                </button>
+                <button className='button button-primary' onClick={handleResetPassword}>
+                  Reset
+                </button>
+              </div>
+            </>
+          )}
+          {/* ---- Danger Zone (Delete User) ---- */}
+          {canEditProfile && (
+            <>
+              <h4>Danger Zone</h4>
+              <button className='button button-danger' onClick={handleDeleteUser}>
+                Delete This User
+              </button>
+            </>
+          )}
+          {/* ---- Confirmation Modal for Delete ---- */}
+          {showConfirmation && (
+            <div className='modal'>
+              <div className='modal-content'>
+                <p>
+                  Are you sure you want to delete user <strong>{userData?.username}</strong>? This
+                  action cannot be undone.
+                </p>
+                <div className='modal-actions'>
+                  <button className='button button-danger' onClick={() => pendingAction?.()}>
+                    Confirm
+                  </button>
+                  <button
+                    className='button button-secondary'
+                    onClick={() => setShowConfirmation(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right column */}
+      <div className='profile-right-column'>
+        {/* ---- Work Experience Section ---- */}
+        <WorkExperienceList username={userData.username} />
+
+        {/* ---- Badges Section ---- */}
+        <h4>Badges</h4>
+        <Badges badges={badges} />
       </div>
     </div>
   );
