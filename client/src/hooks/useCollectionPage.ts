@@ -23,7 +23,7 @@ const useCollectionPage = () => {
         return;
       }
 
-      const collection = await getCollectionById(username, collectionId);
+      const collection = await getCollectionById(currentUser.username, collectionId);
       setCollection(collection);
     };
 
