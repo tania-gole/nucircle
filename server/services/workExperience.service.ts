@@ -102,12 +102,7 @@ export const getWorkExperiencesByUser = async (
   usernameToView: string,
 ): Promise<DatabaseWorkExperience[] | { error: string }> => {
   try {
-    const workExperiences = await WorkExperienceModel.find({ username: usernameToView }).sort({
-      startDate: -1,
-    });
-    if (!workExperiences) {
-      throw new Error('Failed to get work experiences');
-    }
+    const workExperiences = await WorkExperienceModel.find({ username: usernameToView });
     return workExperiences;
   } catch (error) {
     return { error: (error as Error).message };
