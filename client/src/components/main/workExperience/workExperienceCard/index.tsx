@@ -58,12 +58,18 @@ const WorkExperienceCard = ({
         <div className='form-row'>
           <div className='field-group'>
             <label className='field-label'>Type</label>
-            <input
-              className='input-field'
-              type='text'
+            <select
+              name='type'
               value={formState.type}
               onChange={e => setFormState({ ...formState, type: e.target.value })}
-            />
+              className='input-field'
+              required>
+              <option value=''>Select type . . .</option>
+              <option value='Co-op'>Co-op</option>
+              <option value='Internship'>Internship</option>
+              <option value='Full-time'>Full-time</option>
+              <option value='Part-time'>Part-time</option>
+            </select>
           </div>
 
           <div className='field-group'>
