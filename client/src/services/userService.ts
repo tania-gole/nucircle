@@ -5,6 +5,17 @@ import api from './config';
 const USER_API_URL = `/api/user`;
 
 /**
+ * Interface for user statistics
+ */
+export interface UserStats {
+  questionsPosted: number;
+  answersPosted: number;
+  communitiesJoined: number;
+  quizzesWon: number;
+  quizzesPlayed: number;
+}
+
+/**
  * Function to get users
  *
  * @throws Error if there is an issue fetching users.
@@ -142,6 +153,20 @@ const markWelcomeMessageSeen = async (): Promise<SafeDatabaseUser> => {
   }
 };
 
+/**
+ * Fetches statistics for a user
+ * @param username - The username to get stats for
+ * @returns Promise resolving to user statistics
+ * @throws Error if the request fails
+ */
+const getUserStats = async (username: string): Promise<UserStats> => {
+  const res = await api.get(`${USER_API_URL}/stats/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching user stats');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -151,4 +176,5 @@ export {
   resetPassword,
   updateBiography,
   markWelcomeMessageSeen,
+  getUserStats,
 };

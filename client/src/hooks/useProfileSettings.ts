@@ -5,6 +5,8 @@ import {
   deleteUser,
   resetPassword,
   updateBiography,
+  getUserStats,
+  type UserStats,
 } from '../services/userService';
 import badgeService from '../services/badgeService';
 import { SafeDatabaseUser, Badge } from '../types/types';
@@ -28,6 +30,7 @@ const useProfileSettings = () => {
   const [newBio, setNewBio] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
 
   // For delete-user confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -66,6 +69,25 @@ const useProfileSettings = () => {
 
     fetchUserData();
   }, [username]);
+
+  /**
+   * Fetch user statistics such as questions posted, answers posted, etc.
+   */
+  // Fetch stats when userData loads
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!userData) return;
+
+      try {
+        const stats = await getUserStats(userData.username);
+        setUserStats(stats);
+      } catch (error) {
+        setErrorMessage('Error fetching user stats');
+      }
+    };
+
+    fetchStats();
+  }, [userData]);
 
   /**
    * Toggles the visibility of the password fields.
@@ -181,6 +203,7 @@ const useProfileSettings = () => {
     handleUpdateBiography,
     handleDeleteUser,
     handleViewCollectionsPage,
+    userStats,
   };
 };
 

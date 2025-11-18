@@ -31,6 +31,7 @@ const ProfileSettings: React.FC = () => {
     handleUpdateBiography,
     handleDeleteUser,
     handleViewCollectionsPage,
+    userStats,
   } = useProfileSettings();
 
   if (loading) {
@@ -106,15 +107,33 @@ const ProfileSettings: React.FC = () => {
             )}
           </div>
 
-          <p>
-            <strong>Date Joined:</strong>{' '}
-            {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
-          </p>
+          {/* ---- Stats Section ---- */}
+          <div className='stats-section'>
+            <h4>User Stats</h4>
+            <p>
+              <strong>Date Joined:</strong>{' '}
+              {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
+            </p>
+            <p>
+              <strong>Points Earned:</strong> {userData.points || 0}
+            </p>
+            <p>
+              <strong>Questions:</strong> {userStats?.questionsPosted || 0}
+            </p>
+            <p>
+              <strong>Answers:</strong> {userStats?.answersPosted || 0}
+            </p>
+            <p>
+              <strong>Communities:</strong> {userStats?.communitiesJoined || 0}
+            </p>
 
-          {/* ---- Points Section ---- */}
-          <p>
-            <strong>Points Earned:</strong> {userData.points ? userData.points : '0'}
-          </p>
+            <p>
+              <strong>Quizzes Won:</strong> {userStats?.quizzesWon || 0} /{' '}
+              {userStats?.quizzesPlayed || 0}
+            </p>
+          </div>
+
+          {/* ---- Badge Section ---- */}
           <button className='button button-primary' onClick={handleViewCollectionsPage}>
             View Collections
           </button>
