@@ -8,6 +8,7 @@ import {
   UserByUsernameRequest,
   FakeSOSocket,
   UpdateBiographyRequest,
+  WinnableGameState,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -17,6 +18,10 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
+import QuestionModel from '../models/questions.model';
+import AnswerModel from '../models/answers.model';
+import CommunityModel from '../models/community.model';
+import GameModel from '../models/games.model';
 import { generateToken } from '../utils/jwt.util';
 import authMiddleware from '../middleware/auth';
 
@@ -233,6 +238,42 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Gets statistics for a user.
+   * @param req The request containing the username as a route parameter.
+   * @param res The response, either returning the stats or an error.
+   * @returns A promise resolving to void.
+   */
+  const getUserStats = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const questionsPosted = await QuestionModel.countDocuments({ askedBy: username });
+      const answersPosted = await AnswerModel.countDocuments({ ansBy: username });
+      const communitiesJoined = await CommunityModel.countDocuments({
+        participants: username,
+      });
+
+      // Trivia Game
+      const allGames = await GameModel.find({ players: username });
+      const quizzesPlayed = allGames.length;
+      const quizzesWon = allGames.filter(game => {
+        const state = game.state as WinnableGameState;
+        return state.winners && state.winners.includes(username);
+      }).length;
+
+      res.status(200).json({
+        questionsPosted,
+        answersPosted,
+        communitiesJoined,
+        quizzesWon,
+        quizzesPlayed,
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get user stats' });
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -243,6 +284,7 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/updateBiography', updateBiography);
   router.get('/me', authMiddleware, getCurrentUser);
   router.patch('/markWelcomeSeen', authMiddleware, markWelcomeMessageSeen);
+  router.get('/stats/:username', getUserStats);
   return router;
 };
 
