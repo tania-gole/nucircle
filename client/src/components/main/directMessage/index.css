@@ -11,7 +11,7 @@
   /* position: relative; */
   width: 30%;
   background-color: white;
-  border-radius: 15px;
+  border-radius: 16px;
   border: none;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   display: flex;
@@ -108,7 +108,7 @@
   flex-direction: column;
   background-color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }

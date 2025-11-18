@@ -25,7 +25,7 @@ const UserCardView = (props: UserProps) => {
   const { user, handleUserCardViewClickHandler, onChallengeClick, currentUsername } = props;
 
   return (
-    <div className='user_card'>
+    <div className='user_card' onClick={() => handleUserCardViewClickHandler(user)}>
       <div className='user_card_left'>
         <div className='user_card_name'>
           {user.firstName} {user.lastName}
@@ -57,8 +57,7 @@ const UserCardView = (props: UserProps) => {
           height='32'
           viewBox='0 0 20 32'
           fill='none'
-          xmlns='http://www.w3.org/2000/svg'
-          onClick={() => handleUserCardViewClickHandler(user)}>
+          xmlns='http://www.w3.org/2000/svg'>
           <path
             d='M12.2667 16L6.60261e-05 3.73333L3.7334 0L19.7334 16L3.7334 32L6.60261e-05 28.2667L12.2667 16Z'
             fill='#FF6B6B'

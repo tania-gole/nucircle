@@ -14,48 +14,51 @@
   --font-lg: 1.5rem;
 
   background-color: var(--color-bg);
-  padding: 2rem;
+  padding: 32px;
   display: flex;
   justify-content: center;
   min-height: 100vh;
   color: #484848;
+  gap: 30px;
 }
 
-.profile-settings .profile-card {
-  background: var(--color-card-bg);
-  padding: 2rem;
-  border-radius: var(--radius);
-  max-width: 700px;
-  width: 100%;
-  box-shadow: 0 4px 15px rgba(72, 72, 72, 0.1);
+.profile-left-column {
+  flex: 1;
+  min-width: 320px;
+  max-width: 380px;
+  background-color: white;
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  gap: 6px;
+}
+
+.profile-right-column {
+  flex: 2;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .profile-settings h2 {
   font-size: 32px;
+  margin: 0;
   margin-bottom: 1.5rem;
   color: #484848;
   font-weight: bold;
 }
 
 .profile-settings h4 {
-  margin-top: 2rem;
   font-size: 18px;
   color: #484848;
   font-weight: 600;
-}
-
-.profile-settings .input-text {
-  display: block;
-  width: 100%;
-  padding: 12px 20px;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-  border: none;
-  border-radius: 25px;
-  background-color: #FFF4F4;
-  font-size: var(--font-md);
-  color: #323232;
-  box-sizing: border-box;
+  margin: 0;
 }
 
 .profile-settings .input-text:focus {

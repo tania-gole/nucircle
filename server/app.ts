@@ -30,6 +30,7 @@ import badgeController from './controllers/badge.controller';
 import authMiddleware from './middleware/auth';
 import QuizInvitationManager from './services/invitationManager.service';
 import GameManager from './services/games/gameManager';
+import workExperienceController from './controllers/workExperience.controller';
 
 const MONGO_URL = `${process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017'}/fake_so`;
 const PORT = parseInt(process.env.PORT || '8000');
@@ -315,6 +316,7 @@ app.use('/api/collection', collectionController(io));
 app.use('/api/community', communityController(io));
 app.use('/api/community/messages', communityMessagesController(io));
 app.use('/api/badge', badgeController(io));
+app.use('/api/work', workExperienceController(io));
 
 // Export the app instance
 export { app, server, startServer };

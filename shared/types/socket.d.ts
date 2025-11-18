@@ -86,6 +86,16 @@ export interface UserUpdatePayload {
 }
 
 /**
+ * Payload for a work experience update event.
+ * - `type`: The type of update (`'created'`, `'updated'`, or `'deleted'`).
+ * - `workExperience`: The updated work experience object.
+ */
+export interface WorkExperienceUpdatePayload {
+  workExperience: DatabaseWorkExperience;
+  type: 'created' | 'updated' | 'deleted';
+}
+
+/**
  * Interface representing the payload for a game move operation, which contains:
  * - `gameID`: The ID of the game being played.
  * - `move`: The move being made in the game, defined by `GameMove`.
@@ -183,6 +193,7 @@ export interface ClientToServerEvents {
  * - `commentUpdate`: Server sends updated comment for a question or answer.
  * - `messageUpdate`: Server sends updated message.
  * - `userUpdate`: Server sends updated user status.
+ * - `workExperienceUpdate`: Server sends updated work experience.
  * - `gameUpdate`: Server sends updated game state.
  * - `gameError`: Server sends error message related to game operation.
  * - `chatUpdate`: Server sends updated chat.
@@ -203,6 +214,7 @@ export interface ServerToClientEvents {
   commentUpdate: (comment: CommentUpdatePayload) => void;
   messageUpdate: (message: MessageUpdatePayload) => void;
   userUpdate: (user: UserUpdatePayload) => void;
+  workExperienceUpdate: (work: WorkExperienceUpdatePayload) => void;
   gameUpdate: (game: GameUpdatePayload) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
