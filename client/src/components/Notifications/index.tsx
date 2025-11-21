@@ -1,8 +1,8 @@
-import { FC } from 'react';
 import './index.css';
 import useNotifications from '../../hooks/useNotifications';
 
-const Notifications: FC = () => {
+// Component to display notifications
+const Notifications = () => {
   const { notifications } = useNotifications();
 
   return (

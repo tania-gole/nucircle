@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { getSocket } from './useSocket';
 import { NotificationPayload } from '../types/types';
 
+// for when multiple notifications
 export interface NotificationItem extends NotificationPayload {
-  id: string; // unique identifier for each notification
+  id: string;
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
+// Hook to manage notifications
 const useNotifications = () => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
@@ -15,6 +17,10 @@ const useNotifications = () => {
     const socket = getSocket();
     if (!socket) return;
 
+    /**
+     * run when a notification is received
+     * @param payload the notification payload
+     */
     const handleNotification = (payload: NotificationPayload) => {
       const newNotification: NotificationItem = { ...payload, id: generateId() };
       setNotifications(prev => [...prev, newNotification]);
