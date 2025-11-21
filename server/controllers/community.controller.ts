@@ -15,6 +15,7 @@ import {
   deleteCommunity,
   recordCommunityVisit,
 } from '../services/community.service';
+import { getUserByUsername } from '../services/user.service';
 
 /**
  * This controller handles community-related routes.
@@ -128,10 +129,21 @@ const communityController = (socket: FakeSOSocket) => {
 
       socket.emit('communityUpdate', {
         type: 'updated',
-        community: result,
+        community: result.community,
       });
 
-      res.json(result);
+      if (result.added) {
+        const admin = await getUserByUsername(result.community.admin);
+        if (!('error' in admin) && admin.socketId) {
+          socket.to(admin.socketId).emit('notification', {
+            type: 'communityNewMember',
+            from: username,
+            message: `${username} has joined your community "${result.community.name}".`,
+          });
+        }
+      }
+
+      res.json(result.community);
     } catch (err: unknown) {
       res
         .status(500)

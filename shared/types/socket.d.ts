@@ -133,7 +133,7 @@ export interface CollectionUpdatePayload {
 export interface NotificationPayload {
   type: 'dm' | 'answer' | 'communityNewMember';
   from: msgFrom;
-  messagePreview: string;
+  message: string;
 }
 
 /**

@@ -19,6 +19,12 @@ const Notifications = () => {
             <span>{n.from}</span> sent you a DM
           </div>
         );
+      case 'communityNewMember':
+        return (
+          <div>
+            <span>{n.from}</span>
+          </div>
+        );
       default:
         return <strong>Notification</strong>;
     }
@@ -36,7 +42,7 @@ const Notifications = () => {
       {notifications.map(n => (
         <div key={n.id} className='notification-card'>
           {notifTitle(n)}
-          <p>{n.messagePreview}</p>
+          <p>{n.message}</p>
         </div>
       ))}
       {/* <div key={fakenotification.id} className='notification-card'>

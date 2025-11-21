@@ -53,7 +53,7 @@ const answerController = (socket: FakeSOSocket) => {
         socket.to(user.socketId).emit('notification', {
           type: 'answer',
           from: ansInfo.ansBy,
-          messagePreview: ansInfo.text.slice(0, 30), // first 30 chars as preview of answer
+          message: ansInfo.text.slice(0, 30), // first 30 chars as preview of answer
         });
       }
 

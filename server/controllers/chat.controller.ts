@@ -101,7 +101,7 @@ const chatController = (socket: FakeSOSocket) => {
             socket.to(recipientUser.socketId).emit('notification', {
               type: 'dm',
               from: msgFrom,
-              messagePreview: msg.slice(0, 30), // first 30 chars as preview of message
+              message: msg.slice(0, 30), // first 30 chars as preview of message
             });
           }
         }

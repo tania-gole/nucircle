@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { app } from '../../app';
 import * as communityService from '../../services/community.service';
 import { DatabaseCommunity } from '../../types/types';
+import * as userUtil from '../../services/user.service';
 
 // mock jwt auth to always authenticate successfully
 jest.mock('../../middleware/auth', () => ({
@@ -51,6 +52,7 @@ const toggleCommunityMembershipSpy = jest.spyOn(communityService, 'toggleCommuni
 const createCommunitySpy = jest.spyOn(communityService, 'createCommunity');
 const deleteCommunitySpy = jest.spyOn(communityService, 'deleteCommunity');
 const getCommunitiesByUserSpy = jest.spyOn(communityService, 'getCommunitiesByUser');
+const getUserByUsernameSpy = jest.spyOn(userUtil, 'getUserByUsername');
 
 describe('Community Controller', () => {
   beforeEach(() => {
@@ -160,9 +162,23 @@ describe('Community Controller', () => {
         username: 'user3',
       };
 
-      toggleCommunityMembershipSpy.mockResolvedValueOnce({
-        ...mockCommunity,
-        participants: [...mockCommunity.participants, 'user3'],
+      const mockResponse = {
+        community: {
+          ...mockCommunity,
+          participants: [...mockCommunity.participants, 'user3'],
+        },
+        added: true,
+      };
+
+      toggleCommunityMembershipSpy.mockResolvedValueOnce(mockResponse);
+
+      getUserByUsernameSpy.mockResolvedValueOnce({
+        _id: new mongoose.Types.ObjectId(),
+        username: 'user3',
+        dateJoined: new Date(),
+        firstName: 'User',
+        lastName: 'Three',
+        socketId: 'fake-socket-id',
       });
 
       const response = await supertest(app)
@@ -182,9 +198,23 @@ describe('Community Controller', () => {
         username: 'user2',
       };
 
-      toggleCommunityMembershipSpy.mockResolvedValueOnce({
-        ...mockCommunity,
-        participants: ['admin_user', 'user1'],
+      const mockResponse = {
+        community: {
+          ...mockCommunity,
+          participants: ['admin_user', 'user1'],
+        },
+        added: true,
+      };
+
+      toggleCommunityMembershipSpy.mockResolvedValueOnce(mockResponse);
+
+      getUserByUsernameSpy.mockResolvedValueOnce({
+        _id: new mongoose.Types.ObjectId(),
+        username: 'user2',
+        dateJoined: new Date(),
+        firstName: 'User',
+        lastName: 'Two',
+        socketId: 'fake-socket-id',
       });
 
       const response = await supertest(app)
