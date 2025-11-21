@@ -2,7 +2,9 @@ import express, { Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { Answer, AddAnswerRequest, FakeSOSocket, PopulatedDatabaseAnswer } from '../types/types';
 import { addAnswerToQuestion, saveAnswer } from '../services/answer.service';
+import { fetchQuestionById } from '../services/question.service';
 import { populateDocument } from '../utils/database.util';
+import { getUserByUsername } from '../services/user.service';
 
 const answerController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -37,6 +39,22 @@ const answerController = (socket: FakeSOSocket) => {
 
       if (populatedAns && 'error' in populatedAns) {
         throw new Error(populatedAns.error);
+      }
+
+      const question = await fetchQuestionById(qid);
+
+      if ('error' in question) {
+        throw new Error(question.error);
+      }
+
+      const user = await getUserByUsername(question.askedBy);
+
+      if (!('error' in user) && user.socketId) {
+        socket.to(user.socketId).emit('notification', {
+          type: 'answer',
+          from: ansInfo.ansBy,
+          messagePreview: ansInfo.text.slice(0, 30), // first 30 chars as preview of answer
+        });
       }
 
       // Populates the fields of the answer that was added and emits the new object

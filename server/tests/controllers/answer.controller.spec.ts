@@ -4,6 +4,8 @@ import { ObjectId } from 'mongodb';
 import { app } from '../../app';
 import * as answerUtil from '../../services/answer.service';
 import * as databaseUtil from '../../utils/database.util';
+import * as questionUtil from '../../services/question.service';
+import * as userUtil from '../../services/user.service';
 
 // mock jwt auth to always authenticate successfully
 jest.mock('../../middleware/auth', () => ({
@@ -17,6 +19,8 @@ jest.mock('../../middleware/auth', () => ({
 const saveAnswerSpy = jest.spyOn(answerUtil, 'saveAnswer');
 const addAnswerToQuestionSpy = jest.spyOn(answerUtil, 'addAnswerToQuestion');
 const popDocSpy = jest.spyOn(databaseUtil, 'populateDocument');
+const getQuestionSpy = jest.spyOn(questionUtil, 'fetchQuestionById');
+const getUserByUsernameSpy = jest.spyOn(userUtil, 'getUserByUsername');
 
 describe('POST /addAnswer', () => {
   it('should add a new answer to the question', async () => {
@@ -68,6 +72,30 @@ describe('POST /addAnswer', () => {
       answers: [mockAnswer],
       comments: [],
       community: null,
+    });
+
+    getQuestionSpy.mockResolvedValueOnce({
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: '65e9b716ff0e892116b2de01',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [mockAnswer],
+      comments: [],
+      community: null,
+    });
+
+    getUserByUsernameSpy.mockResolvedValueOnce({
+      _id: new mongoose.Types.ObjectId(),
+      username: 'testuser',
+      dateJoined: new Date(),
+      firstName: 'Test',
+      lastName: 'User',
+      socketId: 'fake-socket-id',
     });
 
     const response = await supertest(app).post('/api/answer/addAnswer').send(mockReqBody);

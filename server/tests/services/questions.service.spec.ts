@@ -5,6 +5,7 @@ import {
   filterQuestionsByAskedBy,
   getQuestionsByOrder,
   fetchAndIncrementQuestionViewsById,
+  fetchQuestionById,
   saveQuestion,
   addVoteToQuestion,
   getCommunityQuestions,
@@ -307,6 +308,50 @@ describe('Question model', () => {
       };
 
       expect(result.error).toEqual('Error when fetching and updating a question');
+    });
+  });
+
+  describe('service to fetch a question by ID', () => {
+    test('fetchQuestionById should return question when it exists', async () => {
+      const question = POPULATED_QUESTIONS.filter(
+        q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+      )[0];
+
+      jest.spyOn(QuestionModel, 'findOne').mockReturnValue({
+        populate: jest.fn().mockResolvedValue(question),
+      } as unknown as Query<PopulatedDatabaseQuestion[], typeof QuestionModel>);
+
+      const result = (await fetchQuestionById(
+        '65e9b5a995b6c7045a30d823',
+      )) as PopulatedDatabaseQuestion;
+
+      expect(result._id.toString()).toEqual('65e9b5a995b6c7045a30d823');
+      expect(result.title).toEqual(question.title);
+      expect(result.text).toEqual(question.text);
+      expect(result.answers).toEqual(question.answers);
+      expect(result.askDateTime).toEqual(question.askDateTime);
+    });
+
+    test('fetchQuestionById should return an error if id does not exist', async () => {
+      jest.spyOn(QuestionModel, 'findOne').mockReturnValue({
+        populate: jest.fn().mockResolvedValue(null),
+      } as unknown as Query<PopulatedDatabaseQuestion[], typeof QuestionModel>);
+
+      const result = await fetchQuestionById('65e9b716ff0e892116b2de01');
+
+      expect(result).toEqual({ error: 'Question not found' });
+    });
+
+    test('fetchQuestionById should return an object with error if findOne throws an error', async () => {
+      jest.spyOn(QuestionModel, 'findOne').mockReturnValue({
+        populate: jest.fn().mockRejectedValue(new Error('Database error')),
+      } as unknown as Query<PopulatedDatabaseQuestion[], typeof QuestionModel>);
+
+      const result = (await fetchQuestionById('65e9b716ff0e892116b2de01')) as {
+        error: string;
+      };
+
+      expect(result.error).toEqual('Error fetching question');
     });
   });
 

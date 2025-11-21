@@ -18,14 +18,14 @@ const useNotifications = () => {
     if (!socket) return;
 
     /**
-     * run when a notification is received
-     * @param payload the notification payload
+     * Handles incoming notifications from the server
+     * @param payload - The notification payload received from the server
      */
     const handleNotification = (payload: NotificationPayload) => {
       const newNotification: NotificationItem = { ...payload, id: generateId() };
       setNotifications(prev => [...prev, newNotification]);
 
-      // Remove after 5 seconds
+      // remove after 5 seconds
       setTimeout(() => {
         setNotifications(prev => prev.filter(n => n.id !== newNotification.id));
       }, 5000);
