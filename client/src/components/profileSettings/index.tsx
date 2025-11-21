@@ -59,7 +59,9 @@ const ProfileSettings: React.FC = () => {
       {/* Left column: general info */}
       <div className='profile-left-column'>
         <div className='profile-card'>
-          <h2>Profile</h2>
+          <h2>
+            {userData.firstName} {userData.lastName}
+          </h2>
 
           {successMessage && <p className='success-message'>{successMessage}</p>}
           {errorMessage && <p className='error-message'>{errorMessage}</p>}

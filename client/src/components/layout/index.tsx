@@ -2,6 +2,7 @@ import './index.css';
 import { Outlet } from 'react-router-dom';
 import SideBarNav from '../main/sideBarNav';
 import Header from '../header';
+import Notifications from '../Notifications';
 
 /**
  * Main component represents the layout of the main page, including a sidebar and the main content area.
@@ -14,6 +15,7 @@ const Layout = () => (
       <div id='right_main' className='right_main'>
         <Outlet />
       </div>
+      <Notifications />
     </div>
   </>
 );

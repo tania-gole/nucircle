@@ -10,13 +10,16 @@ import useUserContext from '../../../hooks/useUserContext';
  */
 const SideBarNav = () => {
   const { user } = useUserContext();
-  const [hovered, setHovered] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const location = useLocation();
 
   const isActiveOption = (path: string) =>
     location.pathname === path ? 'message-option-selected ' : '';
 
-  const isMessagingActive = location.pathname.startsWith('/messaging');
+  const toggleMessaging = (e: React.MouseEvent) => {
+    e.preventDefault(); // prevent immediate route change
+    setIsOpen(prev => !prev);
+  };
 
   return (
     <div id='sideBarNav' className='sideBarNav'>
@@ -32,28 +35,25 @@ const SideBarNav = () => {
         className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
         Tags
       </NavLink>
-      <div
-        className='messaging-wrapper'
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}>
-        <NavLink
-          to='/messaging/direct-message'
-          id='menu_messaging'
-          className={`menu_button ${isMessagingActive ? 'menu_selected' : ''}`}>
+      <div className='messaging-wrapper'>
+        <div className={`menu_button`} onClick={toggleMessaging}>
           Messaging
-        </NavLink>
-        {hovered && (
-          <div className='messaging-dropdown'>
+        </div>
+
+        {isOpen && (
+          <div className='messaging-collapse'>
             <NavLink
               to='/messaging/direct-message'
               className={`message-option ${isActiveOption('/messaging/direct-message')}`}>
               Direct Messages
             </NavLink>
+
             <NavLink
               to='/messaging/community-messages'
               className={`message-option ${isActiveOption('/messaging/community-messages')}`}>
               Community Messages
             </NavLink>
+
             <NavLink to='/messaging' className={`message-option ${isActiveOption('/messaging')}`}>
               Global Messages
             </NavLink>

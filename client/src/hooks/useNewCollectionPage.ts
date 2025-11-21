@@ -28,8 +28,10 @@ const useNewCollectionPage = () => {
     setCollectionName(event.target.value);
   };
 
-  const handleCollectionDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCollectionDescription(event.target.value);
+  const handleCollectionDescriptionChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setCollectionDescription(e.target.value);
   };
 
   const handleIsPrivateChange = (event: React.ChangeEvent<HTMLInputElement>) => {

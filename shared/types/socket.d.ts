@@ -126,6 +126,18 @@ export interface CollectionUpdatePayload {
 }
 
 /**
+ * Interface representing the payload for a notification event.
+ * - `type`: The type of notification (`'dm'`, `'answer'`, or `'communityNewMember'`).
+ * - `message`: The notification message content.
+ */
+export interface NotificationPayload {
+  type: 'dm' | 'answer' | 'communityNewMember';
+  from: msgFrom;
+  chatId: string;
+  messagePreview: string;
+}
+
+/**
  * Interface representing a quiz invitation between two users.
  * - `id`: Unique identifier for this invitation (UUID)
  * - `challengerUsername`: Username of the user sending the invitation
@@ -231,6 +243,7 @@ export interface ServerToClientEvents {
       like: { users: string[]; count: number };
     };
   }) => void;
+  notification: (payload: NotificationPayload) => void;
   opponentDisconnected: (payload: {
     gameId: string;
     disconnectedPlayer: string;

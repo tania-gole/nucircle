@@ -17,6 +17,7 @@ import {
   PopulatedDatabaseChat,
 } from '../types/types';
 import { saveMessage } from '../services/message.service';
+import { getUserByUsername } from '../services/user.service';
 
 /*
  * This controller handles chat-related routes.
@@ -91,9 +92,25 @@ const chatController = (socket: FakeSOSocket) => {
       // Enrich the updated chat for the response
       const populatedChat = await populateDocument(updatedChat._id.toString(), 'chat');
 
+      // Notify recipient if it's a direct message
+      if (updatedChat.participants.length == 2) {
+        const recipient = updatedChat.participants.find(p => p !== msgFrom);
+        if (recipient) {
+          const recipientUser = await getUserByUsername(recipient);
+          if (!('error' in recipientUser) && recipientUser.socketId) {
+            socket.to(recipientUser.socketId).emit('notification', {
+              type: 'dm',
+              from: msgFrom,
+              chatId: chatId,
+              messagePreview: msg.slice(0, 30), // First 30 chars as preview
+            });
+          }
+        }
+      }
       socket
         .to(chatId)
         .emit('chatUpdate', { chat: populatedChat as PopulatedDatabaseChat, type: 'newMessage' });
+
       res.json(populatedChat);
     } catch (err: unknown) {
       res.status(500).send(`Error adding a message to chat: ${(err as Error).message}`);

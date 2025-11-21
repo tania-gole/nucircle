@@ -46,6 +46,8 @@
 }
 
 .reaction-btn {
+  display: flex;
+  align-items: center;
   background: transparent;
   border: none;
   cursor: pointer;

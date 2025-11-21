@@ -1,42 +1,46 @@
 .collection-page {
-  padding: 2rem;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  padding: 32px;
   min-height: 100vh;
 }
 
 .collection-header {
-  margin-bottom: 2rem;
+  padding: 16px;
 }
 
 .collection-title {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  color: #1e293b;
+  margin: 0;
+  font-weight: 500;
+  font-size: 32px;
+  color: #2c3849;
 }
 
 .collection-description {
-  font-size: 1rem;
-  color: #475569;
-  margin-bottom: 0.5rem;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  line-clamp: 3;
-  box-orient: vertical;
-  overflow: hidden;
+  font-size: 18px;
+  color: #56606d;
+  margin-bottom: 20px;
+  padding-left: 5px;
+  line-height: 1.4;
 }
 
 .collection-meta {
-  font-size: 0.9rem;
+  font-size: 16px;
   color: #64748b;
+  padding-left: 5px;
+}
+
+.collection-meta span {
+  font-size: 18px;
+  font-weight: 500;
+  padding: 5px 10px;
+  margin-right: 10px;
+  background: #e9e0fe;
+  border-radius: 15px;
+  color: #a17bf7;
 }
 
 .questions-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
 }
 
 .header-row {
@@ -45,9 +49,4 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-}
-
-.collection-title {
-  font-size: 2rem;
-  color: #1e293b;
 }
