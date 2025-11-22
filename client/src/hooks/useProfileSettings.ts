@@ -6,6 +6,7 @@ import {
   resetPassword,
   updateBiography,
   getUserStats,
+  updateUserStatVisibility,
   type UserStats,
 } from '../services/userService';
 import badgeService from '../services/badgeService';
@@ -30,7 +31,15 @@ const useProfileSettings = () => {
   const [newBio, setNewBio] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // User stats
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [showStats, setShowStats] = useState(true);
+  useEffect(() => {
+    if (userData) {
+      setShowStats(userData.showStats ?? true);
+    }
+  }, [userData]);
 
   // For delete-user confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -178,6 +187,23 @@ const useProfileSettings = () => {
     return;
   };
 
+  /**
+   * Toggles visibility of the user's profile stats.
+   */
+  const toggleStatsVisibility = async () => {
+    if (!userData) return;
+
+    const newValue = !showStats;
+
+    try {
+      await updateUserStatVisibility(userData.username, 'showStats', newValue);
+      setShowStats(newValue);
+      setUserData(prev => (prev ? { ...prev, showStats: newValue } : null));
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+    }
+  };
+
   return {
     userData,
     badges,
@@ -204,6 +230,8 @@ const useProfileSettings = () => {
     handleDeleteUser,
     handleViewCollectionsPage,
     userStats,
+    showStats,
+    toggleStatsVisibility,
   };
 };
 

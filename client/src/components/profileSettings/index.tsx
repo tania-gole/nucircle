@@ -32,6 +32,8 @@ const ProfileSettings: React.FC = () => {
     handleDeleteUser,
     handleViewCollectionsPage,
     userStats,
+    showStats,
+    toggleStatsVisibility,
   } = useProfileSettings();
 
   if (loading) {
@@ -114,23 +116,33 @@ const ProfileSettings: React.FC = () => {
               <strong>Date Joined:</strong>{' '}
               {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
             </p>
-            <p>
-              <strong>Points Earned:</strong> {userData.points || 0}
-            </p>
-            <p>
-              <strong>Questions:</strong> {userStats?.questionsPosted || 0}
-            </p>
-            <p>
-              <strong>Answers:</strong> {userStats?.answersPosted || 0}
-            </p>
-            <p>
-              <strong>Communities:</strong> {userStats?.communitiesJoined || 0}
-            </p>
+            {/* show/hide section based on toggleStatsVisibility */}
+            {(showStats || canEditProfile) && (
+              <>
+                <p>
+                  <strong>Points Earned:</strong> {userData.points || 0}
+                </p>
+                <p>
+                  <strong>Questions:</strong> {userStats?.questionsPosted || 0}
+                </p>
+                <p>
+                  <strong>Answers:</strong> {userStats?.answersPosted || 0}
+                </p>
+                <p>
+                  <strong>Communities:</strong> {userStats?.communitiesJoined || 0}
+                </p>
 
-            <p>
-              <strong>Quizzes Won:</strong> {userStats?.quizzesWon || 0} /{' '}
-              {userStats?.quizzesPlayed || 0}
-            </p>
+                <p>
+                  <strong>Quizzes Won:</strong> {userStats?.quizzesWon || 0} /{' '}
+                  {userStats?.quizzesPlayed || 0}
+                </p>
+              </>
+            )}
+            {canEditProfile && (
+              <button className='button button-primary' onClick={toggleStatsVisibility}>
+                {showStats ? 'Unpublish Stats' : 'Publish Stats'}
+              </button>
+            )}
           </div>
 
           {/* ---- Badge Section ---- */}

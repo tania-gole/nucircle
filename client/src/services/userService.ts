@@ -167,6 +167,29 @@ const getUserStats = async (username: string): Promise<UserStats> => {
   return res.data;
 };
 
+/**
+ * Updates visibility settings for user stats
+ * @param username The username of the user
+ * @param field The field to update
+ * @param value The new visibility value
+ * @returns The updated user
+ */
+const updateUserStatVisibility = async (
+  username: string,
+  field: string,
+  value: boolean,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/updateStatVisibility`, {
+    username,
+    field,
+    value,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when updating stat visibility');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -177,4 +200,5 @@ export {
   updateBiography,
   markWelcomeMessageSeen,
   getUserStats,
+  updateUserStatVisibility,
 };

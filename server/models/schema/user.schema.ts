@@ -76,6 +76,10 @@ const userSchema: Schema = new Schema(
       type: Number,
       default: 0,
     },
+    showStats: {
+      type: Boolean,
+      default: true,
+    },
   },
   { collection: 'User' },
 );

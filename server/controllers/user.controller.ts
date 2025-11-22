@@ -274,6 +274,33 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Toggles the visibility of a user's profile stats.
+   * @param req The request containing the username, field, and value in the body.
+   * @param res The response, either confirming the update or returning an error.
+   * @returns A promise resolving to void.
+   */
+  const updateStatVisibility = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, field, value } = req.body;
+      if (username !== req.user!.username) {
+        res.status(401).send('Unauthorized');
+        return;
+      }
+      if (field != 'showStats') {
+        res.status(400).send('Invalid field');
+        return;
+      }
+      const updatedUser = await updateUser(username, { [field]: value });
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error updating visibility: ${(error as Error).message}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -285,6 +312,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/me', authMiddleware, getCurrentUser);
   router.patch('/markWelcomeSeen', authMiddleware, markWelcomeMessageSeen);
   router.get('/stats/:username', getUserStats);
+  router.patch('/updateStatVisibility', authMiddleware, updateStatVisibility);
   return router;
 };
 
