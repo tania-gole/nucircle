@@ -1,130 +1,205 @@
-/* eslint-disable no-console */
 import { useEffect, useState } from 'react';
 import useUserContext from './useUserContext';
 import { SafeDatabaseUser, UserUpdatePayload } from '../types/types';
-import { getUsers } from '../services/userService';
+import {
+  getUsers,
+  searchUsers,
+  getFilterOptions,
+  UserSearchFilters,
+  EnrichedUser,
+} from '../services/userService';
+import { getUserCommunities } from '../services/communityService';
 
-/**
- * Custom hook for managing the users list page state, filtering, and real-time updates.
- *
- * @returns titleText - The current title of the users list page
- * @returns ulist - The list of users to display
- * @returns setUserFilter - Function to set the filtering value of the user search.
- */
 const useUsersListPage = () => {
-  const { socket } = useUserContext();
+  const { socket, user } = useUserContext();
 
-  const [userFilter, setUserFilter] = useState<string>('');
-  const [userList, setUserList] = useState<SafeDatabaseUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<EnrichedUser[]>([]);
+
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filters, setFilters] = useState<UserSearchFilters>({});
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+
+  const [majors, setMajors] = useState<string[]>([]);
+  const [graduationYears, setGraduationYears] = useState<number[]>([]);
+  const [communities, setCommunities] = useState<{ _id: string; name: string }[]>([]);
 
   useEffect(() => {
-    /**
-     * Function to fetch users based and update the user list
-     */
     const fetchData = async () => {
       try {
         const res = await getUsers();
-        setUserList(res || []);
+        const enriched: EnrichedUser[] = res.map(u => ({
+          ...u,
+          workExperiences: [],
+          communities: [],
+        }));
+        setFilteredUsers(enriched);
       } catch (error) {
-        console.log(error);
+        setFilteredUsers([]);
       }
     };
 
-    /**
-     * Removes a user from the userList using a filter
-     * @param prevUserList the list of users
-     * @param user the user to remove
-     * @returns a list without the given user
-     */
-    const removeUserFromList = (prevUserList: SafeDatabaseUser[], user: SafeDatabaseUser) =>
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        const options = await getFilterOptions();
+        setMajors(options.majors);
+        setGraduationYears(options.graduationYears);
+
+        if (user?.username) {
+          const userCommunities = await getUserCommunities(user.username);
+          setCommunities(userCommunities.map(c => ({ _id: c._id.toString(), name: c.name })));
+        }
+      } catch (error) {
+        setMajors([]);
+        setGraduationYears([]);
+      }
+    };
+
+    fetchFilterOptions();
+  }, [user]);
+
+  const handleSearch = async () => {
+    setIsSearching(true);
+
+    try {
+      const hasSearch = searchQuery.trim() !== '';
+      const hasFilters = Object.values(filters).some(v => v);
+
+      if (!hasSearch && !hasFilters) {
+        const res = await getUsers();
+        const enriched: EnrichedUser[] = res.map(u => ({
+          ...u,
+          workExperiences: [],
+          communities: [],
+        }));
+        setFilteredUsers(enriched);
+      } else {
+        const results = await searchUsers(searchQuery, filters);
+        setFilteredUsers(results);
+      }
+    } catch (error) {
+      setFilteredUsers([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleClearSearch = async () => {
+    setSearchQuery('');
+    setFilters({});
+    const res = await getUsers();
+    const enriched: EnrichedUser[] = res.map(u => ({
+      ...u,
+      workExperiences: [],
+      communities: [],
+    }));
+    setFilteredUsers(enriched);
+  };
+
+  const updateFilter = (key: keyof UserSearchFilters, value: string | number | undefined) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value || undefined,
+    }));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const toggleFilters = () => {
+    setShowFilters(prev => !prev);
+  };
+
+  useEffect(() => {
+    const removeUserFromList = (prevUserList: EnrichedUser[], user: SafeDatabaseUser) =>
       prevUserList.filter(otherUser => user.username !== otherUser.username);
 
-    /**
-     * Adds a user to the userList, if not present. Otherwise updates the user.
-     * @param prevUserList the list of users
-     * @param user the user to add
-     * @returns a list with the user added, or updated if present.
-     */
-    const addUserToList = (prevUserList: SafeDatabaseUser[], user: SafeDatabaseUser) => {
+    const addUserToList = (
+      prevUserList: EnrichedUser[],
+      user: SafeDatabaseUser,
+    ): EnrichedUser[] => {
       const userExists = prevUserList.some(otherUser => otherUser.username === user.username);
 
       if (userExists) {
-        // Update the existing user
         return prevUserList.map(otherUser =>
-          otherUser.username === user.username ? user : otherUser,
+          otherUser.username === user.username
+            ? { ...user, workExperiences: [], communities: [] }
+            : otherUser,
         );
       }
 
-      return [user, ...prevUserList];
+      return [{ ...user, workExperiences: [], communities: [] }, ...prevUserList];
     };
 
-    /**
-     * Function to handle user updates from the socket.
-     *
-     * @param user - the updated user object.
-     */
     const handleModifiedUserUpdate = (userUpdate: UserUpdatePayload) => {
-      setUserList(prevUserList => {
+      setFilteredUsers(prevList => {
         switch (userUpdate.type) {
           case 'created':
           case 'updated':
-            return addUserToList(prevUserList, userUpdate.user);
+            return addUserToList(prevList, userUpdate.user);
           case 'deleted':
-            return removeUserFromList(prevUserList, userUpdate.user);
+            return removeUserFromList(prevList, userUpdate.user);
           default:
-            throw new Error('Invalid user update type');
+            return prevList;
         }
       });
     };
 
-    fetchData();
+    const handleUserStatusUpdate = (statusUpdate: {
+      username: string;
+      isOnline: boolean;
+      lastSeen?: Date;
+    }) => {
+      setFilteredUsers(prevList =>
+        prevList.map(user =>
+          user.username === statusUpdate.username
+            ? { ...user, isOnline: statusUpdate.isOnline, lastSeen: statusUpdate.lastSeen }
+            : user,
+        ),
+      );
+    };
 
     socket.on('userUpdate', handleModifiedUserUpdate);
-
-    socket.on(
-      'userStatusUpdate',
-      (statusUpdate: { username: string; isOnline: boolean; lastSeen?: Date }) => {
-        setUserList(prevUserList =>
-          prevUserList.map(user =>
-            user.username === statusUpdate.username
-              ? { ...user, isOnline: statusUpdate.isOnline, lastSeen: statusUpdate.lastSeen }
-              : user,
-          ),
-        );
-      },
-    );
+    socket.on('userStatusUpdate', handleUserStatusUpdate);
 
     return () => {
       socket.off('userUpdate', handleModifiedUserUpdate);
-      socket.off('userStatusUpdate');
+      socket.off('userStatusUpdate', handleUserStatusUpdate);
     };
   }, [socket]);
 
-  /**
-   * Function to handle challenge user button click.
-   *
-   * @param recipientUsername - the user object requesting the quiz
-   */
-  // const handleChallengeClick = (recipientUsername: string) => {
-  //   if (!socket) {
-  //     return;
-  //   }
-  //   socket.emit('sendQuizInvite', recipientUsername);
-  // };
   const handleChallengeClick = (recipientUsername: string) => {
     if (!socket) {
-      console.error('Socket not connected');
       return;
     }
 
-    console.log('[DEBUG] Socket ID:', socket.id); // ← ADD THIS
-    console.log('[DEBUG] Socket connected:', socket.connected); // ← ADD THIS
-    console.log(`Sending quiz invite to ${recipientUsername}`);
     socket.emit('sendQuizInvite', recipientUsername);
   };
 
-  const filteredUserlist = userList.filter(user => user.username.includes(userFilter));
-  return { userList: filteredUserlist, setUserFilter, handleChallengeClick };
+  return {
+    userList: filteredUsers,
+    searchQuery,
+    setSearchQuery,
+    filters,
+    updateFilter,
+    handleSearch,
+    handleClearSearch,
+    handleKeyPress,
+    isSearching,
+    showFilters,
+    toggleFilters,
+    majors,
+    graduationYears,
+    communities,
+    handleChallengeClick,
+  };
 };
 
 export default useUsersListPage;
