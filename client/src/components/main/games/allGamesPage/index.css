@@ -1,20 +1,15 @@
 /* General Styles */
 body {
-  font-family: Arial, sans-serif;
   background-color: #f8f9fa;
   /* margin: 0; */
   padding: 0;
 }
 
-.game-page {
-  padding: 20px;
-  max-width: 900px;
-  margin: 0 auto;
-  margin-top: 20px;
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(72, 72, 72, 0.1);
-  color: #484848;
+.game-title {
+  font-size: 40px;
+  font-weight: 500;
+  color: #2c3849;
+  margin-bottom: 15px;
 }
 
 .game-header h1 {
