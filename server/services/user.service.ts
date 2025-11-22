@@ -237,3 +237,162 @@ export const getOnlineUsers = async (): Promise<UsersResponse> => {
     return { error: `Error occurred when finding online users: ${error}` };
   }
 };
+
+/**
+ * Search and filter users with tags data
+ * @returns - list of users with their work experiences and communities for tag display
+ */
+/**
+ * Interface for enriched user with work experience and communities
+ */
+interface EnrichedUser extends SafeDatabaseUser {
+  workExperiences: Array<{
+    company: string;
+    title: string;
+    type: string;
+  }>;
+  communities: Array<{
+    _id: unknown;
+    name: string;
+  }>;
+}
+
+/**
+ * Search and filter users with tags data
+ * Returns users with their work experiences and communities for tag display
+ */
+export const searchUsers = async (
+  searchQuery: string,
+  filters?: {
+    major?: string;
+    graduationYear?: number;
+    communityId?: string;
+  },
+): Promise<EnrichedUser[]> => {
+  try {
+    const query: Record<string, unknown> = {};
+    let usernames: string[] = [];
+
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchRegex = { $regex: searchQuery, $options: 'i' };
+
+      const usersByName = await UserModel.find({
+        $or: [{ firstName: searchRegex }, { lastName: searchRegex }, { username: searchRegex }],
+      })
+        .select('username')
+        .lean();
+
+      usernames.push(...usersByName.map(u => u.username));
+
+      const WorkExperienceModel = (await import('../models/workExperience.model')).default;
+      const workExps = await WorkExperienceModel.find({
+        $or: [{ company: searchRegex }, { title: searchRegex }],
+      })
+        .select('username')
+        .lean();
+
+      usernames.push(...workExps.map(w => w.username));
+
+      const CommunityModel = (await import('../models/community.model')).default;
+      const communities = await CommunityModel.find({
+        name: searchRegex,
+      }).lean();
+
+      communities.forEach(comm => {
+        usernames.push(...comm.participants);
+      });
+
+      // Remove duplicates
+      usernames = [...new Set(usernames)];
+
+      if (usernames.length > 0) {
+        query.username = { $in: usernames };
+      }
+    }
+
+    if (filters?.major && filters.major !== '') {
+      query.major = { $regex: filters.major, $options: 'i' };
+    }
+
+    if (filters?.graduationYear) {
+      query.graduationYear = filters.graduationYear;
+    }
+
+    // Find users
+    const users = await UserModel.find(query).select('-password').limit(100).lean();
+
+    let filteredUsers = users;
+    if (filters?.communityId) {
+      const CommunityModel = (await import('../models/community.model')).default;
+      const community = await CommunityModel.findById(filters.communityId);
+
+      if (community) {
+        filteredUsers = users.filter(user => community.participants.includes(user.username));
+      }
+    }
+
+    const WorkExperienceModel = (await import('../models/workExperience.model')).default;
+    const CommunityModel = (await import('../models/community.model')).default;
+
+    const enrichedUsers: EnrichedUser[] = await Promise.all(
+      filteredUsers.map(async user => {
+        // Get work experiences
+        const workExps = await WorkExperienceModel.find({ username: user.username })
+          .select('company title type')
+          .limit(3) // Only get latest 3
+          .lean();
+
+        // Get communities
+        const communities = await CommunityModel.find({
+          participants: user.username,
+        })
+          .select('name _id')
+          .limit(3) // Only get 3 communities
+          .lean();
+
+        return {
+          ...(user as SafeDatabaseUser),
+          workExperiences: workExps.map(w => ({
+            company: w.company,
+            title: w.title,
+            type: w.type,
+          })),
+          communities: communities.map(c => ({
+            _id: c._id,
+            name: c.name,
+          })),
+        };
+      }),
+    );
+
+    return enrichedUsers;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Get unique majors for filter dropdown
+ */
+export const getUniqueMajors = async (): Promise<string[]> => {
+  try {
+    const majors = await UserModel.distinct('major');
+    // Cast and filter properly
+    return (majors as string[]).filter(m => m && m.trim() !== '').sort();
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Get unique graduation years for filter dropdown
+ */
+export const getUniqueGraduationYears = async (): Promise<number[]> => {
+  try {
+    const years = await UserModel.distinct('graduationYear');
+    // Cast and filter properly
+    return (years as number[]).filter(y => y !== null && y !== 0).sort((a, b) => a - b);
+  } catch (error) {
+    return [];
+  }
+};
