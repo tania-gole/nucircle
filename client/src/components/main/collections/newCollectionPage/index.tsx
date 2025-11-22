@@ -28,21 +28,28 @@ const NewCollectionPage = () => {
         value={collectionName}
       />
 
-      <input
-        type='text'
+      <textarea
         placeholder='Collection Description'
-        className='new-collection-input'
+        className='new-collection-textarea'
         value={collectionDescription}
         onChange={handleCollectionDescriptionChange}
       />
 
-      <label className='new-collection-checkbox'>
-        <input type='checkbox' checked={isPrivate} onChange={handleIsPrivateChange} />
+      <label className='new-collection-checkbox-label'>
+        <label className='checkbox-wrapper'>
+          <input
+            type='checkbox'
+            checked={isPrivate}
+            onChange={handleIsPrivateChange}
+            className='new-collection-checkbox'
+          />
+          <div className='checkmark'></div>
+        </label>
         Private Collection
       </label>
 
-      <button className='new-collection-btn' onClick={handleCreateCollection}>
-        Create
+      <button className='new-collection-submit' onClick={handleCreateCollection}>
+        Create Collection
       </button>
 
       {error && <p className='new-collection-error'>{error}</p>}

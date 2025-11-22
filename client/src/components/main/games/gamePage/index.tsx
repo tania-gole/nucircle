@@ -54,65 +54,67 @@ const GamePage = () => {
   };
 
   return (
-    <div className='game-page'>
-      <header className='game-header'>
-        <h1>{getGameTitle()}</h1>
-        <p className='game-status'>
-          Status: {gameInstance ? gameInstance.state.status : 'Not started'}
-        </p>
-      </header>
+    <div className='page-container'>
+      <div className='game-page'>
+        <header className='game-header'>
+          <h1>{getGameTitle()}</h1>
+          <p className='game-status'>
+            Status: {gameInstance ? gameInstance.state.status : 'Not started'}
+          </p>
+        </header>
 
-      {gameInstance && (
-        <div className='game-players-list'>
-          <h3>Players in Game:</h3>
-          <ul>
-            {gameInstance.players.length > 0 ? (
-              gameInstance.players.map((player: string) => <li key={player}>{player}</li>)
-            ) : (
-              <li>No players yet</li>
-            )}
-          </ul>
-        </div>
-      )}
-
-      <div className='game-controls'>
-        {/* Game Info, lowkey can be helpful for debugging :P */}
         {gameInstance && (
-          <div
-            style={{
-              marginBottom: '10px',
-              padding: '10px',
-              background: '#f0f0f0',
-              borderRadius: '5px',
-            }}>
-            <p>
-              <strong>Game Info:</strong>
-            </p>
-            <p>Game Status: {gameInstance.state.status}</p>
-            <p>Game Type: {gameInstance.gameType}</p>
-            <p>Player Count: {gameInstance.players.length}</p>
-            <p>Players: {JSON.stringify(gameInstance.players)}</p>
-            <p>Player 1: {(gameInstance.state as GameWithPlayerState).player1 || 'undefined'}</p>
-            <p>Player 2: {(gameInstance.state as GameWithPlayerState).player2 || 'undefined'}</p>
+          <div className='game-players-list'>
+            <h3>Players in Game:</h3>
+            <ul>
+              {gameInstance.players.length > 0 ? (
+                gameInstance.players.map((player: string) => <li key={player}>{player}</li>)
+              ) : (
+                <li>No players yet</li>
+              )}
+            </ul>
           </div>
         )}
 
-        {gameInstance && gameInstance.state.status === 'WAITING_TO_START' && (
-          <button className='btn-start-game' onClick={handleStartGame}>
-            Start Game
+        <div className='game-controls'>
+          {/* Game Info, lowkey can be helpful for debugging :P */}
+          {gameInstance && (
+            <div
+              style={{
+                marginBottom: '10px',
+                padding: '10px',
+                background: '#f0f0f0',
+                borderRadius: '5px',
+              }}>
+              <p>
+                <strong>Game Info:</strong>
+              </p>
+              <p>Game Status: {gameInstance.state.status}</p>
+              <p>Game Type: {gameInstance.gameType}</p>
+              <p>Player Count: {gameInstance.players.length}</p>
+              <p>Players: {JSON.stringify(gameInstance.players)}</p>
+              <p>Player 1: {(gameInstance.state as GameWithPlayerState).player1 || 'undefined'}</p>
+              <p>Player 2: {(gameInstance.state as GameWithPlayerState).player2 || 'undefined'}</p>
+            </div>
+          )}
+
+          {gameInstance && gameInstance.state.status === 'WAITING_TO_START' && (
+            <button className='btn-start-game' onClick={handleStartGame}>
+              Start Game
+            </button>
+          )}
+
+          <button className='btn-leave-game' onClick={handleLeaveGame}>
+            Leave Game
           </button>
+        </div>
+
+        {gameInstance && renderGameComponent(gameInstance.gameType)}
+
+        {error && !error.toLowerCase().includes('request failed with status code') && (
+          <div className='game-error'>{error}</div>
         )}
-
-        <button className='btn-leave-game' onClick={handleLeaveGame}>
-          Leave Game
-        </button>
       </div>
-
-      {gameInstance && renderGameComponent(gameInstance.gameType)}
-
-      {error && !error.toLowerCase().includes('request failed with status code') && (
-        <div className='game-error'>{error}</div>
-      )}
     </div>
   );
 };

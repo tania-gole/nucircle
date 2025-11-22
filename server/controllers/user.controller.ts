@@ -20,6 +20,7 @@ import {
   searchUsers,
   getUniqueMajors,
   getUniqueGraduationYears,
+  getLeaderboard,
 } from '../services/user.service';
 import QuestionModel from '../models/questions.model';
 import AnswerModel from '../models/answers.model';
@@ -364,6 +365,52 @@ const userController = (socket: FakeSOSocket) => {
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when updating profile: ${error}`);
+   * Toggles the visibility of a user's profile stats.
+   * @param req The request containing the username, field, and value in the body.
+   * @param res The response, either confirming the update or returning an error.
+   * @returns A promise resolving to void.
+   */
+  const updateStatVisibility = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, field, value } = req.body;
+      if (username !== req.user!.username) {
+        res.status(401).send('Unauthorized');
+        return;
+      }
+      if (field != 'showStats') {
+        res.status(400).send('Invalid field');
+        return;
+      }
+      const updatedUser = await updateUser(username, { [field]: value });
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error updating visibility: ${(error as Error).message}`);
+    }
+  };
+
+  /**
+   * Gets the global leaderboard sorted by points
+   */
+  const getLeaderboardRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const leaderboard = await getLeaderboard(limit);
+
+      if ('error' in leaderboard) {
+        throw new Error(leaderboard.error);
+      }
+
+      res.status(200).json(leaderboard);
+    } catch (error) {
+      res.status(500).send(`Error fetching leaderboard: ${(error as Error).message}`);
     }
   };
 
@@ -381,6 +428,8 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/search', searchUsersRoute);
   router.get('/filter-options', getFilterOptionsRoute);
   router.patch('/updateProfile', updateProfile);
+  router.patch('/updateStatVisibility', authMiddleware, updateStatVisibility);
+  router.get('/leaderboard', getLeaderboardRoute);
   return router;
 };
 

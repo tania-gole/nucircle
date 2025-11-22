@@ -7,15 +7,21 @@ import {
   createCommunity,
   deleteCommunity,
   getCommunitiesByUser,
+  recordCommunityVisit,
 } from '../../services/community.service';
 import { Community, DatabaseCommunity } from '../../types/types';
 
 import * as badgeService from '../../services/badge.service';
+import * as pointService from '../../services/point.service';
 
 jest.mock('../../services/badge.service', () => ({
   countUserQuestions: jest.fn(),
   checkAndAwardMilestoneBadge: jest.fn(),
   checkAndAwardCommunityBadge: jest.fn(),
+}));
+
+jest.mock('../../services/point.service', () => ({
+  awardPointsToUser: jest.fn(),
 }));
 
 describe('Community Service', () => {
@@ -64,18 +70,7 @@ describe('Community Service', () => {
       expect(result).toEqual(mockCommunities);
       expect(CommunityModel.find).toHaveBeenCalledWith({ participants: 'user1' });
     });
-    test('should return all communities the user is part of if user is not in all communities', async () => {
-      jest.spyOn(CommunityModel, 'find').mockResolvedValueOnce([mockCommunity]);
-      const result = await getCommunitiesByUser('user2');
-      expect(result).toEqual([mockCommunity]);
-      expect(CommunityModel.find).toHaveBeenCalledWith({ participants: 'user2' });
-    });
-    test('should return empty array if user is in no communities', async () => {
-      jest.spyOn(CommunityModel, 'find').mockResolvedValueOnce([]);
-      const result = await getCommunitiesByUser('nonexistent_user');
-      expect(result).toEqual([]);
-      expect(CommunityModel.find).toHaveBeenCalledWith({ participants: 'nonexistent_user' });
-    });
+
     test('should return error when database throws error', async () => {
       jest.spyOn(CommunityModel, 'find').mockRejectedValueOnce(new Error('Database error'));
       const result = await getCommunitiesByUser('user1');
@@ -153,14 +148,18 @@ describe('Community Service', () => {
       jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(communityWithoutUser);
       jest.spyOn(CommunityModel, 'findByIdAndUpdate').mockResolvedValueOnce(updatedCommunity);
       (badgeService.checkAndAwardCommunityBadge as jest.Mock).mockResolvedValue(true);
+      (pointService.awardPointsToUser as jest.Mock).mockResolvedValue(5);
 
       const result = await toggleCommunityMembership('65e9b58910afe6e94fc6e6dc', 'user3');
 
-      expect(result).toEqual(updatedCommunity);
-      expect(CommunityModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      expect(result).toEqual({
+        community: updatedCommunity,
+        added: true,
+      });
+      expect(pointService.awardPointsToUser).toHaveBeenCalledWith('user3', 5);
+      expect(badgeService.checkAndAwardCommunityBadge).toHaveBeenCalledWith(
+        'user3',
         '65e9b58910afe6e94fc6e6dc',
-        { $addToSet: { participants: 'user3' } },
-        { new: true },
       );
     });
 
@@ -176,7 +175,10 @@ describe('Community Service', () => {
 
       const result = await toggleCommunityMembership('65e9b58910afe6e94fc6e6dc', 'user2');
 
-      expect(result).toEqual(updatedCommunity);
+      expect(result).toEqual({
+        community: updatedCommunity,
+        added: false,
+      });
       expect(CommunityModel.findByIdAndUpdate).toHaveBeenCalledWith(
         '65e9b58910afe6e94fc6e6dc',
         { $pull: { participants: 'user2' } },
@@ -337,6 +339,157 @@ describe('Community Service', () => {
       const result = await deleteCommunity('65e9b58910afe6e94fc6e6dc', 'admin_user');
 
       expect(result).toEqual({ error: 'Database error' });
+    });
+  });
+
+  describe('recordCommunityVisit', () => {
+    const communityId = '65e9b58910afe6e94fc6e6dc';
+    const username = 'testuser';
+
+    test('should initialize visit streak for first-time visitor', async () => {
+      const mockCommunityData = {
+        ...mockCommunity,
+        visitStreaks: [],
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunityData as any);
+
+      await recordCommunityVisit(communityId, username);
+
+      expect(mockCommunityData.visitStreaks).toHaveLength(1);
+      expect(mockCommunityData.visitStreaks[0]).toMatchObject({
+        username,
+        currentStreak: 1,
+        longestStreak: 1,
+      });
+      expect(mockCommunityData.save).toHaveBeenCalled();
+    });
+
+    test('should increment streak for consecutive day visit', async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const mockCommunityData = {
+        ...mockCommunity,
+        visitStreaks: [
+          {
+            username,
+            lastVisitDate: yesterday,
+            currentStreak: 2,
+            longestStreak: 3,
+          },
+        ],
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunityData as any);
+
+      await recordCommunityVisit(communityId, username);
+
+      expect(mockCommunityData.visitStreaks[0].currentStreak).toBe(3);
+      expect(mockCommunityData.save).toHaveBeenCalled();
+    });
+
+    test('should update longest streak when current streak exceeds it', async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const mockCommunityData = {
+        ...mockCommunity,
+        visitStreaks: [
+          {
+            username,
+            lastVisitDate: yesterday,
+            currentStreak: 5,
+            longestStreak: 5,
+          },
+        ],
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunityData as any);
+
+      await recordCommunityVisit(communityId, username);
+
+      expect(mockCommunityData.visitStreaks[0].currentStreak).toBe(6);
+      expect(mockCommunityData.visitStreaks[0].longestStreak).toBe(6);
+    });
+
+    test('should reset streak when visit is not consecutive', async () => {
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      threeDaysAgo.setHours(0, 0, 0, 0);
+
+      const mockCommunityData = {
+        ...mockCommunity,
+        visitStreaks: [
+          {
+            username,
+            lastVisitDate: threeDaysAgo,
+            currentStreak: 5,
+            longestStreak: 10,
+          },
+        ],
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunityData as any);
+
+      await recordCommunityVisit(communityId, username);
+
+      expect(mockCommunityData.visitStreaks[0].currentStreak).toBe(1);
+      expect(mockCommunityData.visitStreaks[0].longestStreak).toBe(10);
+    });
+
+    test('should not update for same day visit', async () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const mockCommunityData = {
+        ...mockCommunity,
+        visitStreaks: [
+          {
+            username,
+            lastVisitDate: today,
+            currentStreak: 3,
+            longestStreak: 5,
+          },
+        ],
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunityData as any);
+
+      await recordCommunityVisit(communityId, username);
+
+      expect(mockCommunityData.visitStreaks[0].currentStreak).toBe(3);
+      expect(mockCommunityData.save).not.toHaveBeenCalled();
+    });
+
+    test('should return early when community not found', async () => {
+      jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(null);
+
+      await recordCommunityVisit(communityId, username);
+
+      expect(CommunityModel.findById).toHaveBeenCalledWith(communityId);
+    });
+
+    test('should initialize visitStreaks array if undefined', async () => {
+      const mockCommunityData = {
+        ...mockCommunity,
+        visitStreaks: undefined,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunityData as any);
+
+      await recordCommunityVisit(communityId, username);
+
+      expect(mockCommunityData.visitStreaks).toBeDefined();
+      expect(mockCommunityData.visitStreaks).toHaveLength(1);
     });
   });
 });

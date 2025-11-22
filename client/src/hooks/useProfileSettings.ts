@@ -6,6 +6,7 @@ import {
   resetPassword,
   updateBiography,
   getUserStats,
+  updateUserStatVisibility,
   type UserStats,
   updateUserProfile,
 } from '../services/userService';
@@ -19,7 +20,7 @@ import useUserContext from './useUserContext';
 const useProfileSettings = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
-  const { user: currentUser } = useUserContext();
+  const { user: currentUser, socket } = useUserContext();
 
   // Local state
   const [userData, setUserData] = useState<SafeDatabaseUser | null>(null);
@@ -31,10 +32,29 @@ const useProfileSettings = () => {
   const [newBio, setNewBio] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // User stats
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [editProfileMode, setEditProfileMode] = useState(false);
   const [newMajor, setNewMajor] = useState('');
   const [newGradYear, setNewGradYear] = useState<string | number>('');
+  const [showStats, setShowStats] = useState(true);
+  useEffect(() => {
+    if (!username || !socket) return;
+
+    const handleUserUpdate = (data: { user: SafeDatabaseUser; type: string }) => {
+      if (data.user.username === username && data.type === 'updated') {
+        setUserData(data.user);
+        setShowStats(data.user.showStats ?? true);
+      }
+    };
+
+    socket.on('userUpdate', handleUserUpdate);
+
+    return () => {
+      socket.off('userUpdate', handleUserUpdate);
+    };
+  }, [username, socket]);
 
   // For delete-user confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -201,6 +221,23 @@ const useProfileSettings = () => {
     return;
   };
 
+  /**
+   * Toggles visibility of the user's profile stats.
+   */
+  const toggleStatsVisibility = async () => {
+    if (!userData) return;
+
+    const newValue = !showStats;
+
+    try {
+      await updateUserStatVisibility(userData.username, 'showStats', newValue);
+      setShowStats(newValue);
+      setUserData(prev => (prev ? { ...prev, showStats: newValue } : null));
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+    }
+  };
+
   return {
     userData,
     badges,
@@ -234,6 +271,8 @@ const useProfileSettings = () => {
     newGradYear,
     setNewGradYear,
     handleUpdateProfile,
+    showStats,
+    toggleStatsVisibility,
   };
 };
 

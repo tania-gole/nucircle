@@ -23,7 +23,8 @@ const CollectionPage = () => {
         </div>
         <p className='collection-description'>{collection.description}</p>
         <p className='collection-meta'>
-          {collection.isPrivate ? 'Private' : 'Public'} • by {collection.username}
+          <span>{collection.isPrivate ? 'Private' : 'Public'}</span> •&nbsp;&nbsp;&nbsp; by{' '}
+          {collection.username}
         </p>
       </div>
 

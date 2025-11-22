@@ -27,6 +27,8 @@ import { useSocket, getSocket } from '../hooks/useSocket';
 import CommunityMessages from './main/communityMessagesPage';
 import useQuizInvite from '../hooks/useQuizInvite';
 import QuizInvitationPopUp from './quizInvitationPopUp';
+// import NotificationListener from './Notifications/NotificationListener';
+// import Notifications from './Notifications';
 
 /**
  * Component that handles quiz invitations for logged-in users.
@@ -43,6 +45,7 @@ const QuizInvitationHandler = () => {
     />
   );
 };
+
 const ProtectedRoute = ({
   user,
   children,
@@ -58,6 +61,8 @@ const ProtectedRoute = ({
 
   return (
     <UserContext.Provider value={{ user, socket }}>
+      {/* <NotificationListener />
+      <Notifications /> */}
       <QuizInvitationHandler />
       {children}
     </UserContext.Provider>
@@ -84,7 +89,7 @@ const FakeStackOverflow = () => {
         <Route path='tags' element={<TagPage />} />
         <Route path='/messaging' element={<MessagingPage />} />
         <Route path='/messaging/direct-message' element={<DirectMessage />} />
-        <Route path='/messaging/community-messages' element={<CommunityMessages />} />
+        <Route path='/messaging/community-messages/:communityID' element={<CommunityMessages />} />
         <Route path='/question/:qid' element={<AnswerPage />} />
         <Route path='/new/question' element={<NewQuestionPage />} />
         <Route path='/new/answer/:qid' element={<NewAnswerPage />} />

@@ -23,6 +23,21 @@ const useUsersListPage = () => {
   const [majors, setMajors] = useState<string[]>([]);
   const [graduationYears, setGraduationYears] = useState<number[]>([]);
   const [communities, setCommunities] = useState<{ _id: string; name: string }[]>([]);
+import { getUsers, getLeaderboard } from '../services/userService';
+
+/**
+ * Custom hook for managing the users list page state, filtering, and real-time updates.
+ *
+ * @returns titleText - The current title of the users list page
+ * @returns ulist - The list of users to display
+ * @returns setUserFilter - Function to set the filtering value of the user search.
+ */
+const useUsersListPage = () => {
+  const { socket } = useUserContext();
+
+  const [userFilter, setUserFilter] = useState<string>('');
+  const [userList, setUserList] = useState<SafeDatabaseUser[]>([]);
+  const [leaderboard, setLeaderboard] = useState<SafeDatabaseUser[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +65,11 @@ const useUsersListPage = () => {
       } catch (error) {
         setMajors([]);
         setGraduationYears([]);
+        const [users, leaders] = await Promise.all([getUsers(), getLeaderboard(20)]);
+        setUserList(users);
+        setLeaderboard(leaders);
+      } catch (error) {
+        console.error('Error fetching users/leaderboard:', error);
       }
     };
 
@@ -134,6 +154,14 @@ const useUsersListPage = () => {
             return prevList;
         }
       });
+
+      // Update leaderboard when user updates
+      setLeaderboard(prev => {
+        const updated = prev.map(u =>
+          u.username === userUpdate.user.username ? userUpdate.user : u,
+        );
+        return updated.sort((a, b) => (b.points || 0) - (a.points || 0));
+      });
     };
 
     const handleUserStatusUpdate = (statusUpdate: {
@@ -183,6 +211,12 @@ const useUsersListPage = () => {
     graduationYears,
     communities,
     handleChallengeClick,
+  const filteredUserlist = userList.filter(user => user.username.includes(userFilter));
+  return {
+    userList: filteredUserlist,
+    setUserFilter,
+    handleChallengeClick,
+    leaderboard,
   };
 };
 

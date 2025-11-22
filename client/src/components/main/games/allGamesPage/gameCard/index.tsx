@@ -41,8 +41,7 @@ const GameCard = ({
   return (
     <div className='game-item'>
       <p>
-        <strong>Game Type:</strong> {game.gameType} | <strong>Game ID:</strong> {game.gameID} |{' '}
-        <strong>Status:</strong> {game.state.status}
+        <strong>Game Type:</strong> {game.gameType} | <strong>Status:</strong> {game.state.status}
       </p>
       <ul className='game-players'>
         {game.players.length > 0 ? (

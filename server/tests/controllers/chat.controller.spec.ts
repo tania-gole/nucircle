@@ -8,8 +8,9 @@ import { app } from '../../app';
 import * as messageService from '../../services/message.service';
 import * as chatService from '../../services/chat.service';
 import * as databaseUtil from '../../utils/database.util';
-import { DatabaseChat, PopulatedDatabaseChat, Message } from '../../types/types';
+import { DatabaseChat, PopulatedDatabaseChat, Message, SafeDatabaseUser } from '../../types/types';
 import chatController from '../../controllers/chat.controller';
+import * as userService from '../../services/user.service';
 
 // mock jwt auth to always authenticate successfully
 jest.mock('../../middleware/auth', () => ({
@@ -32,6 +33,7 @@ const getChatSpy = jest.spyOn(chatService, 'getChat');
 const addParticipantSpy = jest.spyOn(chatService, 'addParticipantToChat');
 const populateDocumentSpy = jest.spyOn(databaseUtil, 'populateDocument');
 const getChatsByParticipantsSpy = jest.spyOn(chatService, 'getChatsByParticipants');
+const getUserByUsernameSpy = jest.spyOn(userService, 'getUserByUsername');
 
 /**
  * Sample test suite for the /chat endpoints
@@ -201,9 +203,20 @@ describe('Chat Controller', () => {
         updatedAt: new Date('2025-01-01'),
       };
 
+      const getUserResponse: SafeDatabaseUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'user2',
+        dateJoined: new Date(),
+        firstName: 'User',
+        lastName: 'Two',
+        socketId: 'fake-socket-id',
+      };
+
       saveMessageSpy.mockResolvedValue(messageResponse);
       addMessageSpy.mockResolvedValue(chatResponse);
       populateDocumentSpy.mockResolvedValue(populatedChatResponse);
+
+      getUserByUsernameSpy.mockResolvedValue(getUserResponse);
 
       const response = await supertest(app)
         .post(`/api/chat/${chatId}/addMessage`)

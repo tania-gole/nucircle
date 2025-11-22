@@ -39,6 +39,8 @@ const ProfileSettings: React.FC = () => {
     newGradYear,
     setNewGradYear,
     handleUpdateProfile,
+    showStats,
+    toggleStatsVisibility,
   } = useProfileSettings();
 
   if (loading) {
@@ -74,7 +76,9 @@ const ProfileSettings: React.FC = () => {
     <div className='profile-settings'>
       <div className='profile-left-column'>
         <div className='profile-card'>
-          <h2>Profile</h2>
+          <h2>
+            {userData.firstName} {userData.lastName}
+          </h2>
 
           {successMessage && <p className='success-message'>{successMessage}</p>}
           {errorMessage && <p className='error-message'>{errorMessage}</p>}
@@ -201,6 +205,33 @@ const ProfileSettings: React.FC = () => {
               <strong>Quizzes Won:</strong> {userStats?.quizzesWon || 0} /{' '}
               {userStats?.quizzesPlayed || 0}
             </p>
+            {/* show/hide section based on toggleStatsVisibility */}
+            {(showStats || canEditProfile) && (
+              <>
+                <p>
+                  <strong>Points Earned:</strong> {userData.points || 0}
+                </p>
+                <p>
+                  <strong>Questions:</strong> {userStats?.questionsPosted || 0}
+                </p>
+                <p>
+                  <strong>Answers:</strong> {userStats?.answersPosted || 0}
+                </p>
+                <p>
+                  <strong>Communities:</strong> {userStats?.communitiesJoined || 0}
+                </p>
+
+                <p>
+                  <strong>Quizzes Won:</strong> {userStats?.quizzesWon || 0} /{' '}
+                  {userStats?.quizzesPlayed || 0}
+                </p>
+              </>
+            )}
+            {canEditProfile && (
+              <button className='button button-primary' onClick={toggleStatsVisibility}>
+                {showStats ? 'Unpublish Stats' : 'Publish Stats'}
+              </button>
+            )}
           </div>
 
           <button className='button button-primary' onClick={handleViewCollectionsPage}>

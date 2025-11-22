@@ -266,6 +266,36 @@ const updateUserProfile = async (
   });
   if (res.status !== 200) {
     throw new Error('Error when updating profile');
+ * Updates visibility settings for user stats
+ * @param username The username of the user
+ * @param field The field to update
+ * @param value The new visibility value
+ * @returns The updated user
+ */
+const updateUserStatVisibility = async (
+  username: string,
+  field: string,
+  value: boolean,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/updateStatVisibility`, {
+    username,
+    field,
+    value,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when updating stat visibility');
+  }
+  return res.data;
+};
+
+/**
+ * Fetches the global leaderboard sorted by points
+ * @param limit - Number of top users to return
+ */
+const getLeaderboard = async (limit: number = 20): Promise<SafeDatabaseUser[]> => {
+  const res = await api.get(`${USER_API_URL}/leaderboard?limit=${limit}`);
+  if (res.status !== 200) {
+    throw new Error('Error fetching leaderboard');
   }
   return res.data;
 };
@@ -283,4 +313,6 @@ export {
   searchUsers,
   getFilterOptions,
   updateUserProfile,
+  updateUserStatVisibility,
+  getLeaderboard,
 };

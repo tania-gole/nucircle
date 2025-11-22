@@ -87,3 +87,19 @@ export interface DeleteCommunityRequest extends CommunityIdRequest {
  * Either returns a DatabaseCommunity (successful operation) or an error message
  */
 export type CommunityResponse = DatabaseCommunity | { error: string };
+
+/**
+ * result for toggling community membership
+ * - `community`: The updated community document
+ * - `added`: Boolean indicating if the user was added (true) or removed (false)
+ */
+export interface ToggleMembershipResult {
+  community: DatabaseCommunity;
+  added: boolean; // true if user was added, false if removed
+}
+
+/**
+ * Response type for toggling community membership
+ * Either returns a ToggleMembershipResponse (successful operation) or an error message
+ */
+export type ToggleMembershipResponse = ToggleMembershipResult | { error: string };

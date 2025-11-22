@@ -83,6 +83,9 @@ const userSchema: Schema = new Schema(
     graduationYear: {
       type: Number,
       default: null,
+    showStats: {
+      type: Boolean,
+      default: true,
     },
   },
   { collection: 'User' },

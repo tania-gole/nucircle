@@ -1,6 +1,5 @@
 import './index.css';
 import useAllCollectionsPage from '../../../../hooks/useAllCollectionsPage';
-import DeleteCollectionButton from '../deleteCollectionButton';
 
 /**
  * AllCollectionsPage component displays a list of collections for a specific user.
@@ -17,7 +16,7 @@ const AllCollectionsPage = () => {
   return (
     <div className='collections-page'>
       <div className='collections-header'>
-        <h1 className='collections-title'>{usernameBeingViewed}'s Collections</h1>
+        <h1 className='collection_title'>{usernameBeingViewed}'s Collections</h1>
         {isOwner && (
           <button className='collections-create-btn' onClick={handleCreateCollection}>
             Create Collection
@@ -31,11 +30,10 @@ const AllCollectionsPage = () => {
             key={collection._id.toString()}
             className='collection-card'
             onClick={() => handleViewCollection(collection._id.toString())}>
-            <h2 className='collection-name'>{collection.name}</h2>
-            <p className='collection-description'>{collection.description}</p>
-            <p className='collection-privacy'>{collection.isPrivate ? 'Private' : 'Public'}</p>
-            <p className='collection-questions'>Questions: {collection.questions.length}</p>
-            {isOwner && <DeleteCollectionButton collectionId={collection._id.toString()} />}
+            <h2 className='main-collection-name'>{collection.name}</h2>
+            <div className='main-collection-description'>{collection.description}</div>
+            <div className='collection-privacy'>{collection.isPrivate ? 'Private' : 'Public'}</div>
+            <div className='collection-questions'>Questions: {collection.questions.length}</div>
           </div>
         ))}
       </div>
