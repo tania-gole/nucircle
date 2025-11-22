@@ -19,7 +19,7 @@ import useUserContext from './useUserContext';
 const useProfileSettings = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
-  const { user: currentUser } = useUserContext();
+  const { user: currentUser, socket } = useUserContext();
 
   // Local state
   const [userData, setUserData] = useState<SafeDatabaseUser | null>(null);
@@ -36,10 +36,21 @@ const useProfileSettings = () => {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [showStats, setShowStats] = useState(true);
   useEffect(() => {
-    if (userData) {
-      setShowStats(userData.showStats ?? true);
-    }
-  }, [userData]);
+    if (!username || !socket) return;
+
+    const handleUserUpdate = (data: { user: SafeDatabaseUser; type: string }) => {
+      if (data.user.username === username && data.type === 'updated') {
+        setUserData(data.user);
+        setShowStats(data.user.showStats ?? true);
+      }
+    };
+
+    socket.on('userUpdate', handleUserUpdate);
+
+    return () => {
+      socket.off('userUpdate', handleUserUpdate);
+    };
+  }, [username, socket]);
 
   // For delete-user confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);

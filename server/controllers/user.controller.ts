@@ -295,6 +295,11 @@ const userController = (socket: FakeSOSocket) => {
       if ('error' in updatedUser) {
         throw new Error(updatedUser.error);
       }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error updating visibility: ${(error as Error).message}`);
