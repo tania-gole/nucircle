@@ -53,6 +53,7 @@ export interface User extends UserSignup {
   badges?: Badge[];
   hasSeenWelcomeMessage?: boolean;
   points?: number;
+  showStats?: boolean;
 }
 
 /**
