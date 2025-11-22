@@ -190,6 +190,18 @@ const updateUserStatVisibility = async (
   return res.data;
 };
 
+/**
+ * Fetches the global leaderboard sorted by points
+ * @param limit - Number of top users to return
+ */
+const getLeaderboard = async (limit: number = 20): Promise<SafeDatabaseUser[]> => {
+  const res = await api.get(`${USER_API_URL}/leaderboard?limit=${limit}`);
+  if (res.status !== 200) {
+    throw new Error('Error fetching leaderboard');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -201,4 +213,5 @@ export {
   markWelcomeMessageSeen,
   getUserStats,
   updateUserStatVisibility,
+  getLeaderboard,
 };

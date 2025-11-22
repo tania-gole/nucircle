@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import useUserContext from './useUserContext';
 import { SafeDatabaseUser, UserUpdatePayload } from '../types/types';
-import { getUsers } from '../services/userService';
+import { getUsers, getLeaderboard } from '../services/userService';
 
 /**
  * Custom hook for managing the users list page state, filtering, and real-time updates.
@@ -16,6 +16,7 @@ const useUsersListPage = () => {
 
   const [userFilter, setUserFilter] = useState<string>('');
   const [userList, setUserList] = useState<SafeDatabaseUser[]>([]);
+  const [leaderboard, setLeaderboard] = useState<SafeDatabaseUser[]>([]);
 
   useEffect(() => {
     /**
@@ -23,10 +24,11 @@ const useUsersListPage = () => {
      */
     const fetchData = async () => {
       try {
-        const res = await getUsers();
-        setUserList(res || []);
+        const [users, leaders] = await Promise.all([getUsers(), getLeaderboard(20)]);
+        setUserList(users);
+        setLeaderboard(leaders);
       } catch (error) {
-        console.log(error);
+        console.error('Error fetching users/leaderboard:', error);
       }
     };
 
@@ -74,6 +76,14 @@ const useUsersListPage = () => {
           default:
             throw new Error('Invalid user update type');
         }
+      });
+
+      // Update leaderboard when user updates
+      setLeaderboard(prev => {
+        const updated = prev.map(u =>
+          u.username === userUpdate.user.username ? userUpdate.user : u,
+        );
+        return updated.sort((a, b) => (b.points || 0) - (a.points || 0));
       });
     };
 
@@ -124,7 +134,12 @@ const useUsersListPage = () => {
   };
 
   const filteredUserlist = userList.filter(user => user.username.includes(userFilter));
-  return { userList: filteredUserlist, setUserFilter, handleChallengeClick };
+  return {
+    userList: filteredUserlist,
+    setUserFilter,
+    handleChallengeClick,
+    leaderboard,
+  };
 };
 
 export default useUsersListPage;
