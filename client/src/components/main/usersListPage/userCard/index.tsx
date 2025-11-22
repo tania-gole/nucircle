@@ -1,26 +1,13 @@
 import './index.css';
-import { SafeDatabaseUser } from '../../../../types/types';
+import { EnrichedUser } from '../../../../services/userService';
 
-/**
- * Interface representing the props for the User component.
- *
- * user - The user object containing details about the user.
- * handleUserCardViewClickHandler - The function to handle the click event on the user card.
- */
 interface UserProps {
-  user: SafeDatabaseUser;
-  handleUserCardViewClickHandler: (user: SafeDatabaseUser) => void;
+  user: EnrichedUser;
+  handleUserCardViewClickHandler: (user: EnrichedUser) => void;
   onChallengeClick: (username: string) => void;
   currentUsername: string;
 }
 
-/**
- * User component renders the details of a user including its username and dateJoined.
- * Displays a green dot indicator if the user is currently online.
- * Clicking on the component triggers the handleUserPage function.
- *
- * @param user - The user object containing user details.
- */
 const UserCardView = (props: UserProps) => {
   const { user, handleUserCardViewClickHandler, onChallengeClick, currentUsername } = props;
 
@@ -34,23 +21,46 @@ const UserCardView = (props: UserProps) => {
           {user.isOnline && <span className='online-indicator'></span>}
           {user.username}
         </div>
+
+        {(user.workExperiences?.length > 0 ||
+          user.major ||
+          user.graduationYear ||
+          user.communities?.length > 0) && (
+          <div className='user-tags'>
+            {user.workExperiences &&
+              user.workExperiences.slice(0, 2).map((work, idx) => (
+                <span key={idx} className='tag tag-work'>
+                  {work.company}
+                </span>
+              ))}
+
+            {user.major && <span className='tag tag-major'>{user.major}</span>}
+
+            {user.graduationYear && <span className='tag tag-year'>{user.graduationYear}</span>}
+
+            {user.communities &&
+              user.communities.slice(0, 1).map((community, idx) => (
+                <span key={idx} className='tag tag-community'>
+                  {community.name}
+                </span>
+              ))}
+          </div>
+        )}
       </div>
 
       <div className='user_card_right'>
         <div className='user_card_joined'>joined {new Date(user.dateJoined).toUTCString()}</div>
 
-        {/* Only show if online AND not current user */}
-        {user.isOnline &&
-          user.username !== currentUsername && ( // ← CHANGE THIS
-            <button
-              className='challenge-button'
-              onClick={e => {
-                e.stopPropagation();
-                onChallengeClick(user.username);
-              }}>
-              Challenge to Quiz
-            </button>
-          )}
+        {user.isOnline && user.username !== currentUsername && (
+          <button
+            className='challenge-button'
+            onClick={e => {
+              e.stopPropagation();
+              onChallengeClick(user.username);
+            }}>
+            Challenge to Quiz
+          </button>
+        )}
 
         <svg
           width='20'

@@ -38,6 +38,8 @@ export interface CommunityTag {
 export interface EnrichedUser extends SafeDatabaseUser {
   workExperiences: WorkExperienceTag[];
   communities: CommunityTag[];
+  major?: string;
+  graduationYear?: number;
 }
 
 /**

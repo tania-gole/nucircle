@@ -1,31 +1,42 @@
 import './index.css';
 import useUserSearch from '../../../../hooks/useUserSearch';
+import { UserSearchFilters } from '../../../../services/userService';
 
-/**
- * Interface representing the props for the UserHeader component.
- *
- * userCount - The number of users to be displayed in the header.
- * setUserFilter - A function that sets the search bar filter value.
- */
 interface UserHeaderProps {
   userCount: number;
   setUserFilter: (search: string) => void;
+  filters: UserSearchFilters;
+  updateFilter: (key: keyof UserSearchFilters, value: string | number | undefined) => void;
+  handleSearch: () => void;
+  handleClearSearch: () => void;
+  isSearching: boolean;
+  showFilters: boolean;
+  toggleFilters: () => void;
+  majors: string[];
+  graduationYears: number[];
+  communities: { _id: string; name: string }[];
 }
 
-/**
- * UsersListHeader component displays the header section for a list of users.
- * It includes the title and search bar to filter the user.
- * Username search is case-sensitive.
- *
- * @param userCount - The number of users displayed in the header.
- * @param setUserFilter - Function that sets the search bar filter value.
- */
-const UsersListHeader = ({ userCount, setUserFilter }: UserHeaderProps) => {
+const UsersListHeader = ({
+  userCount,
+  setUserFilter,
+  filters,
+  updateFilter,
+  handleSearch,
+  handleClearSearch,
+  isSearching,
+  showFilters,
+  toggleFilters,
+  majors,
+  graduationYears,
+  communities,
+}: UserHeaderProps) => {
   const { val, handleInputChange } = useUserSearch(setUserFilter);
 
   return (
     <div className='userlist_header_container right_padding'>
       <div className='bold_title'>Users List</div>
+
       <div className='user-search-wrapper'>
         <svg
           className='user-search-icon'
@@ -47,6 +58,75 @@ const UsersListHeader = ({ userCount, setUserFilter }: UserHeaderProps) => {
           onChange={handleInputChange}
         />
       </div>
+
+      <div className='filter-controls-row'>
+        <button className='filter-control-btn' onClick={toggleFilters}>
+          🎚️ Filters
+        </button>
+        <button
+          className='filter-control-btn search-btn'
+          onClick={handleSearch}
+          disabled={isSearching}>
+          {isSearching ? 'Searching...' : 'Search'}
+        </button>
+        <button className='filter-control-btn clear-btn' onClick={handleClearSearch}>
+          Clear
+        </button>
+      </div>
+
+      {showFilters && (
+        <div className='filters-panel-header'>
+          <div className='filter-row'>
+            <div className='filter-column'>
+              <label>Major:</label>
+              <select
+                value={filters.major || ''}
+                onChange={e => updateFilter('major', e.target.value)}>
+                <option value=''>All Majors</option>
+                {majors.map(major => (
+                  <option key={major} value={major}>
+                    {major}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className='filter-column'>
+              <label>Graduation Year:</label>
+              <select
+                value={filters.graduationYear || ''}
+                onChange={e =>
+                  updateFilter(
+                    'graduationYear',
+                    e.target.value ? parseInt(e.target.value) : undefined,
+                  )
+                }>
+                <option value=''>All Years</option>
+                {graduationYears.map(year => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className='filter-column'>
+              <label>Community:</label>
+              <select
+                value={filters.communityId || ''}
+                onChange={e => updateFilter('communityId', e.target.value)}>
+                <option value=''>All Communities</option>
+                {communities.map(community => (
+                  <option key={community._id} value={community._id}>
+                    {community.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className='user_count_label'>
         <span id='user_count'>{userCount} </span>
         <span className='user_count_text'>users</span>

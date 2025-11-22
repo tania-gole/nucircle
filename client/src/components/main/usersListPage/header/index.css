@@ -65,3 +65,106 @@
 .user_count_text {
   color: #727F91;
 }
+
+.filter-controls-row {
+  display: flex;
+  gap: 10px;
+  width: 98%;
+  margin: 0 auto;
+}
+
+.filter-control-btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #f5f5f5;
+  color: #4f5866;
+}
+
+.filter-control-btn:hover {
+  background-color: #ebebeb;
+}
+
+.filter-control-btn.search-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.filter-control-btn.search-btn:hover {
+  background-color: #45a049;
+}
+
+.filter-control-btn.search-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.filter-control-btn.clear-btn {
+  background-color: #FF6B6B;
+  color: white;
+}
+
+.filter-control-btn.clear-btn:hover {
+  background-color: #ff5252;
+}
+
+.filters-panel-header {
+  width: 98%;
+  margin: 0 auto;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 15px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.filter-column {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 180px;
+  flex: 1;
+}
+
+.filter-column label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #727F91;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-column select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  color: #4f5866;
+}
+
+.filter-column select:focus {
+  outline: none;
+  border-color: #4caf50;
+}
