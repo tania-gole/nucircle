@@ -91,11 +91,25 @@ const useAuth = (authType: 'login' | 'signup') => {
         setErr('Please use a valid Northeastern email');
         return false;
       }
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(password)) {
-        setErr(
-          'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character',
-        );
+
+      const errors: string[] = [];
+      if (password.length < 8) {
+        errors.push('at least 8 characters');
+      }
+      if (!/[A-Z]/.test(password)) {
+        errors.push('an uppercase letter');
+      }
+      if (!/[a-z]/.test(password)) {
+        errors.push('a lowercase letter');
+      }
+      if (!/\d/.test(password)) {
+        errors.push('a number');
+      }
+      if (!/[@$!%*?&]/.test(password)) {
+        errors.push('a special character');
+      }
+      if (errors.length > 0) {
+        setErr(`Password must contain ${errors.join(', ')}`);
         return false;
       }
 
@@ -156,7 +170,12 @@ const useAuth = (authType: 'login' | 'signup') => {
       setUser(user);
       navigate('/home');
     } catch (error) {
-      setErr((error as Error).message);
+      if ((error as Error).message.includes('MongoServerError: E11000 duplicate key error')) {
+        setErr('This email is already registered');
+        return;
+      } else {
+        setErr((error as Error).message);
+      }
     }
   };
 

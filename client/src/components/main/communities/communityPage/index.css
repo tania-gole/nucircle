@@ -39,6 +39,7 @@
   font-size: 1.75rem;
   margin-bottom: 1rem;
   color: #1f2937;
+  margin-top: 16px;
 }
 
 .community-description {
@@ -47,6 +48,34 @@
   margin-bottom: 2rem;
   line-height: 1.5;
 }
+
+.community-chat-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0px;
+}
+
+.community-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #82c0ff; 
+  color: white;
+  text-decoration: none;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  
+  transition: background-color 0.2s ease;
+}
+
+.community-chat-btn:hover {
+  background-color: rgb(112, 174, 236);
+}
+
 
 /* Members list */
 .community-members {

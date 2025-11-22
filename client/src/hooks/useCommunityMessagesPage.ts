@@ -11,7 +11,7 @@ import { addCommunityMessage, getCommunityMessages } from '../services/community
  * @returns selectedCommunity - The currently selected community.
  * @returns setSelectedCommunity - Function to change the selected community.
  */
-const useCommunityMessagesPage = () => {
+const useCommunityMessagesPage = (initialCommunityID?: string) => {
   const { user, socket } = useUserContext();
   const [communities, setCommunities] = useState<DatabaseCommunity[]>([]);
   const [selectedCommunity, setSelectedCommunity] = useState<DatabaseCommunity | null>(null);
@@ -26,13 +26,18 @@ const useCommunityMessagesPage = () => {
         if (!user) return;
         const userCommunities: DatabaseCommunity[] = await getUserCommunities(user.username);
         setCommunities(userCommunities);
-        setSelectedCommunity(userCommunities[0] || null);
+        if (initialCommunityID) {
+          const found = userCommunities.find(c => c._id.toString() === initialCommunityID);
+          setSelectedCommunity(found || null);
+        } else {
+          setSelectedCommunity(userCommunities[0] || null);
+        }
       } catch (err) {
         setError('Failed to fetch communities');
       }
     };
     fetchCommunities();
-  }, [user]);
+  }, [user, initialCommunityID]);
 
   // fetch messages when selected community changes
   useEffect(() => {

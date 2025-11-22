@@ -2,12 +2,14 @@ import './index.css';
 import useCommunityMessagesPage from '../../../hooks/useCommunityMessagesPage';
 import MessageCard from '../messageCard';
 import useUserContext from '../../../hooks/useUserContext';
+import { useParams } from 'react-router-dom';
 
 /**
  * Represents the CommunityMessagesPage component which displays the community chat room.
  * and provides functionality to send and receive messages.
  */
 const CommunityMessages = () => {
+  const { communityID } = useParams();
   // return <div>Community Messages Page - Under Construction</div>;
   const {
     communities,
@@ -18,7 +20,7 @@ const CommunityMessages = () => {
     setNewMessage,
     handleSendMessage,
     error,
-  } = useCommunityMessagesPage();
+  } = useCommunityMessagesPage(communityID);
   const { user } = useUserContext();
   return (
     <div className='community-messages-page'>

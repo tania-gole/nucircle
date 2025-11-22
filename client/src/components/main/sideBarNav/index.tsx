@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './index.css';
 import { NavLink, useLocation } from 'react-router-dom';
 import useUserContext from '../../../hooks/useUserContext';
+import { getUserCommunities } from '../../../services/communityService';
+import { DatabaseCommunity } from '../../../types/types';
 
 /**
  * The SideBarNav component has a sidebar navigation menu for all the main pages.
@@ -20,6 +22,24 @@ const SideBarNav = () => {
     e.preventDefault(); // prevent immediate route change
     setIsOpen(prev => !prev);
   };
+
+  const [firstCommunityId, setFirstCommunityId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      if (!user) return;
+      try {
+        const communities: DatabaseCommunity[] = await getUserCommunities(user.username);
+        if (communities.length > 0) {
+          setFirstCommunityId(communities[0]._id.toString());
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch communities for sidebar navigation');
+      }
+    };
+    fetchCommunities();
+  }, [user]);
 
   return (
     <div id='sideBarNav' className='sideBarNav'>
@@ -49,8 +69,16 @@ const SideBarNav = () => {
             </NavLink>
 
             <NavLink
-              to='/messaging/community-messages'
-              className={`message-option ${isActiveOption('/messaging/community-messages')}`}>
+              to={
+                firstCommunityId
+                  ? `/messaging/community-messages/${firstCommunityId}`
+                  : '/messaging/community-messages'
+              }
+              className={`message-option ${
+                location.pathname.startsWith('/messaging/community-messages')
+                  ? 'message-option-selected '
+                  : ''
+              }`}>
               Community Messages
             </NavLink>
 

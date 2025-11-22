@@ -89,7 +89,7 @@ const FakeStackOverflow = () => {
         <Route path='tags' element={<TagPage />} />
         <Route path='/messaging' element={<MessagingPage />} />
         <Route path='/messaging/direct-message' element={<DirectMessage />} />
-        <Route path='/messaging/community-messages' element={<CommunityMessages />} />
+        <Route path='/messaging/community-messages/:communityID' element={<CommunityMessages />} />
         <Route path='/question/:qid' element={<AnswerPage />} />
         <Route path='/new/question' element={<NewQuestionPage />} />
         <Route path='/new/answer/:qid' element={<NewAnswerPage />} />
