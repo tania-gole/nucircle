@@ -377,7 +377,6 @@ export const searchUsers = async (
 export const getUniqueMajors = async (): Promise<string[]> => {
   try {
     const majors = await UserModel.distinct('major');
-    // Cast and filter properly
     return (majors as string[]).filter(m => m && m.trim() !== '').sort();
   } catch (error) {
     return [];
@@ -390,7 +389,6 @@ export const getUniqueMajors = async (): Promise<string[]> => {
 export const getUniqueGraduationYears = async (): Promise<number[]> => {
   try {
     const years = await UserModel.distinct('graduationYear');
-    // Cast and filter properly
     return (years as number[]).filter(y => y !== null && y !== 0).sort((a, b) => a - b);
   } catch (error) {
     return [];

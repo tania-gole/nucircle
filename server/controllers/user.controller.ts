@@ -17,6 +17,9 @@ import {
   loginUser,
   saveUser,
   updateUser,
+  searchUsers,
+  getUniqueMajors,
+  getUniqueGraduationYears,
 } from '../services/user.service';
 import QuestionModel from '../models/questions.model';
 import AnswerModel from '../models/answers.model';
@@ -274,6 +277,51 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Searches and filters users by various criteria including name, company, position, and community.
+   * Returns enriched user data including work experiences and communities for tag display.
+   * @param req The request containing query parameters: q (search query), major, graduationYear, communityId.
+   * @param res The response, either returning the array of enriched users or an error.
+   * @returns A promise resolving to void.
+   */
+  const searchUsersRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const searchQuery = (req.query.q as string) || '';
+      const filters = {
+        major: req.query.major as string | undefined,
+        graduationYear: req.query.graduationYear
+          ? parseInt(req.query.graduationYear as string)
+          : undefined,
+        communityId: req.query.communityId as string | undefined,
+      };
+
+      const users = await searchUsers(searchQuery, filters);
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to search users' });
+    }
+  };
+
+  /**
+   * Retrieves available filter options for the user search functionality.
+   * Returns unique majors and graduation years currently in the database.
+   * @param _ The request (unused).
+   * @param res The response, either returning filter options object or an error.
+   * @returns A promise resolving to void.
+   */
+  const getFilterOptionsRoute = async (_: Request, res: Response): Promise<void> => {
+    try {
+      const [majors, graduationYears] = await Promise.all([
+        getUniqueMajors(),
+        getUniqueGraduationYears(),
+      ]);
+
+      res.json({ majors, graduationYears });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get filter options' });
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -285,6 +333,8 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/me', authMiddleware, getCurrentUser);
   router.patch('/markWelcomeSeen', authMiddleware, markWelcomeMessageSeen);
   router.get('/stats/:username', getUserStats);
+  router.get('/search', searchUsersRoute);
+  router.get('/filter-options', getFilterOptionsRoute);
   return router;
 };
 
