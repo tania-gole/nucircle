@@ -1,5 +1,10 @@
 import CommunityModel from '../models/community.model';
-import { Community, CommunityResponse, DatabaseCommunity } from '../types/types';
+import {
+  Community,
+  CommunityResponse,
+  DatabaseCommunity,
+  ToggleMembershipResponse,
+} from '../types/types';
 import { checkAndAwardCommunityBadge } from './badge.service';
 import { awardPointsToUser } from './point.service';
 
@@ -63,7 +68,7 @@ export const getAllCommunities = async (): Promise<DatabaseCommunity[] | { error
 export const toggleCommunityMembership = async (
   communityId: string,
   username: string,
-): Promise<CommunityResponse> => {
+): Promise<ToggleMembershipResponse> => {
   try {
     const community = await CommunityModel.findById(communityId);
     if (!community) {
@@ -82,6 +87,7 @@ export const toggleCommunityMembership = async (
     const isParticipant = community.participants.includes(username);
 
     let updatedCommunity: DatabaseCommunity | null;
+    let added: boolean;
 
     if (isParticipant) {
       // User is already a participant, so remove them
@@ -90,6 +96,7 @@ export const toggleCommunityMembership = async (
         { $pull: { participants: username } },
         { new: true },
       );
+      added = false;
     } else {
       // User is not a participant, so add them
       updatedCommunity = await CommunityModel.findByIdAndUpdate(
@@ -97,6 +104,7 @@ export const toggleCommunityMembership = async (
         { $addToSet: { participants: username } },
         { new: true },
       );
+      added = true;
 
       // Award community badge, points when user joins
       if (updatedCommunity) {
@@ -105,7 +113,11 @@ export const toggleCommunityMembership = async (
       }
     }
 
-    return updatedCommunity || { error: 'Failed to update community' };
+    if (!updatedCommunity) {
+      return { error: 'Failed to update community' };
+    }
+
+    return { community: updatedCommunity, added };
   } catch (err) {
     return { error: (err as Error).message };
   }

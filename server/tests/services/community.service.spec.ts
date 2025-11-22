@@ -156,7 +156,10 @@ describe('Community Service', () => {
 
       const result = await toggleCommunityMembership('65e9b58910afe6e94fc6e6dc', 'user3');
 
-      expect(result).toEqual(updatedCommunity);
+      expect(result).toEqual({
+        community: updatedCommunity,
+        added: true,
+      });
       expect(CommunityModel.findByIdAndUpdate).toHaveBeenCalledWith(
         '65e9b58910afe6e94fc6e6dc',
         { $addToSet: { participants: 'user3' } },
@@ -176,7 +179,10 @@ describe('Community Service', () => {
 
       const result = await toggleCommunityMembership('65e9b58910afe6e94fc6e6dc', 'user2');
 
-      expect(result).toEqual(updatedCommunity);
+      expect(result).toEqual({
+        community: updatedCommunity,
+        added: false,
+      });
       expect(CommunityModel.findByIdAndUpdate).toHaveBeenCalledWith(
         '65e9b58910afe6e94fc6e6dc',
         { $pull: { participants: 'user2' } },

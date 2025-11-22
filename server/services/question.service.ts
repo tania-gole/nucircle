@@ -158,6 +158,38 @@ export const fetchAndIncrementQuestionViewsById = async (
 };
 
 /**
+ * Fetches a question by ID WITHOUT incrementing views.
+ * @param {string} qid - The question ID
+ * @returns {Promise<PopulatedDatabaseQuestion | { error: string }>}
+ */
+export const fetchQuestionById = async (
+  qid: string,
+): Promise<PopulatedDatabaseQuestion | { error: string }> => {
+  try {
+    const q: PopulatedDatabaseQuestion | null = await QuestionModel.findOne({
+      _id: new ObjectId(qid),
+    }).populate<{
+      tags: DatabaseTag[];
+      answers: PopulatedDatabaseAnswer[];
+      comments: DatabaseComment[];
+      community: DatabaseCommunity;
+    }>([
+      { path: 'tags', model: TagModel },
+      { path: 'answers', model: AnswerModel, populate: { path: 'comments', model: CommentModel } },
+      { path: 'comments', model: CommentModel },
+    ]);
+
+    if (!q) {
+      return { error: 'Question not found' };
+    }
+
+    return q;
+  } catch (error) {
+    return { error: 'Error fetching question' };
+  }
+};
+
+/**
  * Saves a new question to the database.
  * @param {Question} question - The question to save
  * @returns {Promise<QuestionResponse>} - The saved question or error message
