@@ -8,10 +8,10 @@ import {
   UserSearchFilters,
   EnrichedUser,
 } from '../services/userService';
-import { getUserCommunities } from '../services/communityService';
+import { getCommunities } from '../services/communityService';
 
 const useUsersListPage = () => {
-  const { socket, user } = useUserContext();
+  const { socket } = useUserContext();
 
   const [filteredUsers, setFilteredUsers] = useState<EnrichedUser[]>([]);
 
@@ -28,12 +28,8 @@ const useUsersListPage = () => {
     const fetchData = async () => {
       try {
         const res = await getUsers();
-        const enriched: EnrichedUser[] = res.map(u => ({
-          ...u,
-          workExperiences: [],
-          communities: [],
-        }));
-        setFilteredUsers(enriched);
+        // Backend now returns enriched users
+        setFilteredUsers(res as EnrichedUser[]);
       } catch (error) {
         setFilteredUsers([]);
       }
@@ -49,10 +45,8 @@ const useUsersListPage = () => {
         setMajors(options.majors);
         setGraduationYears(options.graduationYears);
 
-        if (user?.username) {
-          const userCommunities = await getUserCommunities(user.username);
-          setCommunities(userCommunities.map(c => ({ _id: c._id.toString(), name: c.name })));
-        }
+        const allCommunities = await getCommunities();
+        setCommunities(allCommunities.map(c => ({ _id: c._id.toString(), name: c.name })));
       } catch (error) {
         setMajors([]);
         setGraduationYears([]);
@@ -60,7 +54,7 @@ const useUsersListPage = () => {
     };
 
     fetchFilterOptions();
-  }, [user]);
+  }, []);
 
   const handleSearch = async () => {
     setIsSearching(true);
@@ -71,12 +65,7 @@ const useUsersListPage = () => {
 
       if (!hasSearch && !hasFilters) {
         const res = await getUsers();
-        const enriched: EnrichedUser[] = res.map(u => ({
-          ...u,
-          workExperiences: [],
-          communities: [],
-        }));
-        setFilteredUsers(enriched);
+        setFilteredUsers(res as EnrichedUser[]);
       } else {
         const results = await searchUsers(searchQuery, filters);
         setFilteredUsers(results);
@@ -92,12 +81,7 @@ const useUsersListPage = () => {
     setSearchQuery('');
     setFilters({});
     const res = await getUsers();
-    const enriched: EnrichedUser[] = res.map(u => ({
-      ...u,
-      workExperiences: [],
-      communities: [],
-    }));
-    setFilteredUsers(enriched);
+    setFilteredUsers(res as EnrichedUser[]);
   };
 
   const updateFilter = (key: keyof UserSearchFilters, value: string | number | undefined) => {

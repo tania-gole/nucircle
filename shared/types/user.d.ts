@@ -43,6 +43,8 @@ export interface UserSignup {
  * - `badges`: An array of badges earned by the user.
  * - `hasSeenWelcomeMessage`: A boolean indicating if the user has seen the welcome message.
  * - `points`: The total points accumulated by the user through platform activities.
+ * - `major`: The user's major/field of study.
+ * - `graduationYear`: The user's expected graduation year.
  */
 export interface User extends UserSignup {
   dateJoined: Date;
@@ -53,6 +55,8 @@ export interface User extends UserSignup {
   badges?: Badge[];
   hasSeenWelcomeMessage?: boolean;
   points?: number;
+  major?: string;
+  graduationYear?: number;
 }
 
 /**

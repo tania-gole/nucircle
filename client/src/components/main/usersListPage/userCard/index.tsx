@@ -11,6 +11,12 @@ interface UserProps {
 const UserCardView = (props: UserProps) => {
   const { user, handleUserCardViewClickHandler, onChallengeClick, currentUsername } = props;
 
+  const workCompanies = new Set(user.workExperiences?.map(w => w.company.toLowerCase()) || []);
+
+  // Filter out communities that match work experience companies
+  const uniqueCommunities =
+    user.communities?.filter(c => !workCompanies.has(c.name.toLowerCase())) || [];
+
   return (
     <div className='user_card' onClick={() => handleUserCardViewClickHandler(user)}>
       <div className='user_card_left'>
@@ -38,12 +44,11 @@ const UserCardView = (props: UserProps) => {
 
             {user.graduationYear && <span className='tag tag-year'>{user.graduationYear}</span>}
 
-            {user.communities &&
-              user.communities.slice(0, 1).map((community, idx) => (
-                <span key={idx} className='tag tag-community'>
-                  {community.name}
-                </span>
-              ))}
+            {uniqueCommunities.slice(0, 1).map((community, idx) => (
+              <span key={idx} className='tag tag-community'>
+                {community.name}
+              </span>
+            ))}
           </div>
         )}
       </div>

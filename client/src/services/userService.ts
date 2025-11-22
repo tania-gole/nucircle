@@ -256,6 +256,20 @@ const getFilterOptions = async (): Promise<{
   }
 };
 
+const updateUserProfile = async (
+  username: string,
+  updates: { major?: string; graduationYear?: number },
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/updateProfile`, {
+    username,
+    ...updates,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when updating profile');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -268,4 +282,5 @@ export {
   getUserStats,
   searchUsers,
   getFilterOptions,
+  updateUserProfile,
 };

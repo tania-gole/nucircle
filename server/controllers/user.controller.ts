@@ -25,6 +25,7 @@ import QuestionModel from '../models/questions.model';
 import AnswerModel from '../models/answers.model';
 import CommunityModel from '../models/community.model';
 import GameModel from '../models/games.model';
+import WorkExperienceModel from '../models/workExperience.model';
 import { generateToken } from '../utils/jwt.util';
 import authMiddleware from '../middleware/auth';
 
@@ -116,7 +117,7 @@ const userController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Retrieves all users from the database.
+   * Retrieves all users from the database with enriched work experience and community data.
    * @param res The response, either returning the users or an error.
    * @returns A promise resolving to void.
    */
@@ -128,7 +129,26 @@ const userController = (socket: FakeSOSocket) => {
         throw Error(users.error);
       }
 
-      res.status(200).json(users);
+      // Enrich with work experiences and communities
+      const enrichedUsers = await Promise.all(
+        users.map(async user => {
+          const workExperiences = await WorkExperienceModel.find({ username: user.username })
+            .select('company title type')
+            .lean();
+
+          const communities = await CommunityModel.find({ participants: user.username })
+            .select('_id name')
+            .lean();
+
+          return {
+            ...user,
+            workExperiences: workExperiences || [],
+            communities: communities || [],
+          };
+        }),
+      );
+
+      res.status(200).json(enrichedUsers);
     } catch (error) {
       res.status(500).send(`Error when getting users: ${error}`);
     }
@@ -322,6 +342,31 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const updateProfile = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, major, graduationYear } = req.body;
+
+      const updates: Partial<User> = {};
+      if (major !== undefined) updates.major = major;
+      if (graduationYear !== undefined) updates.graduationYear = graduationYear;
+
+      const updatedUser = await updateUser(username, updates);
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when updating profile: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -335,6 +380,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/stats/:username', getUserStats);
   router.get('/search', searchUsersRoute);
   router.get('/filter-options', getFilterOptionsRoute);
+  router.patch('/updateProfile', updateProfile);
   return router;
 };
 

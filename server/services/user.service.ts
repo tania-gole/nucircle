@@ -1,4 +1,6 @@
+import CommunityModel from '../models/community.model';
 import UserModel from '../models/users.model';
+import WorkExperienceModel from '../models/workExperience.model';
 import {
   DatabaseUser,
   SafeDatabaseUser,
@@ -81,7 +83,7 @@ export const getUserByUsername = async (username: string): Promise<UserResponse>
  */
 export const getUsersList = async (): Promise<UsersResponse> => {
   try {
-    const users: SafeDatabaseUser[] = await UserModel.find().select('-password');
+    const users: SafeDatabaseUser[] = await UserModel.find().select('-password').lean();
 
     if (!users) {
       throw Error('Users could not be retrieved');
@@ -263,96 +265,91 @@ interface EnrichedUser extends SafeDatabaseUser {
  */
 export const searchUsers = async (
   searchQuery: string,
-  filters?: {
+  filters: {
     major?: string;
     graduationYear?: number;
     communityId?: string;
   },
-): Promise<EnrichedUser[]> => {
+): Promise<EnrichedUser[] | { error: string }> => {
   try {
     const query: Record<string, unknown> = {};
-    let usernames: string[] = [];
 
-    if (searchQuery && searchQuery.trim() !== '') {
-      const searchRegex = { $regex: searchQuery, $options: 'i' };
-
-      const usersByName = await UserModel.find({
-        $or: [{ firstName: searchRegex }, { lastName: searchRegex }, { username: searchRegex }],
-      })
-        .select('username')
-        .lean();
-
-      usernames.push(...usersByName.map(u => u.username));
-
-      const WorkExperienceModel = (await import('../models/workExperience.model')).default;
-      const workExps = await WorkExperienceModel.find({
-        $or: [{ company: searchRegex }, { title: searchRegex }],
-      })
-        .select('username')
-        .lean();
-
-      usernames.push(...workExps.map(w => w.username));
-
-      const CommunityModel = (await import('../models/community.model')).default;
-      const communities = await CommunityModel.find({
-        name: searchRegex,
-      }).lean();
-
-      communities.forEach(comm => {
-        usernames.push(...comm.participants);
-      });
-
-      // Remove duplicates
-      usernames = [...new Set(usernames)];
-
-      if (usernames.length > 0) {
-        query.username = { $in: usernames };
-      }
+    // Text search across name and username
+    if (searchQuery.trim()) {
+      query.$or = [
+        { firstName: { $regex: searchQuery, $options: 'i' } },
+        { lastName: { $regex: searchQuery, $options: 'i' } },
+        { username: { $regex: searchQuery, $options: 'i' } },
+      ];
     }
 
-    if (filters?.major && filters.major !== '') {
-      query.major = { $regex: filters.major, $options: 'i' };
+    // Filter by major
+    if (filters.major) {
+      query.major = filters.major;
     }
 
-    if (filters?.graduationYear) {
+    // Filter by graduation year
+    if (filters.graduationYear) {
       query.graduationYear = filters.graduationYear;
     }
 
     // Find users
-    const users = await UserModel.find(query).select('-password').limit(100).lean();
+    let users: SafeDatabaseUser[] = (await UserModel.find(query)
+      .select('-password')
+      .lean()) as SafeDatabaseUser[];
 
-    let filteredUsers = users;
-    if (filters?.communityId) {
-      const CommunityModel = (await import('../models/community.model')).default;
+    // Filter by community if specified
+    if (filters.communityId) {
       const community = await CommunityModel.findById(filters.communityId);
-
       if (community) {
-        filteredUsers = users.filter(user => community.participants.includes(user.username));
+        const communityUsernames = community.participants;
+        users = users.filter(u => communityUsernames.includes(u.username));
       }
     }
 
-    const WorkExperienceModel = (await import('../models/workExperience.model')).default;
-    const CommunityModel = (await import('../models/community.model')).default;
+    // Also search by company/position in work experiences
+    if (searchQuery.trim()) {
+      const workExpUsers = await WorkExperienceModel.find({
+        $or: [
+          { company: { $regex: searchQuery, $options: 'i' } },
+          { title: { $regex: searchQuery, $options: 'i' } },
+        ],
+      })
+        .select('username')
+        .lean();
 
+      const workExpUsernames = new Set(workExpUsers.map(w => w.username));
+
+      // Get users from work experience matches
+      const additionalUsers: SafeDatabaseUser[] = (await UserModel.find({
+        username: { $in: Array.from(workExpUsernames) },
+      })
+        .select('-password')
+        .lean()) as SafeDatabaseUser[];
+
+      // Merge with existing users (avoid duplicates)
+      const existingUsernames = new Set(users.map(u => u.username));
+      additionalUsers.forEach(u => {
+        if (!existingUsernames.has(u.username)) {
+          users.push(u);
+        }
+      });
+    }
+
+    // Enrich with work experiences and communities
     const enrichedUsers: EnrichedUser[] = await Promise.all(
-      filteredUsers.map(async user => {
-        // Get work experiences
-        const workExps = await WorkExperienceModel.find({ username: user.username })
+      users.map(async (user: SafeDatabaseUser): Promise<EnrichedUser> => {
+        const workExperiences = await WorkExperienceModel.find({ username: user.username })
           .select('company title type')
-          .limit(3) // Only get latest 3
           .lean();
 
-        // Get communities
-        const communities = await CommunityModel.find({
-          participants: user.username,
-        })
-          .select('name _id')
-          .limit(3) // Only get 3 communities
+        const communities = await CommunityModel.find({ participants: user.username })
+          .select('_id name')
           .lean();
 
         return {
-          ...(user as SafeDatabaseUser),
-          workExperiences: workExps.map(w => ({
+          ...user,
+          workExperiences: workExperiences.map(w => ({
             company: w.company,
             title: w.title,
             type: w.type,
@@ -367,7 +364,7 @@ export const searchUsers = async (
 
     return enrichedUsers;
   } catch (error) {
-    return [];
+    return { error: `Failed to search users: ${error}` };
   }
 };
 

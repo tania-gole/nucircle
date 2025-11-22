@@ -119,3 +119,11 @@
   background-color: #e8f5e9;
   color: #388e3c;
 }
+
+.bold_title.right_padding {
+  font-weight: 400;
+  font-size: 18px;
+  color: black;
+  text-align: center;
+  padding: 40px 20px;
+}

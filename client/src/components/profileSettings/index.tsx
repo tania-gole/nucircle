@@ -32,6 +32,13 @@ const ProfileSettings: React.FC = () => {
     handleDeleteUser,
     handleViewCollectionsPage,
     userStats,
+    editProfileMode,
+    setEditProfileMode,
+    newMajor,
+    setNewMajor,
+    newGradYear,
+    setNewGradYear,
+    handleUpdateProfile,
   } = useProfileSettings();
 
   if (loading) {
@@ -54,21 +61,86 @@ const ProfileSettings: React.FC = () => {
     );
   }
 
+  if (!userData) {
+    return (
+      <div className='profile-settings'>
+        <div className='profile-card'>
+          <h2>No user data found. Make sure the username parameter is correct.</h2>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className='profile-settings'>
-      {/* Left column: general info */}
       <div className='profile-left-column'>
         <div className='profile-card'>
           <h2>Profile</h2>
 
           {successMessage && <p className='success-message'>{successMessage}</p>}
           {errorMessage && <p className='error-message'>{errorMessage}</p>}
+
           <h4>General Information</h4>
           <p>
             <strong>Username:</strong> {userData.username}
           </p>
 
-          {/* ---- Biography Section ---- */}
+          <div className='profile-info-section'>
+            {!editProfileMode && (
+              <div>
+                <p>
+                  <strong>Major:</strong> {userData.major || 'Not specified'}
+                </p>
+                <p>
+                  <strong>Graduation Year:</strong> {userData.graduationYear || 'Not specified'}
+                </p>
+                {canEditProfile && (
+                  <button
+                    className='button button-primary'
+                    onClick={() => {
+                      setEditProfileMode(true);
+                      setNewMajor(userData.major || '');
+                      setNewGradYear(userData.graduationYear || '');
+                    }}>
+                    Edit Profile Info
+                  </button>
+                )}
+              </div>
+            )}
+
+            {editProfileMode && canEditProfile && (
+              <div className='profile-edit'>
+                <label>
+                  <strong>Major:</strong>
+                  <input
+                    className='input-text'
+                    type='text'
+                    value={newMajor}
+                    onChange={e => setNewMajor(e.target.value)}
+                    placeholder='Enter your major'
+                  />
+                </label>
+                <label>
+                  <strong>Graduation Year:</strong>
+                  <input
+                    className='input-text'
+                    type='number'
+                    value={newGradYear}
+                    onChange={e => setNewGradYear(e.target.value)}
+                    placeholder='Enter graduation year'
+                    min='2020'
+                    max='2035'
+                  />
+                </label>
+                <button className='button button-primary' onClick={handleUpdateProfile}>
+                  Save
+                </button>
+                <button className='button button-danger' onClick={() => setEditProfileMode(false)}>
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className='bio-section'>
             <strong>Biography:</strong>
             {!editBioMode && (
@@ -107,7 +179,6 @@ const ProfileSettings: React.FC = () => {
             )}
           </div>
 
-          {/* ---- Stats Section ---- */}
           <div className='stats-section'>
             <h4>User Stats</h4>
             <p>
@@ -126,18 +197,16 @@ const ProfileSettings: React.FC = () => {
             <p>
               <strong>Communities:</strong> {userStats?.communitiesJoined || 0}
             </p>
-
             <p>
               <strong>Quizzes Won:</strong> {userStats?.quizzesWon || 0} /{' '}
               {userStats?.quizzesPlayed || 0}
             </p>
           </div>
 
-          {/* ---- Badge Section ---- */}
           <button className='button button-primary' onClick={handleViewCollectionsPage}>
             View Collections
           </button>
-          {/* ---- Reset Password Section ---- */}
+
           {canEditProfile && (
             <>
               <h4>Reset Password</h4>
@@ -165,7 +234,7 @@ const ProfileSettings: React.FC = () => {
               </div>
             </>
           )}
-          {/* ---- Danger Zone (Delete User) ---- */}
+
           {canEditProfile && (
             <>
               <h4>Danger Zone</h4>
@@ -174,7 +243,7 @@ const ProfileSettings: React.FC = () => {
               </button>
             </>
           )}
-          {/* ---- Confirmation Modal for Delete ---- */}
+
           {showConfirmation && (
             <div className='modal'>
               <div className='modal-content'>
@@ -198,12 +267,9 @@ const ProfileSettings: React.FC = () => {
         </div>
       </div>
 
-      {/* Right column */}
       <div className='profile-right-column'>
-        {/* ---- Work Experience Section ---- */}
         <WorkExperienceList username={userData.username} />
 
-        {/* ---- Badges Section ---- */}
         <h4>Badges</h4>
         <Badges badges={badges} />
       </div>
