@@ -17,6 +17,7 @@ import {
   loginUser,
   saveUser,
   updateUser,
+  getLeaderboard,
 } from '../services/user.service';
 import QuestionModel from '../models/questions.model';
 import AnswerModel from '../models/answers.model';
@@ -306,6 +307,24 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Gets the global leaderboard sorted by points
+   */
+  const getLeaderboardRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const leaderboard = await getLeaderboard(limit);
+
+      if ('error' in leaderboard) {
+        throw new Error(leaderboard.error);
+      }
+
+      res.status(200).json(leaderboard);
+    } catch (error) {
+      res.status(500).send(`Error fetching leaderboard: ${(error as Error).message}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -318,6 +337,7 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/markWelcomeSeen', authMiddleware, markWelcomeMessageSeen);
   router.get('/stats/:username', getUserStats);
   router.patch('/updateStatVisibility', authMiddleware, updateStatVisibility);
+  router.get('/leaderboard', getLeaderboardRoute);
   return router;
 };
 

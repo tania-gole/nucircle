@@ -237,3 +237,21 @@ export const getOnlineUsers = async (): Promise<UsersResponse> => {
     return { error: `Error occurred when finding online users: ${error}` };
   }
 };
+
+/**
+ * Gets the global leaderboard sorted by points
+ * @param limit - Number of top users to return
+ * @returns List of top users sorted by points
+ */
+export const getLeaderboard = async (limit: number = 20): Promise<UsersResponse> => {
+  try {
+    const topUsers: SafeDatabaseUser[] = await UserModel.find()
+      .select('-password')
+      .sort({ points: -1 })
+      .limit(limit);
+
+    return topUsers;
+  } catch (error) {
+    return { error: `Error occurred when fetching leaderboard: ${error}` };
+  }
+};
