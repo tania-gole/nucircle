@@ -14,7 +14,6 @@ const UsersListPage = (props: UserListPageProps) => {
   const {
     userList,
     leaderboard,
-    searchQuery,
     setSearchQuery,
     filters,
     updateFilter,
