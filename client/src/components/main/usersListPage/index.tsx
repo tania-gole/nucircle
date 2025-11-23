@@ -13,6 +13,8 @@ interface UserListPageProps {
 const UsersListPage = (props: UserListPageProps) => {
   const {
     userList,
+    leaderboard,
+    searchQuery,
     setSearchQuery,
     filters,
     updateFilter,
@@ -27,7 +29,6 @@ const UsersListPage = (props: UserListPageProps) => {
     handleChallengeClick,
   } = useUsersListPage();
 
-  const { userList, leaderboard, setUserFilter, handleChallengeClick } = useUsersListPage();
   const { handleUserSelect = null } = props;
   const { user: currentUser } = useUserContext();
   const navigate = useNavigate();
@@ -57,27 +58,9 @@ const UsersListPage = (props: UserListPageProps) => {
         communities={communities}
       />
 
-      <div id='users_list' className='users_list'>
-        {userList.map((user, idx) => (
-          <UserCardView
-            key={idx}
-            user={user}
-            handleUserCardViewClickHandler={handleUserCardViewClickHandler}
-            onChallengeClick={handleChallengeClick}
-            currentUsername={currentUser?.username || ''}
-          />
-        ))}
-      </div>
-
-      {(!userList.length || userList.length === 0) && (
-        <div className='bold_title right_padding'>No Users Found</div>
-      )}
-      <UsersListHeader userCount={userList.length} setUserFilter={setUserFilter} />
-
       <div style={{ display: 'flex', gap: '20px' }}>
-        {/* Left column: All users */}
+        {/* Left column: All users with search/filter */}
         <div style={{ flex: 1 }}>
-          <h3>All Users</h3>
           <div id='users_list' className='users_list'>
             {userList.map((user, idx) => (
               <UserCardView
@@ -115,7 +98,7 @@ const UsersListPage = (props: UserListPageProps) => {
                       {index === 0 && '🥇'}
                       {index === 1 && '🥈'}
                       {index === 2 && '🥉'}
-                      {index > 2 && `# ${index + 1}`}
+                      {index > 2 && `#${index + 1}`}
                     </span>
                     <strong>{user.username}</strong>
                   </div>
