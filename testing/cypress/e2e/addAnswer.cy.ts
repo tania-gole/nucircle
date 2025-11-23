@@ -17,7 +17,7 @@ describe("Cypress Tests to verify adding new answers", () => {
       A1_TXT,
     ];
     
-    loginUser('user123');
+    loginUser('e.hopper');
 
     goToAnswerQuestion(Q1_DESC);
 
@@ -30,7 +30,7 @@ describe("Cypress Tests to verify adding new answers", () => {
 
 
   it("1.2 | Answer is mandatory when creating a new answer", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
 
     goToAnswerQuestion(Q1_DESC);
 

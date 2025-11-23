@@ -10,13 +10,21 @@
  */
 export const loginUser = (username: string, password: string = 'securePass123!') => {
   cy.visit('http://localhost:4530');
-  cy.contains('Welcome to FakeStackOverflow!');
+  cy.contains('Please login to continue to NUCircle');
   cy.get('#username-input').type(username);
   cy.get('#password-input').type(password);
-  cy.contains('Submit').click();
+  cy.contains('Log in').click();
   // Wait for redirect to home page
   cy.url().should('include', '/home');
+  cy.get('.welcome-popup-button').click();
 };
+
+/**
+ * Logs out the currently logged-in user
+ */
+export const logoutUser = () => {
+  cy.get('.logout-button').click();
+}
 
 /**
  * Seeds the database with test data
@@ -125,12 +133,11 @@ export const goToCollections = () => {
  * @param text - Question content
  * @param tags - Space-separated tags
  */
-export const createCommunity = (title: string, desc: string, isPrivate: boolean) => {
+export const createCommunity = (title: string, desc: string, isPublic: boolean) => {
   cy.get('.new-community-button').click();
-  // Use expected classnames instead of placeholder selectors
-  cy.get('.new-community-input').eq(0).type(title);
-  cy.get('.new-community-input').eq(1).type(desc);
-  if (isPrivate) {cy.get('.new-community-checkbox-label input[type="checkbox"]').check();};
+  cy.get('.new-community-input').type(title);
+  cy.get('.new-community-textarea').type(desc);
+  if (!isPublic) { cy.get('.checkbox-wrapper').click();};
   cy.get('.new-community-submit').click();
 };
 
@@ -148,6 +155,13 @@ export const viewCommunityCard = (CommunityName:string) => {
   cy.contains('.community-card-title', CommunityName).closest('.community-card').contains('button', 'View Community').click();
 };
 
+/**
+ * Navigates to the Community Messages page
+ */
+export const goToCommunityMessages = () => {
+  cy.contains('Messaging').click();
+  cy.contains('Community Messages').click();
+}
 
 /**
  * Waits for questions to load and verifies the page is ready
