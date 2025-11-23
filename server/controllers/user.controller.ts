@@ -22,6 +22,7 @@ import {
   getUniqueGraduationYears,
   getLeaderboard,
 } from '../services/user.service';
+import { checkAndAwardLeaderboardBadges } from '../services/badge.service';
 import QuestionModel from '../models/questions.model';
 import AnswerModel from '../models/answers.model';
 import CommunityModel from '../models/community.model';
@@ -410,6 +411,9 @@ const userController = (socket: FakeSOSocket) => {
       if ('error' in leaderboard) {
         throw new Error(leaderboard.error);
       }
+
+      // Check and award badges to top 3 users
+      await checkAndAwardLeaderboardBadges(leaderboard);
 
       res.status(200).json(leaderboard);
     } catch (error) {
