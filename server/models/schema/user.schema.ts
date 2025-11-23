@@ -76,6 +76,14 @@ const userSchema: Schema = new Schema(
       type: Number,
       default: 0,
     },
+    major: {
+      type: String,
+      default: '',
+    },
+    graduationYear: {
+      type: Number,
+      default: null,
+    },
     showStats: {
       type: Boolean,
       default: true,

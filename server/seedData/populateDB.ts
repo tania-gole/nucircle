@@ -22,6 +22,8 @@ import CommunityModel from '../models/community.model';
 import CollectionModel from '../models/collection.model';
 import collectionsResolver from './resolvers/collection';
 
+import WorkExperienceModel from '../models/workExperience.model';
+
 // Compute the import order based on dependencies
 const IMPORT_ORDER = computeImportOrder(collectionDependencies);
 
@@ -60,6 +62,10 @@ const collectionMapping = {
   },
   triviaQuestion: {
     model: TriviaQuestionModel,
+    resolver: identityResolver,
+  },
+  workExperience: {
+    model: WorkExperienceModel,
     resolver: identityResolver,
   },
 };

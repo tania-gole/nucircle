@@ -8,6 +8,7 @@ import {
   getUserStats,
   updateUserStatVisibility,
   type UserStats,
+  updateUserProfile,
 } from '../services/userService';
 import badgeService from '../services/badgeService';
 import { SafeDatabaseUser, Badge } from '../types/types';
@@ -34,6 +35,9 @@ const useProfileSettings = () => {
 
   // User stats
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [editProfileMode, setEditProfileMode] = useState(false);
+  const [newMajor, setNewMajor] = useState('');
+  const [newGradYear, setNewGradYear] = useState<string | number>('');
   const [showStats, setShowStats] = useState(true);
   useEffect(() => {
     if (!username || !socket) return;
@@ -151,6 +155,25 @@ const useProfileSettings = () => {
     }
   };
 
+  const handleUpdateProfile = async () => {
+    if (!username) return;
+
+    try {
+      const updates: { major?: string; graduationYear?: number } = {};
+      if (newMajor.trim()) updates.major = newMajor;
+      if (newGradYear) updates.graduationYear = parseInt(newGradYear.toString());
+
+      const updatedUser = await updateUserProfile(username, updates);
+      setUserData(updatedUser);
+      setEditProfileMode(false);
+      setSuccessMessage('Profile updated successfully!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to update profile');
+      setSuccessMessage(null);
+    }
+  };
+
   const handleUpdateBiography = async () => {
     if (!username) return;
     try {
@@ -241,6 +264,13 @@ const useProfileSettings = () => {
     handleDeleteUser,
     handleViewCollectionsPage,
     userStats,
+    editProfileMode,
+    setEditProfileMode,
+    newMajor,
+    setNewMajor,
+    newGradYear,
+    setNewGradYear,
+    handleUpdateProfile,
     showStats,
     toggleStatsVisibility,
   };

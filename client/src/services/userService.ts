@@ -16,6 +16,42 @@ export interface UserStats {
 }
 
 /**
+ * Interface for work experience tag data
+ */
+export interface WorkExperienceTag {
+  company: string;
+  title: string;
+  type: string;
+}
+
+/**
+ * Interface for community tag data
+ */
+export interface CommunityTag {
+  _id: string;
+  name: string;
+}
+
+/**
+ * Interface for enriched user with work experiences and communities
+ */
+export interface EnrichedUser extends SafeDatabaseUser {
+  workExperiences: WorkExperienceTag[];
+  communities: CommunityTag[];
+  major?: string;
+  graduationYear?: number;
+}
+
+/**
+ * Interface for search filters
+ */
+export interface UserSearchFilters {
+  major?: string;
+  graduationYear?: number;
+  communityId?: string;
+}
+
+/**
  * Function to get users
  *
  * @throws Error if there is an issue fetching users.
@@ -168,6 +204,72 @@ const getUserStats = async (username: string): Promise<UserStats> => {
 };
 
 /**
+ * Searches and filters users by various criteria
+ * @param searchQuery -  The type being searched (searches name, username, company, position, community)
+ * @param filters - Optional filters
+ * @returns A promise resolving to an array of users with work experiences and communities
+ * @throws Error if the request to the server is unsuccessful
+ */
+const searchUsers = async (
+  searchQuery: string,
+  filters?: UserSearchFilters,
+): Promise<EnrichedUser[]> => {
+  try {
+    const params = new URLSearchParams();
+
+    if (searchQuery) params.append('q', searchQuery);
+    if (filters?.major) params.append('major', filters.major);
+    if (filters?.graduationYear) params.append('graduationYear', filters.graduationYear.toString());
+    if (filters?.communityId) params.append('communityId', filters.communityId);
+
+    const res = await api.get(`${USER_API_URL}/search?${params.toString()}`);
+
+    if (res.status !== 200) {
+      throw new Error('Failed to search users');
+    }
+
+    return res.data;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Retrieves available filter options for the user search
+ * @returns - A promise resolving to an object containing arrays of majors and graduation years
+ * @throws Error if the request to the server is unsuccessful
+ */
+const getFilterOptions = async (): Promise<{
+  majors: string[];
+  graduationYears: number[];
+}> => {
+  try {
+    const res = await api.get(`${USER_API_URL}/filter-options`);
+
+    if (res.status !== 200) {
+      throw new Error('Failed to get filter options');
+    }
+
+    return res.data;
+  } catch (error) {
+    return { majors: [], graduationYears: [] };
+  }
+};
+
+const updateUserProfile = async (
+  username: string,
+  updates: { major?: string; graduationYear?: number },
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/updateProfile`, {
+    username,
+    ...updates,
+  });
+   if (res.status !== 200) {
+    throw new Error('Error when updating profile');
+  }
+  return res.data;
+};
+/**
  * Updates visibility settings for user stats
  * @param username The username of the user
  * @param field The field to update
@@ -212,6 +314,9 @@ export {
   updateBiography,
   markWelcomeMessageSeen,
   getUserStats,
+  searchUsers,
+  getFilterOptions,
+  updateUserProfile,
   updateUserStatVisibility,
   getLeaderboard,
 };

@@ -119,8 +119,9 @@ describe('getUsersList', () => {
 
   it('should return the users', async () => {
     jest.spyOn(UserModel, 'find').mockReturnValue({
-      select: jest.fn().mockResolvedValue([safeUser]),
-    } as unknown as Query<SafeDatabaseUser[], typeof UserModel>);
+      select: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([safeUser]),
+    } as any);
 
     const retrievedUsers = (await getUsersList()) as SafeDatabaseUser[];
 
@@ -131,7 +132,7 @@ describe('getUsersList', () => {
   it('should throw an error if the users cannot be found', async () => {
     jest.spyOn(UserModel, 'find').mockReturnValue({
       select: jest.fn().mockResolvedValue(null),
-    } as unknown as Query<SafeDatabaseUser[], typeof UserModel>);
+    } as any);
 
     const getUsersError = await getUsersList();
 
@@ -140,12 +141,13 @@ describe('getUsersList', () => {
 
   it('should throw an error if there is an error while searching the database', async () => {
     jest.spyOn(UserModel, 'find').mockReturnValue({
-      select: jest.fn().mockRejectedValue(new Error('Error finding documents')),
-    } as unknown as Query<SafeDatabaseUser[], typeof UserModel>);
+      select: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockRejectedValue(new Error('Error finding documents')),
+    } as any);
 
     const getUsersError = await getUsersList();
 
-    expect('error' in getUsersError).toBe(true);
+    expect((getUsersError as { error: string }).error).toMatch('Error occurred when finding users');
   });
 });
 
