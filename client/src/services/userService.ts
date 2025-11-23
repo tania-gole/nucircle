@@ -264,8 +264,12 @@ const updateUserProfile = async (
     username,
     ...updates,
   });
-  if (res.status !== 200) {
+   if (res.status !== 200) {
     throw new Error('Error when updating profile');
+  }
+  return res.data;
+};
+/**
  * Updates visibility settings for user stats
  * @param username The username of the user
  * @param field The field to update
