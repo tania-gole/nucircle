@@ -33,7 +33,6 @@ const useUsersListPage = () => {
         setFilteredUsers(users as EnrichedUser[]);
         setLeaderboard(leaders);
       } catch (error) {
-        console.error('Error fetching users/leaderboard:', error);
         setFilteredUsers([]);
         setLeaderboard([]);
       }
