@@ -365,6 +365,9 @@ const userController = (socket: FakeSOSocket) => {
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when updating profile: ${error}`);
+    }
+  };
+  /**
    * Toggles the visibility of a user's profile stats.
    * @param req The request containing the username, field, and value in the body.
    * @param res The response, either confirming the update or returning an error.
