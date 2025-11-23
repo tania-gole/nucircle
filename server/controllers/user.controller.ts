@@ -345,11 +345,14 @@ const userController = (socket: FakeSOSocket) => {
 
   const updateProfile = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { username, major, graduationYear } = req.body;
+      const { username, major, graduationYear, coopInterests, firstName, lastName } = req.body;
 
       const updates: Partial<User> = {};
       if (major !== undefined) updates.major = major;
       if (graduationYear !== undefined) updates.graduationYear = graduationYear;
+      if (coopInterests !== undefined) updates.coopInterests = coopInterests;
+      if (firstName !== undefined) updates.firstName = firstName;
+      if (lastName !== undefined) updates.lastName = lastName;
 
       const updatedUser = await updateUser(username, updates);
 
