@@ -38,6 +38,12 @@ const ProfileSettings: React.FC = () => {
     setNewMajor,
     newGradYear,
     setNewGradYear,
+    newCoopInterests,
+    setNewCoopInterests,
+    newFirstName,
+    setNewFirstName,
+    newLastName,
+    setNewLastName,
     handleUpdateProfile,
     showStats,
     toggleStatsVisibility,
@@ -92,18 +98,27 @@ const ProfileSettings: React.FC = () => {
             {!editProfileMode && (
               <div>
                 <p>
+                  <strong>Name:</strong> {userData.firstName} {userData.lastName}
+                </p>
+                <p>
                   <strong>Major:</strong> {userData.major || 'Not specified'}
                 </p>
                 <p>
                   <strong>Graduation Year:</strong> {userData.graduationYear || 'Not specified'}
+                </p>
+                <p>
+                  <strong>Co-op Interests:</strong> {userData.coopInterests || 'Not specified'}
                 </p>
                 {canEditProfile && (
                   <button
                     className='button button-primary'
                     onClick={() => {
                       setEditProfileMode(true);
+                      setNewFirstName(userData.firstName || '');
+                      setNewLastName(userData.lastName || '');
                       setNewMajor(userData.major || '');
                       setNewGradYear(userData.graduationYear || '');
+                      setNewCoopInterests(userData.coopInterests || '');
                     }}>
                     Edit Profile Info
                   </button>
@@ -113,6 +128,26 @@ const ProfileSettings: React.FC = () => {
 
             {editProfileMode && canEditProfile && (
               <div className='profile-edit'>
+                <label>
+                  <strong>First Name:</strong>
+                  <input
+                    className='input-text'
+                    type='text'
+                    value={newFirstName}
+                    onChange={e => setNewFirstName(e.target.value)}
+                    placeholder='Enter your first name'
+                  />
+                </label>
+                <label>
+                  <strong>Last Name:</strong>
+                  <input
+                    className='input-text'
+                    type='text'
+                    value={newLastName}
+                    onChange={e => setNewLastName(e.target.value)}
+                    placeholder='Enter your last name'
+                  />
+                </label>
                 <label>
                   <strong>Major:</strong>
                   <input
@@ -134,6 +169,18 @@ const ProfileSettings: React.FC = () => {
                     min='2020'
                     max='2035'
                   />
+                </label>
+                <label>
+                  <strong>Co-op Interests:</strong>
+                  <select
+                    className='input-text'
+                    value={newCoopInterests}
+                    onChange={e => setNewCoopInterests(e.target.value)}>
+                    <option value=''>Select co-op interest</option>
+                    <option value='Searching for co-op'>Searching for co-op</option>
+                    <option value='Completed co-ops'>Completed co-ops</option>
+                    <option value='Not interested in co-op'>Not interested in co-op</option>
+                  </select>
                 </label>
                 <button className='button button-primary' onClick={handleUpdateProfile}>
                   Save

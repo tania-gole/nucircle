@@ -58,6 +58,7 @@ export interface User extends UserSignup {
   major?: string;
   graduationYear?: number;
   showStats?: boolean;
+  coopInterests?: string;
 }
 
 /**
