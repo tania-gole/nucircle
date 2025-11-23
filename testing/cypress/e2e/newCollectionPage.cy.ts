@@ -6,7 +6,8 @@ import {
   goToCreateCollection,
   verifyCollectionPageDetails,
   createNewCollection,
-  verifyCollectionExists
+  verifyCollectionExists,
+  goToCollection
 } from '../support/helpers';
 
 describe('Cypress Tests for creating collections', () => {
@@ -19,10 +20,10 @@ describe('Cypress Tests for creating collections', () => {
   });
 
   it('13.1 | Allows user to create a new Public collection', () => {
-    const collectionName = 'Reactss Favorites';
+    const collectionName = 'New Collection';
 
     // Log in
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // Navigate to My Collections
     goToMyCollections();
@@ -30,21 +31,21 @@ describe('Cypress Tests for creating collections', () => {
     // Click "Create Collection"
     goToCreateCollection();
 
-    createNewCollection('Reactss Favorites', 'A list of React resources', false);
+    createNewCollection('New Collection', 'A list of new sources', false);
 
     goToMyCollections();
 
     // Verify the resulting collection page
     verifyCollectionExists(collectionName);
-    // cy.get('.collection-meta').should('contain', 'Public');
-    verifyCollectionPageDetails(collectionName, "user123");
+    goToCollection(collectionName);
+    verifyCollectionPageDetails(collectionName, 'e.hopper');
   });
 
   it('13.2 | Allows user to create a new Private collection', () => {
     const collectionName = 'Private Collection';
 
     // Log in
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // Navigate to My Collections
     goToMyCollections();
@@ -53,10 +54,13 @@ describe('Cypress Tests for creating collections', () => {
     goToCreateCollection();
     createNewCollection('Private Collection', 'Only I can see this', true);
 
+    goToMyCollections();
     // Verify the resulting collection page
     verifyCollectionExists(collectionName);
     // cy.get('.collection-meta').should('contain', 'Private');
 
-    verifyCollectionPageDetails(collectionName, "user123");
+    goToCollection(collectionName);
+
+    verifyCollectionPageDetails(collectionName, 'e.hopper');
   });
 });

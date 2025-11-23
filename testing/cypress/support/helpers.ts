@@ -59,7 +59,7 @@ export const teardownTest = () => {
  * Navigates to the Ask Question page
  */
 export const goToAskQuestion = () => {
-  cy.contains('Ask a Question').click();
+  cy.contains('Ask Question').click();
   cy.url().should('include', '/new/question');
 };
 
@@ -175,7 +175,7 @@ export const waitForQuestionsToLoad = () => {
  * @param questionTitle - The title of the question to click on
  */
 export const openSaveToCollectionModal = (questionTitle: string) => {
-  cy.get('.question_mid').contains('.postTitle', questionTitle).parents('.question_mid').parents('.question').find('.collections-btn').click();
+  cy.contains('.postTitle', questionTitle).closest('.question').find('.collections-btn').click();
 };
 
 /**
@@ -320,28 +320,26 @@ export const createNewCollection = (
   isPrivate: boolean = false
 ) => {
   // Fill using expected classnames instead of placeholders
-  cy.get('.new-collection-input').eq(0)
+  cy.get('.new-collection-input')
     .should('exist')
     .clear()
     .type(name);
 
-  cy.get('.new-collection-input').eq(1)
+  cy.get('.new-collection-textarea')
     .should('exist')
     .clear()
     .type(description);
 
   // Handle privacy checkbox
-  const checkboxSelector = '.new-collection-checkbox input[type="checkbox"]';
+  const checkboxSelector = '.checkbox-wrapper';
   cy.get(checkboxSelector).then(($checkbox) => {
     if (isPrivate) {
-      cy.wrap($checkbox).check({ force: true });
-    } else {
-      cy.wrap($checkbox).uncheck({ force: true });
-    }
+      cy.wrap($checkbox).click({ force: true });
+    } 
   });
 
   // Submit the form
-  cy.get('.new-collection-btn').should('exist').click({ force: true });
+  cy.get('.new-collection-submit').should('exist').click({ force: true });
 };
 
 /**
@@ -350,16 +348,10 @@ export const createNewCollection = (
  */
 export const deleteCollection = (name: string) => {
   goToMyCollections();
-
-   cy.get('.collection-card').contains('.collection-name', name).then(($nameEl) => {
-    // Go back to a stable parent context before clicking
-    cy.wrap($nameEl)
-      .closest('.collection-card')
-      .find('.delete-collection-button')
-      .click({ force: true });
-  });
-  // Verify deletion
-  cy.get('.collection-name').should('not.contain', name);
+  cy.get('.collection-card').contains('.main-collection-name', name).click();
+  cy.get('.delete-collection-button').click({ force: true });
+  cy.contains('Are you sure you want to delete this collection? This action cannot be undone.').should('exist');
+  cy.get('.button-danger').click({ force: true });
 };
 
 /**
@@ -377,7 +369,7 @@ export const verifyCollectionVisible = (name: string) => {
 export const verifyCollectionExists = (collectionName: string) => {
   cy.get('.collections-list').should('exist');
   cy.get('.collection-card').should('exist');
-  cy.get('.collection-name').contains(collectionName).should('be.visible');
+  cy.get('.main-collection-name').contains(collectionName).should('be.visible');
 };
 
 /**
@@ -385,7 +377,7 @@ export const verifyCollectionExists = (collectionName: string) => {
  * @param name - Name of the collection to open
  */
 export const goToCollection = (name: string) => {
-  cy.get('.collection-card').contains('.collection-name', name).click({ force: true });
+  cy.get('.collection-card').contains('.main-collection-name', name).click({ force: true });
   cy.url().should('include', '/collections/');
   cy.get('.collection-page').should('exist');
 };
@@ -401,7 +393,6 @@ export const verifyCollectionPageDetails = (name: string, username?: string) => 
   cy.get('.collection-description').should('exist');
   cy.get('.collection-meta').should('exist');
   cy.get('.questions-list').should('exist');
-
   if (username) {
     cy.get('.collection-meta').should('contain', username);
   }

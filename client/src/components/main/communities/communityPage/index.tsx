@@ -55,8 +55,8 @@ const CommunityPage = () => {
       </main>
 
       <div className='community-sidebar'>
+        <h2 className='community-title'>{community.name}</h2>
         <div className='community-chat-container'>
-          <h2 className='community-title'>{community.name}</h2>
           {isPartOfCommunity && (
             <NavLink
               to={`/messaging/community-messages/${community._id}`}

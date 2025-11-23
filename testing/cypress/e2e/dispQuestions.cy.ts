@@ -1,15 +1,11 @@
 import { createAnswer, createQuestion, goToAnswerQuestion, goToQuestions, loginUser, setupTest, teardownTest } from "../support/helpers";
 
-const Q1_TITLE = "How to properly handle async data fetching in React?";
-const Q2_TITLE = "Node.js memory issues when handling large file uploads";
-const Q3_TITLE = "Webpack configuration issues with latest JavaScript features";
-const Q4_TITLE = "Optimizing a slow PostgreSQL query with JOINs";
-const Q5_TITLE = "How to handle edge cases in JavaScript array processing";
-const Q6_TITLE = "Fixing CORS issues with fetch API in React frontend";
-const Q7_TITLE = "Improving performance of Python data processing script";
-const Q8_TITLE = "Docker container environment variable configuration";
-const Q9_TITLE = "Proper way to handle async/await in JavaScript";
-const Q10_TITLE = "Preventing memory leaks in React applications";
+const Q1_TITLE = "How do I know if a company’s culture will be a good fit?";
+const Q2_TITLE = "How important is LinkedIn when applying for internships?";
+const Q3_TITLE = "Balancing co-op work and classes — how do you manage it?";
+const Q4_TITLE = "What’s the best way to network at company info sessions?";
+const Q5_TITLE = "How to tailor my resume for consulting vs. tech roles?";
+const Q6_TITLE = "What are the best ways to prepare for a behavioral co-op interview?";
 
 describe("Cypress Tests to verify order of questions displayed", () => {
   beforeEach(() => {
@@ -21,7 +17,7 @@ describe("Cypress Tests to verify order of questions displayed", () => {
   });
 
   it('10.1 | Adds three questions and one answer, then click "Questions", then click unanswered button, verifies the sequence', () => {
-    loginUser('user123');
+    loginUser('e.hopper');
 
     createQuestion("Test Question A", "Test Question A Text", "javascript");
 
@@ -45,19 +41,15 @@ describe("Cypress Tests to verify order of questions displayed", () => {
 
   it("10.2 | Check if questions are displayed in descending order of dates.", () => {
     const qTitles = [
-      Q10_TITLE,
-      Q9_TITLE,
-      Q8_TITLE,
-      Q7_TITLE,
-      Q6_TITLE,
-      Q5_TITLE,
-      Q4_TITLE,
-      Q3_TITLE,
+      Q1_TITLE,
       Q2_TITLE,
-      Q1_TITLE
+      Q3_TITLE,
+      Q4_TITLE,
+      Q5_TITLE,
+      Q6_TITLE
     ];
 
-    loginUser('user123');
+    loginUser('e.hopper');
     
     cy.get(".postTitle").each(($el, index, $list) => {
       cy.wrap($el).should("contain", qTitles[index]);
@@ -66,19 +58,15 @@ describe("Cypress Tests to verify order of questions displayed", () => {
 
   it("10.3 | successfully shows all questions in model in most viewed order", () => {
     const qTitles = [
-      Q4_TITLE,
-      Q2_TITLE,
-      Q8_TITLE,
+      Q3_TITLE,
+      Q5_TITLE,
       Q6_TITLE,
       Q1_TITLE,
-      Q7_TITLE,
-      Q3_TITLE,
-      Q10_TITLE,
-      Q5_TITLE,
-      Q9_TITLE
+      Q2_TITLE,
+      Q4_TITLE,
     ];
 
-    loginUser('user123');
+    loginUser('e.hopper');
 
     cy.contains("Most Viewed").click();
     cy.get(".postTitle").each(($el, index, $list) => {
