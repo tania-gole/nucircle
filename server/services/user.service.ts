@@ -389,6 +389,10 @@ export const getUniqueGraduationYears = async (): Promise<number[]> => {
     return (years as number[]).filter(y => y !== null && y !== 0).sort((a, b) => a - b);
   } catch (error) {
     return [];
+  }
+};
+
+/**
  * Gets the global leaderboard sorted by points
  * @param limit - Number of top users to return
  * @returns List of top users sorted by points
@@ -399,7 +403,11 @@ export const getLeaderboard = async (limit: number = 20): Promise<UsersResponse>
       .select('-password')
       .sort({ points: -1 })
       .limit(limit);
-
+      .lean(); 
+    
+    if (!topUsers) {
+      throw Error('Could not retrieve leaderboard');
+    }
     return topUsers;
   } catch (error) {
     return { error: `Error occurred when fetching leaderboard: ${error}` };
