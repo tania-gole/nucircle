@@ -7,6 +7,7 @@ import {
   getFilterOptions,
   UserSearchFilters,
   EnrichedUser,
+  getLeaderboard,
 } from '../services/userService';
 import { getCommunities } from '../services/communityService';
 
@@ -14,6 +15,7 @@ const useUsersListPage = () => {
   const { socket } = useUserContext();
 
   const [filteredUsers, setFilteredUsers] = useState<EnrichedUser[]>([]);
+  const [leaderboard, setLeaderboard] = useState<SafeDatabaseUser[]>([]);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filters, setFilters] = useState<UserSearchFilters>({});
@@ -23,30 +25,17 @@ const useUsersListPage = () => {
   const [majors, setMajors] = useState<string[]>([]);
   const [graduationYears, setGraduationYears] = useState<number[]>([]);
   const [communities, setCommunities] = useState<{ _id: string; name: string }[]>([]);
-import { getUsers, getLeaderboard } from '../services/userService';
-
-/**
- * Custom hook for managing the users list page state, filtering, and real-time updates.
- *
- * @returns titleText - The current title of the users list page
- * @returns ulist - The list of users to display
- * @returns setUserFilter - Function to set the filtering value of the user search.
- */
-const useUsersListPage = () => {
-  const { socket } = useUserContext();
-
-  const [userFilter, setUserFilter] = useState<string>('');
-  const [userList, setUserList] = useState<SafeDatabaseUser[]>([]);
-  const [leaderboard, setLeaderboard] = useState<SafeDatabaseUser[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await getUsers();
-        // Backend now returns enriched users
-        setFilteredUsers(res as EnrichedUser[]);
+        const [users, leaders] = await Promise.all([getUsers(), getLeaderboard(20)]);
+        setFilteredUsers(users as EnrichedUser[]);
+        setLeaderboard(leaders);
       } catch (error) {
+        console.error('Error fetching users/leaderboard:', error);
         setFilteredUsers([]);
+        setLeaderboard([]);
       }
     };
 
@@ -65,11 +54,6 @@ const useUsersListPage = () => {
       } catch (error) {
         setMajors([]);
         setGraduationYears([]);
-        const [users, leaders] = await Promise.all([getUsers(), getLeaderboard(20)]);
-        setUserList(users);
-        setLeaderboard(leaders);
-      } catch (error) {
-        console.error('Error fetching users/leaderboard:', error);
       }
     };
 
@@ -111,12 +95,6 @@ const useUsersListPage = () => {
     }));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
   const toggleFilters = () => {
     setShowFilters(prev => !prev);
   };
@@ -155,7 +133,7 @@ const useUsersListPage = () => {
         }
       });
 
-      // Update leaderboard when user updates
+      // Update leaderboard
       setLeaderboard(prev => {
         const updated = prev.map(u =>
           u.username === userUpdate.user.username ? userUpdate.user : u,
@@ -197,13 +175,13 @@ const useUsersListPage = () => {
 
   return {
     userList: filteredUsers,
+    leaderboard,
     searchQuery,
     setSearchQuery,
     filters,
     updateFilter,
     handleSearch,
     handleClearSearch,
-    handleKeyPress,
     isSearching,
     showFilters,
     toggleFilters,
@@ -211,12 +189,6 @@ const useUsersListPage = () => {
     graduationYears,
     communities,
     handleChallengeClick,
-  const filteredUserlist = userList.filter(user => user.username.includes(userFilter));
-  return {
-    userList: filteredUserlist,
-    setUserFilter,
-    handleChallengeClick,
-    leaderboard,
   };
 };
 
