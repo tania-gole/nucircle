@@ -1,4 +1,3 @@
-// client/src/components/main/usersListPage/header/index.tsx
 import './index.css';
 import useUserSearch from '../../../../hooks/useUserSearch';
 import { UserSearchFilters } from '../../../../services/userService';
