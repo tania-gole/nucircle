@@ -481,7 +481,7 @@ export const addWorkExperience = () => {
 }
 
 export const editWorkExperience = (field: string, value: string) => {
-  cy.get(".edit-button").click();
+  cy.get('.work-experience-card').contains('Worked on machine learning infrastructure.').parents('.work-experience-card').find('.edit-button').click();
   cy.get(field).clear().type(value);
   cy.contains("Save").click();
 }

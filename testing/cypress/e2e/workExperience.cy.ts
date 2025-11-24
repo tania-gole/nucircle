@@ -65,7 +65,7 @@ describe("Cypress Tests for Work Experience", () => {
         addWorkExperience();
         cy.contains("Software Engineering Co-op").should("exist");
         
-        cy.get('.delete-button').click();
+        cy.get('.work-experience-card').contains('Software Engineering Co-op').parents('.work-experience-card').find('.delete-button').click();
         cy.contains('Are you sure you want to delete this work experience? This action cannot be undone.').should('exist');
         cy.contains('Confirm').click({ force: true });
         cy.contains("Software Engineering Co-op").should("not.exist");
