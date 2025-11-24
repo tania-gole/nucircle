@@ -88,6 +88,20 @@ const userSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
+    externalLinks: {
+      linkedin: {
+        type: String,
+        default: '',
+      },
+      github: {
+        type: String,
+        default: '',
+      },
+      portfolio: {
+        type: String,
+        default: '',
+      },
+    },
   },
   { collection: 'User' },
 );

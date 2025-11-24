@@ -368,6 +368,31 @@ const userController = (socket: FakeSOSocket) => {
       res.status(500).send(`Error when updating profile: ${error}`);
     }
   };
+
+  const updateExternalLinks = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, externalLinks } = req.body;
+
+      const updates: Partial<User> = {
+        externalLinks: externalLinks || {},
+      };
+
+      const updatedUser = await updateUser(username, updates);
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when updating external links: ${error}`);
+    }
+  };
   /**
    * Toggles the visibility of a user's profile stats.
    * @param req The request containing the username, field, and value in the body.
@@ -436,6 +461,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/filter-options', getFilterOptionsRoute);
   router.patch('/updateProfile', updateProfile);
   router.patch('/updateStatVisibility', authMiddleware, updateStatVisibility);
+  router.patch('/updateExternalLinks', updateExternalLinks);
   router.get('/leaderboard', getLeaderboardRoute);
   return router;
 };

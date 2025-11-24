@@ -47,6 +47,7 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       badges: result.badges || [],
       hasSeenWelcomeMessage: result.hasSeenWelcomeMessage || false,
       points: result.points || 0,
+      externalLinks: result.externalLinks || {},
     };
 
     return safeUser;
@@ -126,6 +127,7 @@ export const loginUser = async (loginCredentials: UserLogin): Promise<UserRespon
       badges: user.badges || [],
       hasSeenWelcomeMessage: user.hasSeenWelcomeMessage || false,
       points: user.points || 0,
+      externalLinks: user.externalLinks || {},
     };
 
     return safeUser;

@@ -41,6 +41,17 @@ const ProfileSettings: React.FC = () => {
     handleUpdateProfile,
     showStats,
     toggleStatsVisibility,
+    editLinksMode,
+    setEditLinksMode,
+    newLinkedIn,
+    setNewLinkedIn,
+    newGithub,
+    setNewGithub,
+    newPortfolio,
+    setNewPortfolio,
+    handleUpdateExternalLinks,
+    linkValidationError,
+    setLinkValidationError,
   } = useProfileSettings();
 
   if (loading) {
@@ -177,6 +188,124 @@ const ProfileSettings: React.FC = () => {
                   Save
                 </button>
                 <button className='button button-danger' onClick={() => setEditBioMode(false)}>
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className='external-links-section'>
+            <h4>External Links</h4>
+            {!editLinksMode && (
+              <div>
+                {userData.externalLinks?.linkedin && (
+                  <p>
+                    <strong>LinkedIn:</strong>{' '}
+                    <a
+                      href={userData.externalLinks.linkedin}
+                      target='_blank'
+                      rel='noopener noreferrer'>
+                      {userData.externalLinks.linkedin}
+                    </a>
+                  </p>
+                )}
+                {userData.externalLinks?.github && (
+                  <p>
+                    <strong>GitHub:</strong>{' '}
+                    <a
+                      href={userData.externalLinks.github}
+                      target='_blank'
+                      rel='noopener noreferrer'>
+                      {userData.externalLinks.github}
+                    </a>
+                  </p>
+                )}
+                {userData.externalLinks?.portfolio && (
+                  <p>
+                    <strong>Portfolio:</strong>{' '}
+                    <a
+                      href={userData.externalLinks.portfolio}
+                      target='_blank'
+                      rel='noopener noreferrer'>
+                      {userData.externalLinks.portfolio}
+                    </a>
+                  </p>
+                )}
+                {!userData.externalLinks?.linkedin &&
+                  !userData.externalLinks?.github &&
+                  !userData.externalLinks?.portfolio && <p>No external links added yet.</p>}
+                {canEditProfile && (
+                  <button
+                    className='button button-primary'
+                    onClick={() => {
+                      setEditLinksMode(true);
+                      setNewLinkedIn(userData.externalLinks?.linkedin || '');
+                      setNewGithub(userData.externalLinks?.github || '');
+                      setNewPortfolio(userData.externalLinks?.portfolio || '');
+                    }}>
+                    {userData.externalLinks?.linkedin ||
+                    userData.externalLinks?.github ||
+                    userData.externalLinks?.portfolio
+                      ? 'Edit Links'
+                      : 'Add Links'}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {editLinksMode && canEditProfile && (
+              <div className='links-edit'>
+                {linkValidationError && (
+                  <p className='error-message link-error-message'>{linkValidationError}</p>
+                )}
+                <label>
+                  <strong>LinkedIn:</strong>
+                  <input
+                    className='input-text'
+                    type='url'
+                    value={newLinkedIn}
+                    onChange={e => {
+                      setNewLinkedIn(e.target.value);
+                      setLinkValidationError(null);
+                    }}
+                    placeholder='https://linkedin.com/in/yourprofile'
+                  />
+                </label>
+                <label>
+                  <strong>GitHub:</strong>
+                  <input
+                    className='input-text'
+                    type='url'
+                    value={newGithub}
+                    onChange={e => {
+                      setNewGithub(e.target.value);
+                      setLinkValidationError(null);
+                    }}
+                    placeholder='https://github.com/yourusername'
+                  />
+                </label>
+                <label>
+                  <strong>Portfolio:</strong>
+                  <input
+                    className='input-text'
+                    type='url'
+                    value={newPortfolio}
+                    onChange={e => {
+                      setNewPortfolio(e.target.value);
+                      setLinkValidationError(null);
+                    }}
+                    placeholder='https://yourportfolio.com'
+                  />
+                </label>
+                <button className='button button-primary' onClick={handleUpdateExternalLinks}>
+                  Save
+                </button>
+                <button
+                  className='button button-danger'
+                  onClick={() => {
+                    setEditLinksMode(false);
+                    setLinkValidationError(null);
+                  }}>
                   Cancel
                 </button>
               </div>

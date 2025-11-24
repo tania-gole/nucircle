@@ -515,4 +515,139 @@ describe('DELETE /deleteUser', () => {
       );
     });
   });
+
+  describe('PATCH /updateExternalLinks', () => {
+    it('should successfully update external links given correct arguments', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        externalLinks: {
+          linkedin: 'https://linkedin.com/in/testuser',
+          github: 'https://github.com/testuser',
+          portfolio: 'https://testuser.com',
+        },
+      };
+
+      const updatedUser: SafeDatabaseUser = {
+        ...mockSafeUser,
+        externalLinks: mockReqBody.externalLinks,
+      };
+
+      updatedUserSpy.mockResolvedValueOnce(updatedUser);
+
+      const response = await supertest(app)
+        .patch('/api/user/updateExternalLinks')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body.externalLinks).toEqual(mockReqBody.externalLinks);
+      expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, {
+        externalLinks: mockReqBody.externalLinks,
+      });
+    });
+
+    it('should successfully update partial external links', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        externalLinks: {
+          linkedin: 'https://linkedin.com/in/testuser',
+        },
+      };
+
+      const updatedUser: SafeDatabaseUser = {
+        ...mockSafeUser,
+        externalLinks: mockReqBody.externalLinks,
+      };
+
+      updatedUserSpy.mockResolvedValueOnce(updatedUser);
+
+      const response = await supertest(app)
+        .patch('/api/user/updateExternalLinks')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body.externalLinks.linkedin).toBe(mockReqBody.externalLinks.linkedin);
+      expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, {
+        externalLinks: mockReqBody.externalLinks,
+      });
+    });
+
+    it('should successfully update with empty external links object', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        externalLinks: {},
+      };
+
+      const updatedUser: SafeDatabaseUser = {
+        ...mockSafeUser,
+        externalLinks: {},
+      };
+
+      updatedUserSpy.mockResolvedValueOnce(updatedUser);
+
+      const response = await supertest(app)
+        .patch('/api/user/updateExternalLinks')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body.externalLinks).toEqual({});
+      expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, {
+        externalLinks: {},
+      });
+    });
+
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        externalLinks: {
+          linkedin: 'https://linkedin.com/in/testuser',
+        },
+      };
+
+      const response = await supertest(app)
+        .patch('/api/user/updateExternalLinks')
+        .send(mockReqBody);
+
+      const openApiError = JSON.parse(response.text);
+
+      expect(response.status).toBe(400);
+      expect(openApiError.errors[0].path).toBe('/body/username');
+    });
+
+    it('should return 400 for request with empty username', async () => {
+      const mockReqBody = {
+        username: '',
+        externalLinks: {
+          linkedin: 'https://linkedin.com/in/testuser',
+        },
+      };
+
+      const response = await supertest(app)
+        .patch('/api/user/updateExternalLinks')
+        .send(mockReqBody);
+
+      const openApiError = JSON.parse(response.text);
+
+      expect(response.status).toBe(400);
+      expect(openApiError.errors[0].path).toBe('/body/username');
+    });
+
+    it('should return 500 if updateUser returns an error', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        externalLinks: {
+          linkedin: 'https://linkedin.com/in/testuser',
+        },
+      };
+
+      updatedUserSpy.mockResolvedValueOnce({ error: 'Error updating user' });
+
+      const response = await supertest(app)
+        .patch('/api/user/updateExternalLinks')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain(
+        'Error when updating external links: Error: Error updating user',
+      );
+    });
+  });
 });

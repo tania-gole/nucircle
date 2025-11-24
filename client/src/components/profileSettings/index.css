@@ -112,6 +112,17 @@
   box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
 }
 
+.profile-settings .button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.profile-settings .button:disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
 .profile-settings .success-message {
   color: var(--color-success);
   font-weight: 500;
@@ -143,6 +154,43 @@
   flex-direction: column;
   gap: 0.75rem;
   margin: 1rem 0;
+}
+
+.profile-settings .external-links-section {
+  margin: 1.5rem 0;
+}
+
+.profile-settings .external-links-section p {
+  margin: 0.5rem 0;
+}
+
+.profile-settings .external-links-section a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.profile-settings .external-links-section a:hover {
+  text-decoration: underline;
+}
+
+.profile-settings .links-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.profile-settings .links-edit label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.profile-settings .link-error-message {
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+  max-width: 100%;
 }
 
 .profile-settings .password-actions {
