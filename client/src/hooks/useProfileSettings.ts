@@ -1,3 +1,4 @@
+// client/src/hooks/useProfileSettings.ts
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -33,6 +34,8 @@ const useProfileSettings = () => {
   const [newBio, setNewBio] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [newCareerGoals, setNewCareerGoals] = useState('');
+  const [newTechnicalInterests, setNewTechnicalInterests] = useState('');
 
   // User stats
   const [userStats, setUserStats] = useState<UserStats | null>(null);
@@ -173,12 +176,22 @@ const useProfileSettings = () => {
     if (!username) return;
 
     try {
-      const updates: { major?: string; graduationYear?: number; coopInterests?: string; firstName?: string; lastName?: string } = {};
+      const updates: {
+        major?: string;
+        graduationYear?: number;
+        coopInterests?: string;
+        firstName?: string;
+        lastName?: string;
+        careerGoals?: string;
+        technicalInterests?: string;
+      } = {};
       if (newMajor.trim()) updates.major = newMajor;
       if (newGradYear) updates.graduationYear = parseInt(newGradYear.toString());
       if (newCoopInterests !== undefined) updates.coopInterests = newCoopInterests;
       if (newFirstName.trim()) updates.firstName = newFirstName;
       if (newLastName.trim()) updates.lastName = newLastName;
+      if (newCareerGoals !== undefined) updates.careerGoals = newCareerGoals;
+      if (newTechnicalInterests !== undefined) updates.technicalInterests = newTechnicalInterests;
 
       const updatedUser = await updateUserProfile(username, updates);
       setUserData(updatedUser);
@@ -353,6 +366,10 @@ const useProfileSettings = () => {
     handleUpdateExternalLinks,
     linkValidationError,
     setLinkValidationError,
+    newCareerGoals,
+    setNewCareerGoals,
+    newTechnicalInterests,
+    setNewTechnicalInterests,
   };
 };
 

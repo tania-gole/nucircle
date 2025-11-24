@@ -1,3 +1,4 @@
+// client/src/components/profileSettings/index.tsx
 import * as React from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -58,6 +59,10 @@ const ProfileSettings: React.FC = () => {
     handleUpdateExternalLinks,
     linkValidationError,
     setLinkValidationError,
+    newCareerGoals,
+    setNewCareerGoals,
+    newTechnicalInterests,
+    setNewTechnicalInterests,
   } = useProfileSettings();
 
   if (loading) {
@@ -120,6 +125,13 @@ const ProfileSettings: React.FC = () => {
                 <p>
                   <strong>Co-op Interests:</strong> {userData.coopInterests || 'Not specified'}
                 </p>
+                <p>
+                  <strong>Career Goals:</strong> {userData.careerGoals || 'Not specified'}
+                </p>
+                <p>
+                  <strong>Technical Interests:</strong>{' '}
+                  {userData.technicalInterests || 'Not specified'}
+                </p>
                 {canEditProfile && (
                   <button
                     className='button button-primary'
@@ -130,6 +142,8 @@ const ProfileSettings: React.FC = () => {
                       setNewMajor(userData.major || '');
                       setNewGradYear(userData.graduationYear || '');
                       setNewCoopInterests(userData.coopInterests || '');
+                      setNewCareerGoals(userData.careerGoals || ' ');
+                      setNewTechnicalInterests(userData.technicalInterests || ' ');
                     }}>
                     Edit Profile Info
                   </button>
@@ -192,6 +206,32 @@ const ProfileSettings: React.FC = () => {
                     <option value='Completed co-ops'>Completed co-ops</option>
                     <option value='Not interested in co-op'>Not interested in co-op</option>
                   </select>
+                </label>
+                <label>
+                  <strong>Career Goals:</strong>
+                  <input
+                    className='input-text'
+                    type='text'
+                    value={newCareerGoals}
+                    onChange={e => setNewCareerGoals(e.target.value)}
+                    placeholder='e.g., data science, finance, product management'
+                  />
+                  <small style={{ color: '#888', fontSize: '0.85em' }}>
+                    Comma-separated values (e.g., "data science, finance")
+                  </small>
+                </label>
+                <label>
+                  <strong>Technical Interests:</strong>
+                  <input
+                    className='input-text'
+                    type='text'
+                    value={newTechnicalInterests}
+                    onChange={e => setNewTechnicalInterests(e.target.value)}
+                    placeholder='e.g., machine learning, web development, cloud computing'
+                  />
+                  <small style={{ color: '#888', fontSize: '0.85em' }}>
+                    Comma-separated values (e.g., "machine learning, react")
+                  </small>
                 </label>
                 <button className='button button-primary' onClick={handleUpdateProfile}>
                   Save

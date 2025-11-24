@@ -1,3 +1,4 @@
+// client/src/services/userService.ts
 import axios from 'axios';
 import { AuthResponse, SafeDatabaseUser, UserLogin, UserSignup } from '../types/types';
 import api from './config';
@@ -49,6 +50,8 @@ export interface UserSearchFilters {
   major?: string;
   graduationYear?: number;
   communityId?: string;
+  careerGoals?: string;
+  technicalInterests?: string;
 }
 
 /**
@@ -221,6 +224,9 @@ const searchUsers = async (
     if (filters?.major) params.append('major', filters.major);
     if (filters?.graduationYear) params.append('graduationYear', filters.graduationYear.toString());
     if (filters?.communityId) params.append('communityId', filters.communityId);
+    if (filters?.careerGoals) params.append('careerGoals', filters.careerGoals);
+    if (filters?.technicalInterests)
+      params.append('technicalInterests', filters.technicalInterests);
 
     const res = await api.get(`${USER_API_URL}/search?${params.toString()}`);
 
@@ -258,7 +264,15 @@ const getFilterOptions = async (): Promise<{
 
 const updateUserProfile = async (
   username: string,
-  updates: { major?: string; graduationYear?: number; coopInterests?: string; firstName?: string; lastName?: string },
+  updates: {
+    major?: string;
+    graduationYear?: number;
+    coopInterests?: string;
+    firstName?: string;
+    lastName?: string;
+    careerGoals?: string;
+    technicalInterests?: string;
+  },
 ): Promise<SafeDatabaseUser> => {
   const res = await api.patch(`${USER_API_URL}/updateProfile`, {
     username,
