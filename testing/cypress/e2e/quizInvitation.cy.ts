@@ -23,7 +23,7 @@ describe('Cypress Tests to verify quiz invitation system', () => {
     loginUser('test_user');
     goToUsers();
 
-    cy.get('.user-card').contains('.username', 'azad').parents('.user-card').within(() => {
+    cy.get('.user-card').contains('.username', 'test_user1').parents('.user-card').within(() => {
       cy.get('.challenge-button').should('be.visible');
     });
   });
