@@ -48,6 +48,45 @@ const deleteUserByUsernameSpy = jest.spyOn(util, 'deleteUserByUsername');
 
 describe('Test userController', () => {
   describe('POST /signup', () => {
+    it('should successfully create user with email provided', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        password: mockUser.password,
+        email: 'test@northeastern.edu',
+      };
+
+      const mockSafeUserWithEmail = {
+        ...mockSafeUser,
+        email: 'test@northeastern.edu',
+      };
+
+      saveUserSpy.mockResolvedValueOnce(mockSafeUserWithEmail);
+
+      const response = await supertest(app).post('/api/user/signup').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body.user.email).toBe('test@northeastern.edu');
+      expect(saveUserSpy).toHaveBeenCalledWith({
+        ...mockReqBody,
+        biography: '',
+        dateJoined: expect.any(Date),
+      });
+    });
+
+    it('should return 500 for duplicate email registration', async () => {
+      const mockReqBody = {
+        username: 'newuser',
+        password: mockUser.password,
+        email: 'existing@northeastern.edu',
+      };
+
+      saveUserSpy.mockResolvedValueOnce({ error: 'Email already in use' });
+
+      const response = await supertest(app).post('/api/user/signup').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain('Email already in use');
+    });
     it('should create a new user given correct arguments', async () => {
       const mockReqBody = {
         username: mockUser.username,
