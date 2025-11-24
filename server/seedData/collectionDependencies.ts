@@ -1,5 +1,5 @@
 import { AnswerImport, CollectionImport, QuestionImport } from '../types/populate';
-import { User, Comment, Tag, Message, Community } from '../types/types';
+import { User, Comment, Tag, Message, Community, DatabaseWorkExperience } from '../types/types';
 import { TriviaQuestionDocument } from '../models/triviaQuestion.model';
 
 /**
@@ -17,6 +17,7 @@ export const collectionDependencies = {
   question: ['tag', 'comment', 'answer', 'community'],
   community: [],
   collection: ['question'],
+  workExperience: ['user'],
 } as const;
 
 export type CollectionName = keyof typeof collectionDependencies;
@@ -31,4 +32,5 @@ export type CollectionDocTypes = {
   community: Community;
   collection: CollectionImport;
   triviaQuestion: TriviaQuestionDocument;
+  workExperience: DatabaseWorkExperience;
 };

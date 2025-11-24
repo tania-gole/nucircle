@@ -9,6 +9,7 @@
   ],
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.554.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

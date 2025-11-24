@@ -17,11 +17,16 @@ import {
   loginUser,
   saveUser,
   updateUser,
+  searchUsers,
+  getUniqueMajors,
+  getUniqueGraduationYears,
+  getLeaderboard,
 } from '../services/user.service';
 import QuestionModel from '../models/questions.model';
 import AnswerModel from '../models/answers.model';
 import CommunityModel from '../models/community.model';
 import GameModel from '../models/games.model';
+import WorkExperienceModel from '../models/workExperience.model';
 import { generateToken } from '../utils/jwt.util';
 import authMiddleware from '../middleware/auth';
 
@@ -113,7 +118,7 @@ const userController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Retrieves all users from the database.
+   * Retrieves all users from the database with enriched work experience and community data.
    * @param res The response, either returning the users or an error.
    * @returns A promise resolving to void.
    */
@@ -125,7 +130,26 @@ const userController = (socket: FakeSOSocket) => {
         throw Error(users.error);
       }
 
-      res.status(200).json(users);
+      // Enrich with work experiences and communities
+      const enrichedUsers = await Promise.all(
+        users.map(async user => {
+          const workExperiences = await WorkExperienceModel.find({ username: user.username })
+            .select('company title type')
+            .lean();
+
+          const communities = await CommunityModel.find({ participants: user.username })
+            .select('_id name')
+            .lean();
+
+          return {
+            ...user,
+            workExperiences: workExperiences || [],
+            communities: communities || [],
+          };
+        }),
+      );
+
+      res.status(200).json(enrichedUsers);
     } catch (error) {
       res.status(500).send(`Error when getting users: ${error}`);
     }
@@ -274,6 +298,128 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Searches and filters users by various criteria including name, company, position, and community.
+   * Returns enriched user data including work experiences and communities for tag display.
+   * @param req The request containing query parameters: q (search query), major, graduationYear, communityId.
+   * @param res The response, either returning the array of enriched users or an error.
+   * @returns A promise resolving to void.
+   */
+  const searchUsersRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const searchQuery = (req.query.q as string) || '';
+      const filters = {
+        major: req.query.major as string | undefined,
+        graduationYear: req.query.graduationYear
+          ? parseInt(req.query.graduationYear as string)
+          : undefined,
+        communityId: req.query.communityId as string | undefined,
+      };
+
+      const users = await searchUsers(searchQuery, filters);
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to search users' });
+    }
+  };
+
+  /**
+   * Retrieves available filter options for the user search functionality.
+   * Returns unique majors and graduation years currently in the database.
+   * @param _ The request (unused).
+   * @param res The response, either returning filter options object or an error.
+   * @returns A promise resolving to void.
+   */
+  const getFilterOptionsRoute = async (_: Request, res: Response): Promise<void> => {
+    try {
+      const [majors, graduationYears] = await Promise.all([
+        getUniqueMajors(),
+        getUniqueGraduationYears(),
+      ]);
+
+      res.json({ majors, graduationYears });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get filter options' });
+    }
+  };
+
+  const updateProfile = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, major, graduationYear, coopInterests, firstName, lastName } = req.body;
+
+      const updates: Partial<User> = {};
+      if (major !== undefined) updates.major = major;
+      if (graduationYear !== undefined) updates.graduationYear = graduationYear;
+      if (coopInterests !== undefined) updates.coopInterests = coopInterests;
+      if (firstName !== undefined) updates.firstName = firstName;
+      if (lastName !== undefined) updates.lastName = lastName;
+
+      const updatedUser = await updateUser(username, updates);
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when updating profile: ${error}`);
+    }
+  };
+  /**
+   * Toggles the visibility of a user's profile stats.
+   * @param req The request containing the username, field, and value in the body.
+   * @param res The response, either confirming the update or returning an error.
+   * @returns A promise resolving to void.
+   */
+  const updateStatVisibility = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, field, value } = req.body;
+      if (username !== req.user!.username) {
+        res.status(401).send('Unauthorized');
+        return;
+      }
+      if (field != 'showStats') {
+        res.status(400).send('Invalid field');
+        return;
+      }
+      const updatedUser = await updateUser(username, { [field]: value });
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error updating visibility: ${(error as Error).message}`);
+    }
+  };
+
+  /**
+   * Gets the global leaderboard sorted by points
+   */
+  const getLeaderboardRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const leaderboard = await getLeaderboard(limit);
+
+      if ('error' in leaderboard) {
+        throw new Error(leaderboard.error);
+      }
+
+      res.status(200).json(leaderboard);
+    } catch (error) {
+      res.status(500).send(`Error fetching leaderboard: ${(error as Error).message}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -285,6 +431,11 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/me', authMiddleware, getCurrentUser);
   router.patch('/markWelcomeSeen', authMiddleware, markWelcomeMessageSeen);
   router.get('/stats/:username', getUserStats);
+  router.get('/search', searchUsersRoute);
+  router.get('/filter-options', getFilterOptionsRoute);
+  router.patch('/updateProfile', updateProfile);
+  router.patch('/updateStatVisibility', authMiddleware, updateStatVisibility);
+  router.get('/leaderboard', getLeaderboardRoute);
   return router;
 };
 

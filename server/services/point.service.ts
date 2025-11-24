@@ -1,7 +1,4 @@
 import UserModel from '../models/users.model';
-// import QuestionModel from '../models/questions.model';
-// import AnswerModel from '../models/answers.model';
-// import CommunityModel from '../models/community.model';
 import { DatabaseUser } from '../types/types';
 
 /**

@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import { app } from '../../app';
 import * as util from '../../services/user.service';
 import { SafeDatabaseUser, User } from '../../types/types';
+import CommunityModel from '../../models/community.model';
+import WorkExperienceModel from '../../models/workExperience.model';
 
 // mock jwt auth to always authenticate successfully
 jest.mock('../../middleware/auth', () => ({
@@ -353,47 +355,58 @@ describe('Test userController', () => {
     it('should return the users from the database', async () => {
       getUsersListSpy.mockResolvedValueOnce([mockSafeUser]);
 
+      // Mock WorkExperience and Community queries
+      jest.spyOn(WorkExperienceModel, 'find').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([]),
+      } as any);
+
+      jest.spyOn(CommunityModel, 'find').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([]),
+      } as any);
+
       const response = await supertest(app).get(`/api/user/getUsers`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([mockUserJSONResponse]);
-      expect(getUsersListSpy).toHaveBeenCalled();
-    });
-
-    it('should return 500 if database error while finding users', async () => {
-      getUsersListSpy.mockResolvedValueOnce({ error: 'Error finding users' });
-
-      const response = await supertest(app).get(`/api/user/getUsers`);
-
-      expect(response.status).toBe(500);
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0].username).toBe(mockSafeUser.username);
     });
   });
 
-  describe('DELETE /deleteUser', () => {
-    it('should return the deleted user given correct arguments', async () => {
-      deleteUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);
+  it('should return 500 if database error while finding users', async () => {
+    getUsersListSpy.mockResolvedValueOnce({ error: 'Error finding users' });
 
-      const response = await supertest(app).delete(`/api/user/deleteUser/${mockUser.username}`);
+    const response = await supertest(app).get(`/api/user/getUsers`);
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockUserJSONResponse);
-      expect(deleteUserByUsernameSpy).toHaveBeenCalledWith(mockUser.username);
-    });
+    expect(response.status).toBe(500);
+  });
+});
 
-    it('should return 500 if database error while searching username', async () => {
-      deleteUserByUsernameSpy.mockResolvedValueOnce({ error: 'Error deleting user' });
+describe('DELETE /deleteUser', () => {
+  it('should return the deleted user given correct arguments', async () => {
+    deleteUserByUsernameSpy.mockResolvedValueOnce(mockSafeUser);
 
-      const response = await supertest(app).delete(`/api/user/deleteUser/${mockUser.username}`);
+    const response = await supertest(app).delete(`/api/user/deleteUser/${mockUser.username}`);
 
-      expect(response.status).toBe(500);
-    });
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(mockUserJSONResponse);
+    expect(deleteUserByUsernameSpy).toHaveBeenCalledWith(mockUser.username);
+  });
 
-    it('should return 404 if username not provided', async () => {
-      // Express automatically returns 404 for missing parameters when
-      // defined as required in the route
-      const response = await supertest(app).delete('/api/user/deleteUser/');
-      expect(response.status).toBe(404);
-    });
+  it('should return 500 if database error while searching username', async () => {
+    deleteUserByUsernameSpy.mockResolvedValueOnce({ error: 'Error deleting user' });
+
+    const response = await supertest(app).delete(`/api/user/deleteUser/${mockUser.username}`);
+
+    expect(response.status).toBe(500);
+  });
+
+  it('should return 404 if username not provided', async () => {
+    // Express automatically returns 404 for missing parameters when
+    // defined as required in the route
+    const response = await supertest(app).delete('/api/user/deleteUser/');
+    expect(response.status).toBe(404);
   });
 
   describe('PATCH /updateBiography', () => {

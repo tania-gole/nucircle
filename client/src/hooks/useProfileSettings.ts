@@ -6,7 +6,9 @@ import {
   resetPassword,
   updateBiography,
   getUserStats,
+  updateUserStatVisibility,
   type UserStats,
+  updateUserProfile,
 } from '../services/userService';
 import badgeService from '../services/badgeService';
 import { SafeDatabaseUser, Badge } from '../types/types';
@@ -18,7 +20,7 @@ import useUserContext from './useUserContext';
 const useProfileSettings = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
-  const { user: currentUser } = useUserContext();
+  const { user: currentUser, socket } = useUserContext();
 
   // Local state
   const [userData, setUserData] = useState<SafeDatabaseUser | null>(null);
@@ -30,7 +32,32 @@ const useProfileSettings = () => {
   const [newBio, setNewBio] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // User stats
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [editProfileMode, setEditProfileMode] = useState(false);
+  const [newMajor, setNewMajor] = useState('');
+  const [newGradYear, setNewGradYear] = useState<string | number>('');
+  const [newCoopInterests, setNewCoopInterests] = useState('');
+  const [newFirstName, setNewFirstName] = useState('');
+  const [newLastName, setNewLastName] = useState('');
+  const [showStats, setShowStats] = useState(true);
+  useEffect(() => {
+    if (!username || !socket) return;
+
+    const handleUserUpdate = (data: { user: SafeDatabaseUser; type: string }) => {
+      if (data.user.username === username && data.type === 'updated') {
+        setUserData(data.user);
+        setShowStats(data.user.showStats ?? true);
+      }
+    };
+
+    socket.on('userUpdate', handleUserUpdate);
+
+    return () => {
+      socket.off('userUpdate', handleUserUpdate);
+    };
+  }, [username, socket]);
 
   // For delete-user confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -131,6 +158,28 @@ const useProfileSettings = () => {
     }
   };
 
+  const handleUpdateProfile = async () => {
+    if (!username) return;
+
+    try {
+      const updates: { major?: string; graduationYear?: number; coopInterests?: string; firstName?: string; lastName?: string } = {};
+      if (newMajor.trim()) updates.major = newMajor;
+      if (newGradYear) updates.graduationYear = parseInt(newGradYear.toString());
+      if (newCoopInterests !== undefined) updates.coopInterests = newCoopInterests;
+      if (newFirstName.trim()) updates.firstName = newFirstName;
+      if (newLastName.trim()) updates.lastName = newLastName;
+
+      const updatedUser = await updateUserProfile(username, updates);
+      setUserData(updatedUser);
+      setEditProfileMode(false);
+      setSuccessMessage('Profile updated successfully!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to update profile');
+      setSuccessMessage(null);
+    }
+  };
+
   const handleUpdateBiography = async () => {
     if (!username) return;
     try {
@@ -178,6 +227,23 @@ const useProfileSettings = () => {
     return;
   };
 
+  /**
+   * Toggles visibility of the user's profile stats.
+   */
+  const toggleStatsVisibility = async () => {
+    if (!userData) return;
+
+    const newValue = !showStats;
+
+    try {
+      await updateUserStatVisibility(userData.username, 'showStats', newValue);
+      setShowStats(newValue);
+      setUserData(prev => (prev ? { ...prev, showStats: newValue } : null));
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+    }
+  };
+
   return {
     userData,
     badges,
@@ -204,6 +270,21 @@ const useProfileSettings = () => {
     handleDeleteUser,
     handleViewCollectionsPage,
     userStats,
+    editProfileMode,
+    setEditProfileMode,
+    newMajor,
+    setNewMajor,
+    newGradYear,
+    setNewGradYear,
+    newCoopInterests,
+    setNewCoopInterests,
+    newFirstName,
+    setNewFirstName,
+    newLastName,
+    setNewLastName,
+    handleUpdateProfile,
+    showStats,
+    toggleStatsVisibility,
   };
 };
 

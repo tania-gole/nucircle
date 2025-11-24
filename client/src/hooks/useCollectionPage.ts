@@ -54,7 +54,7 @@ const useCollectionPage = () => {
     return () => {
       socket.off('collectionUpdate', handleCollectionUpdate);
     };
-  }, [username, collectionId, socket, navigate]);
+  }, [username, collectionId, socket, navigate, currentUser.username]);
 
   return {
     collection,
