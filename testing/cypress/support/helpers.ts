@@ -392,3 +392,83 @@ export const verifyCollectionPageDetails = (name: string, username?: string) => 
     cy.get('.collection-meta').should('contain', username);
   }
 };
+
+/**
+ * Navigates to the user list page
+ */
+export const goToUsers = () => {
+  cy.contains('Users').click();
+  cy.url().should('include', '/users')
+}
+
+/**
+ * Verifies user's status 
+ * @param username - The username to check
+ * @param expectedStatus - 'Online' or 'Offline'
+ */
+export const verifyUserOnlineStatus = (username: string, expectedStatus: 'Online' | 'Offline') => {
+  cy.get('.user-card').contains('.username', username).parents('.user-card').within(() => {
+    cy.get('.online-status').should('contain', expectedStatus);
+  });
+};
+
+/**
+ * Verifies last seen timesamp is displayed for a user
+ * @param username - The username to check
+ */
+export const verifyLastSeenDisplayed = (username: string) => {
+  cy.get('.user-card').contains('.username', username).parents('.user-card').within(() => {
+    cy.get('.last-seen').should('exist');
+    cy.get('.last-seen').should('contain', 'Last seen');
+  });
+};
+
+/**
+ * Sends a quiz invitation to a user
+ * @param username - Username to challenge
+ */
+export const sendQuizInvite = (username: string) => {
+  cy.get('.user-card').contains('.username', username).parents('.user-card').within(() => {
+    cy.get('.challenge-button').click();
+  });
+};
+
+/**
+ * Verifies challenge button state for a user
+ * @param username - The username to check
+ * @param shouldBeDisabled - If button should be disabled
+ */
+export const verifyChallengeButtonState = (username: string, shouldBeDisabled: boolean) => {
+  cy.get('.user-card').contains('.username', username).parents('.user-card').within(() => {
+    if (shouldBeDisabled) {
+      cy.get('.challenge-button').should('be.disabled');
+    } else {
+      cy.get('.challenge-button').should('not.be.disabled');
+    }
+  });
+};
+
+export const acceptQuizInvite = () => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.accept-invite-button').click();
+};
+
+export const declineQuizInvite = () => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.decline-invite-button').click();
+};
+
+/**
+ * Verifies quiz invitation modal is displayed
+ * @param challengerUsername - The username of the challenger
+ */
+export const verifyQuizInviteModal = (challengerUsername: string) => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.quiz-invite-modal').should('contain', challengerUsername);
+  cy.get('.accept-invite-button').should('be.visible');
+  cy.get('.decline-invite-button').should('be.visible');
+};
+
+export const logoutUser = () => {
+  cy.contains('Logout').click();
+};
