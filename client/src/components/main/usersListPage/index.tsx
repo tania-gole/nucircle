@@ -1,4 +1,3 @@
-// client/src/components/main/usersListPage/index.tsx
 import './index.css';
 import { useNavigate } from 'react-router-dom';
 import UserCardView from './userCard';

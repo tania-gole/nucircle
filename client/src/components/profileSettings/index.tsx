@@ -1,4 +1,3 @@
-// client/src/components/profileSettings/index.tsx
 import * as React from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';

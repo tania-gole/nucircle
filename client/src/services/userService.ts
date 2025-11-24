@@ -1,4 +1,3 @@
-// client/src/services/userService.ts
 import axios from 'axios';
 import { AuthResponse, SafeDatabaseUser, UserLogin, UserSignup } from '../types/types';
 import api from './config';
