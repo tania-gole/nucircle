@@ -397,3 +397,23 @@ export const verifyCollectionPageDetails = (name: string, username?: string) => 
     cy.get('.collection-meta').should('contain', username);
   }
 };
+
+/**
+ * Adds a new work experience entry using the work experience form.
+ */
+export const addWorkExperience = () => {
+  cy.contains("+ Add").click();
+    cy.get('input[name="title"]').type("Software Engineering Co-op");
+    cy.get('input[name="company"]').type("OpenAI");
+    cy.get('select[name="type"]').select("Co-op");
+    cy.get('input[name="location"]').type("Boston, MA");
+    cy.get('input[name="startDate"]').type("2024-01-10");
+    cy.get('textarea[name="description"]').type("Worked on machine learning infrastructure.");
+    cy.contains("Save").click();
+}
+
+export const editWorkExperience = (field: string, value: string) => {
+  cy.get(".edit-button").click();
+  cy.get(field).clear().type(value);
+  cy.contains("Save").click();
+}

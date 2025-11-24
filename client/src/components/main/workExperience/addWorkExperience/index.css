@@ -21,10 +21,12 @@
     padding: 0px;
 }
 
-.input-text {
+.work-experience-form .input-text {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 10px;
+  border: none;
+  background: white;
 }
 
 .input-field {
