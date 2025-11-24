@@ -298,6 +298,34 @@ export const searchUsers = async (
       query.graduationYear = filters.graduationYear;
     }
 
+    // Filter by career goals (comma-separated)
+    if (filters.careerGoals) {
+      const goals = filters.careerGoals
+        .split(',')
+        .map(g => g.trim())
+        .filter(g => g);
+      if (goals.length > 0) {
+        query.careerGoals = {
+          $regex: goals.map(g => g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
+          $options: 'i',
+        };
+      }
+    }
+
+    // Filter by technical interests (comma-separated)
+    if (filters.technicalInterests) {
+      const interests = filters.technicalInterests
+        .split(',')
+        .map(i => i.trim())
+        .filter(i => i);
+      if (interests.length > 0) {
+        query.technicalInterests = {
+          $regex: interests.map(i => i.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
+          $options: 'i',
+        };
+      }
+    }
+
     // Find users
     let users: SafeDatabaseUser[] = (await UserModel.find(query)
       .select('-password')
@@ -339,34 +367,6 @@ export const searchUsers = async (
           users.push(u);
         }
       });
-    }
-
-    // Filter by career goals (comma-separated)
-    if (filters.careerGoals) {
-      const goals = filters.careerGoals
-        .split(',')
-        .map(g => g.trim())
-        .filter(g => g);
-      if (goals.length > 0) {
-        query.careerGoals = {
-          $regex: goals.map(g => g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
-          $options: 'i',
-        };
-      }
-    }
-
-    // Filter by technical interests (comma-separated)
-    if (filters.technicalInterests) {
-      const interests = filters.technicalInterests
-        .split(',')
-        .map(i => i.trim())
-        .filter(i => i);
-      if (interests.length > 0) {
-        query.technicalInterests = {
-          $regex: interests.map(i => i.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
-          $options: 'i',
-        };
-      }
     }
 
     // Enrich with work experiences and communities

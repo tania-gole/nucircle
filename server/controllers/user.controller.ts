@@ -316,6 +316,8 @@ const userController = (socket: FakeSOSocket) => {
           ? parseInt(req.query.graduationYear as string)
           : undefined,
         communityId: req.query.communityId as string | undefined,
+        careerGoals: req.query.careerGoals as string | undefined,
+        technicalInterests: req.query.technicalInterests as string | undefined,
       };
 
       const users = await searchUsers(searchQuery, filters);
