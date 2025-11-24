@@ -5,6 +5,7 @@ import { io, Socket } from 'socket.io-client';
 // const SOCKET_URL = window.location.origin;
 
 let socket: Socket | null = null;
+// const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
 /**
  * Custom hook to manage Socket.IO connection for real-time communication.
@@ -74,6 +75,11 @@ export const useSocket = (username: string | null): void => {
       socket = io(window.location.origin, {
         path: '/socket.io',
         transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+        timeout: 20000,
       });
 
       socketRef.current = socket;
@@ -86,6 +92,14 @@ export const useSocket = (username: string | null): void => {
 
       socket.on('connect_error', error => {
         console.error('[useSocket] Socket connection error:', error);
+        console.error('[useSocket] Error details:', {
+          message: error.message,
+          description: error.message,
+          type: error.name,
+        });
+      });
+      socket.on('disconnect', reason => {
+        console.log('[useSocket] Socket disconnected:', reason);
       });
     }
 

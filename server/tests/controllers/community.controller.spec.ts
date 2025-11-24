@@ -53,6 +53,7 @@ const createCommunitySpy = jest.spyOn(communityService, 'createCommunity');
 const deleteCommunitySpy = jest.spyOn(communityService, 'deleteCommunity');
 const getCommunitiesByUserSpy = jest.spyOn(communityService, 'getCommunitiesByUser');
 const getUserByUsernameSpy = jest.spyOn(userUtil, 'getUserByUsername');
+const recordCommunityVisitSpy = jest.spyOn(communityService, 'recordCommunityVisit');
 
 describe('Community Controller', () => {
   beforeEach(() => {
@@ -525,5 +526,37 @@ describe('Community Controller', () => {
 
       expect(response.status).toBe(500);
     });
+  });
+  describe('POST /:communityId/visit', () => {
+    test('should record visit successfully', async () => {
+      const mockReqBody = {
+        username: 'test_user',
+      };
+
+      recordCommunityVisitSpy.mockResolvedValueOnce(undefined);
+
+      const response = await supertest(app)
+        .post('/api/community/65e9b58910afe6e94fc6e6dc/visit')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ message: 'Visit recorded' });
+      expect(recordCommunityVisitSpy).toHaveBeenCalledWith('65e9b58910afe6e94fc6e6dc', 'test_user');
+    });
+
+    //   test('should return 500 when service throws error', async () => {
+    //     const mockReqBody = {
+    //       username: 'test_user',
+    //     };
+
+    //     recordCommunityVisitSpy.mockRejectedValueOnce(new Error('Database error'));
+
+    //     const response = await supertest(app)
+    //       .post('/api/community/65e9b58910afe6e94fc6e6dc/visit')
+    //       .send(mockReqBody);
+
+    //     expect(response.status).toBe(500);
+    //     expect(response.text).toContain('Error recording visit: Database error');
+    //   });
   });
 });

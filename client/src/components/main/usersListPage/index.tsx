@@ -8,6 +8,7 @@ import useUserContext from '../../../hooks/useUserContext';
 
 interface UserListPageProps {
   handleUserSelect?: (user: SafeDatabaseUser) => void;
+  showLeaderboard?: boolean;
 }
 
 const UsersListPage = (props: UserListPageProps) => {
@@ -31,6 +32,7 @@ const UsersListPage = (props: UserListPageProps) => {
   const { handleUserSelect = null } = props;
   const { user: currentUser } = useUserContext();
   const navigate = useNavigate();
+  const showLeaderboard = props.showLeaderboard ?? true;
 
   const handleUserCardViewClickHandler = (user: SafeDatabaseUser): void => {
     if (handleUserSelect) {
@@ -56,7 +58,6 @@ const UsersListPage = (props: UserListPageProps) => {
         graduationYears={graduationYears}
         communities={communities}
       />
-
       <div style={{ display: 'flex', gap: '20px' }}>
         {/* Left column: All users with search/filter */}
         <div style={{ flex: 1 }}>
@@ -75,38 +76,41 @@ const UsersListPage = (props: UserListPageProps) => {
             <div className='bold_title right_padding'>No Users Found</div>
           )}
         </div>
-
-        {/* Right column: Global leaderboard */}
-        <div style={{ width: '300px' }}>
-          <h3>🏆 Leaderboard</h3>
-          <div className='users_list'>
-            {leaderboard.map((user, index) => (
-              <div
-                key={user._id.toString()}
-                className='userCard'
-                onClick={() => navigate(`/user/${user.username}`)}
-                style={{ cursor: 'pointer', padding: '10px' }}>
+        {showLeaderboard && (
+          /* Right column: Global leaderboard */
+          <div style={{ width: '280px', marginRight: '20px' }}>
+            <h3>🏆 Leaderboard</h3>
+            <div className='users_list'>
+              {leaderboard.map((user, index) => (
                 <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}>
-                  <div>
-                    <span style={{ fontSize: '1.2em', marginRight: '8px' }}>
-                      {index === 0 && '🥇'}
-                      {index === 1 && '🥈'}
-                      {index === 2 && '🥉'}
-                      {index > 2 && `#${index + 1}`}
-                    </span>
-                    <strong>{user.username}</strong>
+                  key={user._id.toString()}
+                  className='userCard'
+                  onClick={() => navigate(`/user/${user.username}`)}
+                  style={{ cursor: 'pointer', padding: '10px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}>
+                    <div>
+                      <span style={{ fontSize: '1.2em', marginRight: '8px' }}>
+                        {index === 0 && '🥇'}
+                        {index === 1 && '🥈'}
+                        {index === 2 && '🥉'}
+                        {index > 2 && `#${index + 1}`}
+                      </span>
+                      <strong>{user.username}</strong>
+                    </div>
+                    <div style={{ color: '#82c0ff', fontWeight: 'bold' }}>
+                      {user.points || 0} pts
+                    </div>
                   </div>
-                  <div style={{ color: '#82c0ff', fontWeight: 'bold' }}>{user.points || 0} pts</div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

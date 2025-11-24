@@ -45,9 +45,15 @@ const io: FakeSOSocket = new Server(server, {
       'http://localhost:4530',
       'http://localhost:3000',
       'http://localhost:5173',
+      'https://fall25-project-m-a-r-t-514.onrender.com',
     ],
     credentials: true,
+    methods: ['GET', 'POST'],
   },
+  transports: ['websocket', 'polling'], // Explicitly set transports
+  allowEIO3: true, // Allow Engine.IO v3 clients
+  pingTimeout: 60000, // Increase timeout for slower connections
+  pingInterval: 25000,
 });
 
 function connectDatabase() {
@@ -61,10 +67,13 @@ function startServer() {
   });
 }
 
-// CODE CHANGE
+/**
+ * Socket.IO connection handler
+ *
+ * Manages real-time communication between the server and clients
+ * Handles the user online status, quiz invitations, and game disconnections.
+ */
 io.on('connection', socket => {
-  console.log('A user connected ->', socket.id);
-
   // Listen for userConnect event: client sends this after successful login
   socket.on('userConnect', async (username: string) => {
     console.log(`User ${username} connected with socket ${socket.id}`);
@@ -73,31 +82,32 @@ io.on('connection', socket => {
     const result = await updateUserOnlineStatus(username, true, socket.id);
 
     if ('error' in result) {
-      console.error('Error updating user status:', result.error);
+      socket.emit('error', { message: 'Failed to update online status' });
       return;
     }
 
     // Store username in socket instance
     socket.data.username = username;
 
+    // Broadcast to all other clients
     socket.broadcast.emit('userStatusUpdate', {
       username,
       isOnline: true,
     });
-
-    // Notify all connected clients that this user came online
-    console.log(`User ${username} is online`);
   });
 
+  /**
+   * Event handler for sendQuizInvite
+   * Triggered when the user clicks Challenge button on another user's profile
+   * Sends quiz invitation to recipient if they are online
+   */
   socket.on('sendQuizInvite', async (recipientUsername: string) => {
     const challengerUsername = socket.data.username;
 
     if (!challengerUsername) {
-      console.error('Cannot send invite: user not authenticated');
+      socket.emit('error', { message: 'Recipient not found' });
       return;
     }
-
-    console.log(`Quiz invite: ${challengerUsername} → ${recipientUsername}`);
 
     // Check if user is online
     const recipientUser = await getUserByUsername(recipientUsername);
@@ -129,22 +139,19 @@ io.on('connection', socket => {
 
     // Send invitation to recipient via their socket
     socket.to(recipientUser.socketId).emit('quizInviteReceived', invite);
-
-    console.log(`Invitation ${invite.id} sent to ${recipientUsername}`);
   });
 
   // Respond to Invitation
   socket.on('respondToQuizInvite', async (inviteId: string, accepted: boolean) => {
-    console.log(`Invitation ${inviteId} response: ${accepted ? 'ACCEPTED' : 'DECLINED'}`);
-
     const invitationManager = QuizInvitationManager.getInstance();
     const invite = invitationManager.getInvitation(inviteId);
 
     if (!invite) {
-      console.error('Invitation not found:', inviteId);
+      socket.emit('error', { message: 'Invitation not found or expired' });
       return;
     }
 
+    // Response object to send to both players
     const result: {
       inviteId: string;
       challengerUsername: string;
@@ -182,10 +189,7 @@ io.on('connection', socket => {
         // Notify both players with gameId
         io.to(invite.challengerSocketId).emit('quizInviteAccepted', result);
         io.to(invite.recipientSocketId).emit('quizInviteAccepted', result);
-
-        console.log(`Game ${gameId} created and started for invitation ${inviteId}`);
       } else {
-        console.error('Failed to create game:', gameIdResult.error);
         socket.emit('error', { message: 'Failed to create game' });
         return;
       }

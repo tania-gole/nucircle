@@ -47,6 +47,21 @@ const ProfileSettings: React.FC = () => {
     handleUpdateProfile,
     showStats,
     toggleStatsVisibility,
+    editLinksMode,
+    setEditLinksMode,
+    newLinkedIn,
+    setNewLinkedIn,
+    newGithub,
+    setNewGithub,
+    newPortfolio,
+    setNewPortfolio,
+    handleUpdateExternalLinks,
+    linkValidationError,
+    setLinkValidationError,
+    newCareerGoals,
+    setNewCareerGoals,
+    newTechnicalInterests,
+    setNewTechnicalInterests,
   } = useProfileSettings();
 
   if (loading) {
@@ -85,21 +100,14 @@ const ProfileSettings: React.FC = () => {
           <h2>
             {userData.firstName} {userData.lastName}
           </h2>
+          <div className='profile-username'>@ {userData.username}</div>
 
           {successMessage && <p className='success-message'>{successMessage}</p>}
           {errorMessage && <p className='error-message'>{errorMessage}</p>}
 
-          <h4>General Information</h4>
-          <p>
-            <strong>Username:</strong> {userData.username}
-          </p>
-
           <div className='profile-info-section'>
             {!editProfileMode && (
               <div>
-                <p>
-                  <strong>Name:</strong> {userData.firstName} {userData.lastName}
-                </p>
                 <p>
                   <strong>Major:</strong> {userData.major || 'Not specified'}
                 </p>
@@ -108,6 +116,13 @@ const ProfileSettings: React.FC = () => {
                 </p>
                 <p>
                   <strong>Co-op Interests:</strong> {userData.coopInterests || 'Not specified'}
+                </p>
+                <p>
+                  <strong>Career Goals:</strong> {userData.careerGoals || 'Not specified'}
+                </p>
+                <p>
+                  <strong>Technical Interests:</strong>{' '}
+                  {userData.technicalInterests || 'Not specified'}
                 </p>
                 {canEditProfile && (
                   <button
@@ -119,6 +134,8 @@ const ProfileSettings: React.FC = () => {
                       setNewMajor(userData.major || '');
                       setNewGradYear(userData.graduationYear || '');
                       setNewCoopInterests(userData.coopInterests || '');
+                      setNewCareerGoals(userData.careerGoals || ' ');
+                      setNewTechnicalInterests(userData.technicalInterests || ' ');
                     }}>
                     Edit Profile Info
                   </button>
@@ -182,6 +199,32 @@ const ProfileSettings: React.FC = () => {
                     <option value='Not interested in co-op'>Not interested in co-op</option>
                   </select>
                 </label>
+                <label>
+                  <strong>Career Goals:</strong>
+                  <input
+                    className='input-text'
+                    type='text'
+                    value={newCareerGoals}
+                    onChange={e => setNewCareerGoals(e.target.value)}
+                    placeholder='e.g., data science, finance, product management'
+                  />
+                  <small style={{ color: '#888', fontSize: '0.85em' }}>
+                    Comma-separated values (e.g., "data science, finance")
+                  </small>
+                </label>
+                <label>
+                  <strong>Technical Interests:</strong>
+                  <input
+                    className='input-text'
+                    type='text'
+                    value={newTechnicalInterests}
+                    onChange={e => setNewTechnicalInterests(e.target.value)}
+                    placeholder='e.g., machine learning, web development, cloud computing'
+                  />
+                  <small style={{ color: '#888', fontSize: '0.85em' }}>
+                    Comma-separated values (e.g., "machine learning, react")
+                  </small>
+                </label>
                 <button className='button button-primary' onClick={handleUpdateProfile}>
                   Save
                 </button>
@@ -224,6 +267,124 @@ const ProfileSettings: React.FC = () => {
                   Save
                 </button>
                 <button className='button button-danger' onClick={() => setEditBioMode(false)}>
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className='external-links-section'>
+            <h4>External Links</h4>
+            {!editLinksMode && (
+              <div>
+                {userData.externalLinks?.linkedin && (
+                  <p>
+                    <strong>LinkedIn:</strong>{' '}
+                    <a
+                      href={userData.externalLinks.linkedin}
+                      target='_blank'
+                      rel='noopener noreferrer'>
+                      {userData.externalLinks.linkedin}
+                    </a>
+                  </p>
+                )}
+                {userData.externalLinks?.github && (
+                  <p>
+                    <strong>GitHub:</strong>{' '}
+                    <a
+                      href={userData.externalLinks.github}
+                      target='_blank'
+                      rel='noopener noreferrer'>
+                      {userData.externalLinks.github}
+                    </a>
+                  </p>
+                )}
+                {userData.externalLinks?.portfolio && (
+                  <p>
+                    <strong>Portfolio:</strong>{' '}
+                    <a
+                      href={userData.externalLinks.portfolio}
+                      target='_blank'
+                      rel='noopener noreferrer'>
+                      {userData.externalLinks.portfolio}
+                    </a>
+                  </p>
+                )}
+                {!userData.externalLinks?.linkedin &&
+                  !userData.externalLinks?.github &&
+                  !userData.externalLinks?.portfolio && <p>No external links added yet.</p>}
+                {canEditProfile && (
+                  <button
+                    className='button button-primary'
+                    onClick={() => {
+                      setEditLinksMode(true);
+                      setNewLinkedIn(userData.externalLinks?.linkedin || '');
+                      setNewGithub(userData.externalLinks?.github || '');
+                      setNewPortfolio(userData.externalLinks?.portfolio || '');
+                    }}>
+                    {userData.externalLinks?.linkedin ||
+                    userData.externalLinks?.github ||
+                    userData.externalLinks?.portfolio
+                      ? 'Edit Links'
+                      : 'Add Links'}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {editLinksMode && canEditProfile && (
+              <div className='links-edit'>
+                {linkValidationError && (
+                  <p className='error-message link-error-message'>{linkValidationError}</p>
+                )}
+                <label>
+                  <strong>LinkedIn:</strong>
+                  <input
+                    className='input-text'
+                    type='url'
+                    value={newLinkedIn}
+                    onChange={e => {
+                      setNewLinkedIn(e.target.value);
+                      setLinkValidationError(null);
+                    }}
+                    placeholder='https://linkedin.com/in/yourprofile'
+                  />
+                </label>
+                <label>
+                  <strong>GitHub:</strong>
+                  <input
+                    className='input-text'
+                    type='url'
+                    value={newGithub}
+                    onChange={e => {
+                      setNewGithub(e.target.value);
+                      setLinkValidationError(null);
+                    }}
+                    placeholder='https://github.com/yourusername'
+                  />
+                </label>
+                <label>
+                  <strong>Portfolio:</strong>
+                  <input
+                    className='input-text'
+                    type='url'
+                    value={newPortfolio}
+                    onChange={e => {
+                      setNewPortfolio(e.target.value);
+                      setLinkValidationError(null);
+                    }}
+                    placeholder='https://yourportfolio.com'
+                  />
+                </label>
+                <button className='button button-primary' onClick={handleUpdateExternalLinks}>
+                  Save
+                </button>
+                <button
+                  className='button button-danger'
+                  onClick={() => {
+                    setEditLinksMode(false);
+                    setLinkValidationError(null);
+                  }}>
                   Cancel
                 </button>
               </div>

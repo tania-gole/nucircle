@@ -31,16 +31,24 @@ const Badges = ({ badges }: BadgesProps) => {
     }
   };
 
+  const getBadgeIcon = (badge: Badge): string => {
+    if (badge.type === 'community') return '🤝';
+    if (badge.type === 'milestone') return '🏆';
+    if (badge.type === 'leaderboard') {
+      if (badge.name === '1st Place') return '🥇';
+      if (badge.name === '2nd Place') return '🥈';
+      if (badge.name === '3rd Place') return '🥉';
+      return '🥇';
+    }
+    return '🏅';
+  };
+
   return (
     <div className='badges-container'>
       <div className='badges-grid'>
         {badges.map((badge, index) => (
           <div key={index} className={`badge-card ${getBadgeTypeClass(badge.type)}`}>
-            <div className='badge-icon'>
-              {badge.type === 'community' && '🤝'}
-              {badge.type === 'milestone' && '🏆'}
-              {badge.type === 'leaderboard' && '🥇'}
-            </div>
+            <div className='badge-icon'>{getBadgeIcon(badge)}</div>
             <div className='badge-info'>
               <div className='badge-name'>{badge.name}</div>
               <div className='badge-type'>{badge.type}</div>

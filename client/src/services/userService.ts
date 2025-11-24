@@ -49,6 +49,8 @@ export interface UserSearchFilters {
   major?: string;
   graduationYear?: number;
   communityId?: string;
+  careerGoals?: string;
+  technicalInterests?: string;
 }
 
 /**
@@ -221,6 +223,9 @@ const searchUsers = async (
     if (filters?.major) params.append('major', filters.major);
     if (filters?.graduationYear) params.append('graduationYear', filters.graduationYear.toString());
     if (filters?.communityId) params.append('communityId', filters.communityId);
+    if (filters?.careerGoals) params.append('careerGoals', filters.careerGoals);
+    if (filters?.technicalInterests)
+      params.append('technicalInterests', filters.technicalInterests);
 
     const res = await api.get(`${USER_API_URL}/search?${params.toString()}`);
 
@@ -258,14 +263,42 @@ const getFilterOptions = async (): Promise<{
 
 const updateUserProfile = async (
   username: string,
-  updates: { major?: string; graduationYear?: number; coopInterests?: string; firstName?: string; lastName?: string },
+  updates: {
+    major?: string;
+    graduationYear?: number;
+    coopInterests?: string;
+    firstName?: string;
+    lastName?: string;
+    careerGoals?: string;
+    technicalInterests?: string;
+  },
 ): Promise<SafeDatabaseUser> => {
   const res = await api.patch(`${USER_API_URL}/updateProfile`, {
     username,
     ...updates,
   });
-   if (res.status !== 200) {
+  if (res.status !== 200) {
     throw new Error('Error when updating profile');
+  }
+  return res.data;
+};
+
+/**
+ * Updates external links for a user (LinkedIn, GitHub, Portfolio)
+ * @param username The username of the user
+ * @param externalLinks Object containing linkedin, github, and portfolio URLs
+ * @returns The updated user
+ */
+const updateExternalLinks = async (
+  username: string,
+  externalLinks: { linkedin?: string; github?: string; portfolio?: string },
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/updateExternalLinks`, {
+    username,
+    externalLinks,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when updating external links');
   }
   return res.data;
 };
@@ -318,5 +351,6 @@ export {
   getFilterOptions,
   updateUserProfile,
   updateUserStatVisibility,
+  updateExternalLinks,
   getLeaderboard,
 };

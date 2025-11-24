@@ -82,7 +82,7 @@ const DirectMessage = () => {
               </button>
             </div>
             <div className='users-list-page'>
-              <UsersListPage handleUserSelect={handleUserSelect} />
+              <UsersListPage handleUserSelect={handleUserSelect} showLeaderboard={false} />
             </div>
             <button
               className={`custom-button create-chat-btn ${!chatToCreate ? 'disabled' : ''}`}

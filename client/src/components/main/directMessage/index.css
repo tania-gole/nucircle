@@ -77,23 +77,25 @@
 }
 
 .selected-user {
-  font-weight: 600;
   color: #FF6B6B;
+  text-decoration: underline;
 }
 
 .close-button {
-  background: #FF6B6B;
+  background: #d3d3d3;
   color: white;
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  box-shadow:0px 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow:0px 2px 6px rgba(0, 0, 0, 0.1);
+  transition: background 0.2s;
+  margin: 0;
 }
 
 .close-button:hover {
-  background: #e55a5a;
+  background: #b5b4b4;
 }
 
 .create-chat-btn.disabled {

@@ -22,6 +22,7 @@ import {
   getUniqueGraduationYears,
   getLeaderboard,
 } from '../services/user.service';
+import { checkAndAwardLeaderboardBadges } from '../services/badge.service';
 import QuestionModel from '../models/questions.model';
 import AnswerModel from '../models/answers.model';
 import CommunityModel from '../models/community.model';
@@ -314,6 +315,8 @@ const userController = (socket: FakeSOSocket) => {
           ? parseInt(req.query.graduationYear as string)
           : undefined,
         communityId: req.query.communityId as string | undefined,
+        careerGoals: req.query.careerGoals as string | undefined,
+        technicalInterests: req.query.technicalInterests as string | undefined,
       };
 
       const users = await searchUsers(searchQuery, filters);
@@ -345,7 +348,16 @@ const userController = (socket: FakeSOSocket) => {
 
   const updateProfile = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { username, major, graduationYear, coopInterests, firstName, lastName } = req.body;
+      const {
+        username,
+        major,
+        graduationYear,
+        coopInterests,
+        firstName,
+        lastName,
+        careerGoals,
+        technicalInterests,
+      } = req.body;
 
       const updates: Partial<User> = {};
       if (major !== undefined) updates.major = major;
@@ -353,6 +365,8 @@ const userController = (socket: FakeSOSocket) => {
       if (coopInterests !== undefined) updates.coopInterests = coopInterests;
       if (firstName !== undefined) updates.firstName = firstName;
       if (lastName !== undefined) updates.lastName = lastName;
+      if (careerGoals !== undefined) updates.careerGoals = careerGoals;
+      if (technicalInterests !== undefined) updates.technicalInterests = technicalInterests;
 
       const updatedUser = await updateUser(username, updates);
 
@@ -368,6 +382,31 @@ const userController = (socket: FakeSOSocket) => {
       res.status(200).json(updatedUser);
     } catch (error) {
       res.status(500).send(`Error when updating profile: ${error}`);
+    }
+  };
+
+  const updateExternalLinks = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, externalLinks } = req.body;
+
+      const updates: Partial<User> = {
+        externalLinks: externalLinks || {},
+      };
+
+      const updatedUser = await updateUser(username, updates);
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when updating external links: ${error}`);
     }
   };
   /**
@@ -414,6 +453,9 @@ const userController = (socket: FakeSOSocket) => {
         throw new Error(leaderboard.error);
       }
 
+      // Check and award badges to top 3 users
+      await checkAndAwardLeaderboardBadges(leaderboard);
+
       res.status(200).json(leaderboard);
     } catch (error) {
       res.status(500).send(`Error fetching leaderboard: ${(error as Error).message}`);
@@ -435,6 +477,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/filter-options', getFilterOptionsRoute);
   router.patch('/updateProfile', updateProfile);
   router.patch('/updateStatVisibility', authMiddleware, updateStatVisibility);
+  router.patch('/updateExternalLinks', updateExternalLinks);
   router.get('/leaderboard', getLeaderboardRoute);
   return router;
 };

@@ -1,3 +1,4 @@
+// shared/types/user.d.ts
 import { Request } from 'express';
 import { ObjectId } from 'mongodb';
 
@@ -45,6 +46,11 @@ export interface UserSignup {
  * - `points`: The total points accumulated by the user through platform activities.
  * - `major`: The user's major/field of study.
  * - `graduationYear`: The user's expected graduation year.
+ * - `showStats`: A boolean indicating if the user has opted to display their statistics publicly.
+ * - `externalLinks`: An object containing optional external links (LinkedIn, GitHub, Portfolio).
+ * - `coopInterests`: A string describing the user's co-op interests.
+ * - `careerGoals`: A string describing the user's career goals.
+ * - `technicalInterests`: A string describing the user's technical interests.
  */
 export interface User extends UserSignup {
   dateJoined: Date;
@@ -58,7 +64,14 @@ export interface User extends UserSignup {
   major?: string;
   graduationYear?: number;
   showStats?: boolean;
+  externalLinks?: {
+    linkedin?: string;
+    github?: string;
+    portfolio?: string;
+  };
   coopInterests?: string;
+  careerGoals?: string;
+  technicalInterests?: string;
 }
 
 /**
