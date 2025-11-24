@@ -445,6 +445,14 @@ export const verifyChallengeButtonState = (username: string, shouldBeVisible: bo
   });
 };
 
+/**
+ * Views a community by navigating to its URL
+ * @param communityId - The ID of the community to view
+ */
+export const viewCommunity = (communityId: string): void => {
+  cy.visit(`/community/${communityId}`);
+};
+
 export const acceptQuizInvite = () => {
   cy.get('.quiz-invite-modal').should('be.visible');
   cy.get('.accept-invite-button').click();
