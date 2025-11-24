@@ -1,3 +1,4 @@
+// server/controllers/user.controller.ts
 import express, { Request, Response, Router } from 'express';
 import {
   SignupRequest,
@@ -315,6 +316,8 @@ const userController = (socket: FakeSOSocket) => {
           ? parseInt(req.query.graduationYear as string)
           : undefined,
         communityId: req.query.communityId as string | undefined,
+        careerGoals: req.query.careerGoals as string | undefined,
+        technicalInterests: req.query.technicalInterests as string | undefined,
       };
 
       const users = await searchUsers(searchQuery, filters);
@@ -346,7 +349,16 @@ const userController = (socket: FakeSOSocket) => {
 
   const updateProfile = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { username, major, graduationYear, coopInterests, firstName, lastName } = req.body;
+      const {
+        username,
+        major,
+        graduationYear,
+        coopInterests,
+        firstName,
+        lastName,
+        careerGoals,
+        technicalInterests,
+      } = req.body;
 
       const updates: Partial<User> = {};
       if (major !== undefined) updates.major = major;
@@ -354,6 +366,8 @@ const userController = (socket: FakeSOSocket) => {
       if (coopInterests !== undefined) updates.coopInterests = coopInterests;
       if (firstName !== undefined) updates.firstName = firstName;
       if (lastName !== undefined) updates.lastName = lastName;
+      if (careerGoals !== undefined) updates.careerGoals = careerGoals;
+      if (technicalInterests !== undefined) updates.technicalInterests = technicalInterests;
 
       const updatedUser = await updateUser(username, updates);
 
