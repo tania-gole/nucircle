@@ -88,9 +88,19 @@ const userSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
-    coopInterests: {
-      type: String,
-      default: '',
+    externalLinks: {
+      linkedin: {
+        type: String,
+        default: '',
+      },
+      github: {
+        type: String,
+        default: '',
+      },
+      portfolio: {
+        type: String,
+        default: '',
+      },
     },
   },
   { collection: 'User' },

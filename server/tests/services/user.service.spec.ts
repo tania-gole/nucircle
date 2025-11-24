@@ -543,4 +543,70 @@ describe('updateUser', () => {
       throw new Error('Expected a safe user, got an error object.');
     }
   });
+
+  it('should update external links when updating user', async () => {
+    const externalLinks = {
+      linkedin: 'https://linkedin.com/in/testuser',
+      github: 'https://github.com/testuser',
+      portfolio: 'https://testuser.com',
+    };
+    const externalLinksUpdates: Partial<User> = { externalLinks };
+    jest.spyOn(UserModel, 'findOneAndUpdate').mockImplementation((filter?: any) => {
+      expect(filter.username).toBeDefined();
+      const query: any = {};
+      query.select = jest
+        .fn()
+        .mockReturnValue(Promise.resolve({ ...safeUpdatedUser, externalLinks }));
+      return query;
+    });
+
+    const result = await updateUser(user.username, externalLinksUpdates);
+
+    if ('username' in result) {
+      expect(result.externalLinks).toEqual(externalLinks);
+      expect(result.externalLinks?.linkedin).toBe('https://linkedin.com/in/testuser');
+      expect(result.externalLinks?.github).toBe('https://github.com/testuser');
+      expect(result.externalLinks?.portfolio).toBe('https://testuser.com');
+    } else {
+      throw new Error('Expected a safe user, got an error object.');
+    }
+  });
+
+  it('should update partial external links when updating user', async () => {
+    const externalLinks = {
+      linkedin: 'https://linkedin.com/in/testuser',
+    };
+    const externalLinksUpdates: Partial<User> = { externalLinks };
+    jest.spyOn(UserModel, 'findOneAndUpdate').mockImplementation((filter?: any) => {
+      expect(filter.username).toBeDefined();
+      const query: any = {};
+      query.select = jest
+        .fn()
+        .mockReturnValue(Promise.resolve({ ...safeUpdatedUser, externalLinks }));
+      return query;
+    });
+
+    const result = await updateUser(user.username, externalLinksUpdates);
+
+    if ('username' in result) {
+      expect(result.externalLinks).toEqual(externalLinks);
+      expect(result.externalLinks?.linkedin).toBe('https://linkedin.com/in/testuser');
+      expect(result.externalLinks?.github).toBeUndefined();
+      expect(result.externalLinks?.portfolio).toBeUndefined();
+    } else {
+      throw new Error('Expected a safe user, got an error object.');
+    }
+  });
+
+  it('should return an error if external links update fails because user not found', async () => {
+    jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(null);
+
+    const externalLinks = {
+      linkedin: 'https://linkedin.com/in/testuser',
+    };
+    const externalLinksUpdates: Partial<User> = { externalLinks };
+    const updatedError = await updateUser(user.username, externalLinksUpdates);
+
+    expect('error' in updatedError).toBe(true);
+  });
 });

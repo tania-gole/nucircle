@@ -1065,6 +1065,29 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorResponse'
 
+  /user/updateExternalLinks:
+    patch:
+      tags:
+        - Users
+      summary: Update a user's external links (LinkedIn, GitHub, Portfolio).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateExternalLinksBody'
+      responses:
+        '200':
+          description: User external links successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
 components:
   schemas:
     # --------------------
@@ -1511,6 +1534,28 @@ components:
           minLength: 1
         biography:
           type: string
+
+    UpdateExternalLinksBody:
+      type: object
+      required:
+        - username
+        - externalLinks
+      properties:
+        username:
+          type: string
+          minLength: 1
+        externalLinks:
+          type: object
+          properties:
+            linkedin:
+              type: string
+              format: uri
+            github:
+              type: string
+              format: uri
+            portfolio:
+              type: string
+              format: uri
 
     User:
       type: object

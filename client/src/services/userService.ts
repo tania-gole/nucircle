@@ -269,6 +269,26 @@ const updateUserProfile = async (
   }
   return res.data;
 };
+
+/**
+ * Updates external links for a user (LinkedIn, GitHub, Portfolio)
+ * @param username The username of the user
+ * @param externalLinks Object containing linkedin, github, and portfolio URLs
+ * @returns The updated user
+ */
+const updateExternalLinks = async (
+  username: string,
+  externalLinks: { linkedin?: string; github?: string; portfolio?: string },
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/updateExternalLinks`, {
+    username,
+    externalLinks,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when updating external links');
+  }
+  return res.data;
+};
 /**
  * Updates visibility settings for user stats
  * @param username The username of the user
@@ -318,5 +338,6 @@ export {
   getFilterOptions,
   updateUserProfile,
   updateUserStatVisibility,
+  updateExternalLinks,
   getLeaderboard,
 };

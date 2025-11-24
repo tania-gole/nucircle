@@ -9,6 +9,7 @@ import {
   updateUserStatVisibility,
   type UserStats,
   updateUserProfile,
+  updateExternalLinks,
 } from '../services/userService';
 import badgeService from '../services/badgeService';
 import { SafeDatabaseUser, Badge } from '../types/types';
@@ -42,6 +43,11 @@ const useProfileSettings = () => {
   const [newFirstName, setNewFirstName] = useState('');
   const [newLastName, setNewLastName] = useState('');
   const [showStats, setShowStats] = useState(true);
+  const [editLinksMode, setEditLinksMode] = useState(false);
+  const [newLinkedIn, setNewLinkedIn] = useState('');
+  const [newGithub, setNewGithub] = useState('');
+  const [newPortfolio, setNewPortfolio] = useState('');
+  const [linkValidationError, setLinkValidationError] = useState<string | null>(null);
   useEffect(() => {
     if (!username || !socket) return;
 
@@ -76,6 +82,11 @@ const useProfileSettings = () => {
         setLoading(true);
         const data = await getUserByUsername(username);
         setUserData(data);
+
+        // Initialize external links state
+        setNewLinkedIn(data.externalLinks?.linkedin || '');
+        setNewGithub(data.externalLinks?.github || '');
+        setNewPortfolio(data.externalLinks?.portfolio || '');
 
         // Fetch badges for the user
         try {
@@ -176,6 +187,52 @@ const useProfileSettings = () => {
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage('Failed to update profile');
+      setSuccessMessage(null);
+    }
+  };
+
+  /**
+   * Validates a URL string. Returns true if the URL is valid or empty.
+   */
+  const isValidUrl = (url: string): boolean => {
+    if (!url.trim()) return true; // Empty URLs are allowed
+    try {
+      const urlObj = new URL(url);
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
+  const handleUpdateExternalLinks = async () => {
+    if (!username) return;
+
+    // Validate all URLs
+    const linkedinValid = isValidUrl(newLinkedIn);
+    const githubValid = isValidUrl(newGithub);
+    const portfolioValid = isValidUrl(newPortfolio);
+
+    if (!linkedinValid || !githubValid || !portfolioValid) {
+      setLinkValidationError('URLs must start with http:// or https://');
+      setErrorMessage(null);
+      setSuccessMessage(null);
+      return;
+    }
+
+    setLinkValidationError(null);
+
+    try {
+      const updatedUser = await updateExternalLinks(username, {
+        linkedin: newLinkedIn.trim() || undefined,
+        github: newGithub.trim() || undefined,
+        portfolio: newPortfolio.trim() || undefined,
+      });
+      setUserData(updatedUser);
+      setEditLinksMode(false);
+      setSuccessMessage('External links updated successfully!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to update external links');
       setSuccessMessage(null);
     }
   };
@@ -285,6 +342,17 @@ const useProfileSettings = () => {
     handleUpdateProfile,
     showStats,
     toggleStatsVisibility,
+    editLinksMode,
+    setEditLinksMode,
+    newLinkedIn,
+    setNewLinkedIn,
+    newGithub,
+    setNewGithub,
+    newPortfolio,
+    setNewPortfolio,
+    handleUpdateExternalLinks,
+    linkValidationError,
+    setLinkValidationError,
   };
 };
 
