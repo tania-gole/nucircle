@@ -25,7 +25,6 @@ export const loginUser = (username: string, password: string = 'securePass123!')
 export const logoutUser = () => {
   cy.get('.logout-button').click();
 }
-
 /**
  * Seeds the database with test data
  */
@@ -399,6 +398,75 @@ export const verifyCollectionPageDetails = (name: string, username?: string) => 
 };
 
 /**
+ * Navigates to the user list page
+ */
+export const goToUsers = () => {
+  cy.contains('Users').click();
+  cy.url().should('include', '/users');
+};
+
+/**
+ * Verifies user has online indicator
+ * @param username - The username to check
+ * @param shouldBeOnline - true if user should be online
+ */
+export const verifyUserOnlineStatus = (username: string, shouldBeOnline: boolean) => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
+    if (shouldBeOnline) {
+      cy.get('.online-indicator').should('exist');
+    } else {
+      cy.get('.online-indicator').should('not.exist');
+    }
+  });
+};
+
+/**
+ * Sends a quiz invitation to a user
+ * @param username - Username to challenge
+ */
+export const sendQuizInvite = (username: string) => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
+    cy.get('.challenge-button').click();
+  });
+};
+
+/**
+ * Verifies challenge button state for a user
+ * @param username - The username to check
+ * @param shouldBeVisible - If button should be visible
+ */
+export const verifyChallengeButtonState = (username: string, shouldBeVisible: boolean) => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
+    if (shouldBeVisible) {
+      cy.get('.challenge-button').should('be.visible');
+    } else {
+      cy.get('.challenge-button').should('not.exist');
+    }
+  });
+};
+
+export const acceptQuizInvite = () => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.accept-invite-button').click();
+};
+
+export const declineQuizInvite = () => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.decline-invite-button').click();
+};
+
+/**
+ * Verifies quiz invitation modal is displayed
+ * @param challengerUsername - The username of the challenger
+ */
+export const verifyQuizInviteModal = (challengerUsername: string) => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.quiz-invite-modal').should('contain', challengerUsername);
+  cy.get('.accept-invite-button').should('be.visible');
+  cy.get('.decline-invite-button').should('be.visible');
+};
+
+/*
  * Adds a new work experience entry using the work experience form.
  */
 export const addWorkExperience = () => {
