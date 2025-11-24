@@ -655,6 +655,18 @@ describe('Chat Controller', () => {
       expect(addParticipantSpy).toHaveBeenCalledWith(chatId, userId);
     });
 
+    it('should return 401 if userId does not match authenticated user', async () => {
+      const chatId = new mongoose.Types.ObjectId().toString();
+      const wrongUserId = '';
+
+      const response = await supertest(app)
+        .post(`/api/chat/${chatId}/addParticipant`)
+        .send({ username: wrongUserId });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid username parameter');
+    });
+
     it('should return 400 if userId is missing', async () => {
       const chatId = new mongoose.Types.ObjectId().toString();
       const response = await supertest(app).post(`/api/chat/${chatId}/addParticipant`).send({}); // Missing userId
