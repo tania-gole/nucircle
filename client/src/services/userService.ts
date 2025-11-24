@@ -264,7 +264,7 @@ const updateUserProfile = async (
     username,
     ...updates,
   });
-   if (res.status !== 200) {
+  if (res.status !== 200) {
     throw new Error('Error when updating profile');
   }
   return res.data;

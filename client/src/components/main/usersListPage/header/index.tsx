@@ -1,7 +1,7 @@
 import './index.css';
 import useUserSearch from '../../../../hooks/useUserSearch';
 import { UserSearchFilters } from '../../../../services/userService';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { Filter } from 'lucide-react';
 
 interface UserHeaderProps {
