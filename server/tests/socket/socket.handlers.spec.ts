@@ -53,7 +53,7 @@ describe('Socket.IO Handlers - COS Features', () => {
     jest.clearAllMocks();
   });
 
-  describe('US1: Online Status - userConnect event', () => {
+  describe('Online Status userConnect event', () => {
     it('should update user online status successfully', done => {
       const mockUser = {
         username: 'testuser',
@@ -94,7 +94,7 @@ describe('Socket.IO Handlers - COS Features', () => {
     });
   });
 
-  describe('Quiz Invitations - sendQuizInvite event', () => {
+  describe('Quiz Invitations, sendQuizInvite event', () => {
     it('should return error when challenger username not set', done => {
       clientSocket.on('error', data => {
         expect(data.message).toBe('Recipient not found');
@@ -160,7 +160,6 @@ describe('Socket.IO Handlers - COS Features', () => {
         socketId: 'recipient-socket-id',
       });
 
-      // Create a pending invitation first
       const manager = QuizInvitationManager.getInstance();
       manager.createInvitation('challenger', 'socket1', 'recipient', 'socket2');
 
@@ -209,7 +208,7 @@ describe('Socket.IO Handlers - COS Features', () => {
     });
   });
 
-  describe('Quiz Invitations - respondToQuizInvite event', () => {
+  describe('Quiz Invitations, respondToQuizInvite event', () => {
     it('should return error when invitation not found', done => {
       clientSocket.on('error', data => {
         expect(data.message).toBe('Invitation not found or expired');
