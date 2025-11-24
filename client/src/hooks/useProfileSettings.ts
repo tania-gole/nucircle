@@ -29,7 +29,6 @@ const useProfileSettings = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [editBioMode, setEditBioMode] = useState(false);
   const [newBio, setNewBio] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -258,11 +257,8 @@ const useProfileSettings = () => {
       // Ensure state updates occur sequentially after the API call completes
       await new Promise(resolve => {
         setUserData(updatedUser); // Update the user data
-        setEditBioMode(false); // Exit edit mode
         resolve(null); // Resolve the promise
       });
-
-      setSuccessMessage('Biography updated!');
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage('Failed to update biography.');
@@ -321,8 +317,6 @@ const useProfileSettings = () => {
     setNewPassword,
     setConfirmNewPassword,
     loading,
-    editBioMode,
-    setEditBioMode,
     newBio,
     setNewBio,
     successMessage,

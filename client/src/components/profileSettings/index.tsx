@@ -1,6 +1,4 @@
 import * as React from 'react';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import './index.css';
 import useProfileSettings from '../../hooks/useProfileSettings';
 import Badges from '../main/badges';
@@ -11,7 +9,6 @@ const ProfileSettings: React.FC = () => {
     userData,
     badges,
     loading,
-    editBioMode,
     newBio,
     newPassword,
     confirmNewPassword,
@@ -22,7 +19,6 @@ const ProfileSettings: React.FC = () => {
     canEditProfile,
     showPassword,
     togglePasswordVisibility,
-    setEditBioMode,
     setNewBio,
     setNewPassword,
     setConfirmNewPassword,
@@ -107,26 +103,34 @@ const ProfileSettings: React.FC = () => {
 
           <div className='profile-info-section'>
             {!editProfileMode && (
-              <div>
-                <p>
-                  <strong>Major:</strong> {userData.major || 'Not specified'}
-                </p>
-                <p>
-                  <strong>Graduation Year:</strong> {userData.graduationYear || 'Not specified'}
-                </p>
-                <p>
-                  <strong>Co-op Interests:</strong> {userData.coopInterests || 'Not specified'}
-                </p>
-                <p>
-                  <strong>Career Goals:</strong> {userData.careerGoals || 'Not specified'}
-                </p>
-                <p>
-                  <strong>Technical Interests:</strong>{' '}
-                  {userData.technicalInterests || 'Not specified'}
-                </p>
+              <div className='profile-info-display'>
+                <div>
+                  <strong>Major:</strong>
+                  <p>{userData.major || 'Not specified'} </p>
+                </div>
+                <div>
+                  <strong>Graduation Year:</strong>
+                  <p>{userData.graduationYear || 'Not specified'} </p>
+                </div>
+                <div>
+                  <strong>Co-op Interests:</strong>
+                  <p>{userData.coopInterests || 'Not specified'} </p>
+                </div>
+                <div>
+                  <strong>Career Goals:</strong>
+                  <p>{userData.careerGoals || 'Not specified'} </p>
+                </div>
+                <div>
+                  <strong>Technical Interests:</strong>
+                  <p>{userData.technicalInterests || 'Not specified'}</p>
+                </div>
+                <div>
+                  <strong>Biography:</strong>
+                  <p>{userData.biography || 'No biography yet.'}</p>
+                </div>
                 {canEditProfile && (
                   <button
-                    className='button button-primary'
+                    className='edit-profile-button'
                     onClick={() => {
                       setEditProfileMode(true);
                       setNewFirstName(userData.firstName || '');
@@ -136,6 +140,7 @@ const ProfileSettings: React.FC = () => {
                       setNewCoopInterests(userData.coopInterests || '');
                       setNewCareerGoals(userData.careerGoals || ' ');
                       setNewTechnicalInterests(userData.technicalInterests || ' ');
+                      setNewBio(userData.biography || '');
                     }}>
                     Edit Profile Info
                   </button>
@@ -225,48 +230,24 @@ const ProfileSettings: React.FC = () => {
                     Comma-separated values (e.g., "machine learning, react")
                   </small>
                 </label>
-                <button className='button button-primary' onClick={handleUpdateProfile}>
+                <label>
+                  <strong>Biography:</strong>
+                  <textarea
+                    className='input-text biography-input'
+                    value={newBio}
+                    onChange={e => setNewBio(e.target.value)}
+                    placeholder='Write your biography here...'
+                  />
+                </label>
+                <button
+                  className='edit-profile-button'
+                  onClick={async () => {
+                    await handleUpdateProfile();
+                    await handleUpdateBiography();
+                  }}>
                   Save
                 </button>
-                <button className='button button-danger' onClick={() => setEditProfileMode(false)}>
-                  Cancel
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className='bio-section'>
-            <strong>Biography:</strong>
-            {!editBioMode && (
-              <div>
-                <Markdown remarkPlugins={[remarkGfm]}>
-                  {userData.biography || 'No biography yet.'}
-                </Markdown>
-                {canEditProfile && (
-                  <button
-                    className='button button-primary'
-                    onClick={() => {
-                      setEditBioMode(true);
-                      setNewBio(userData.biography || '');
-                    }}>
-                    Edit
-                  </button>
-                )}
-              </div>
-            )}
-
-            {editBioMode && canEditProfile && (
-              <div className='bio-edit'>
-                <input
-                  className='input-text'
-                  type='text'
-                  value={newBio}
-                  onChange={e => setNewBio(e.target.value)}
-                />
-                <button className='button button-primary' onClick={handleUpdateBiography}>
-                  Save
-                </button>
-                <button className='button button-danger' onClick={() => setEditBioMode(false)}>
+                <button className='edit-profile-button' onClick={() => setEditProfileMode(false)}>
                   Cancel
                 </button>
               </div>
@@ -315,7 +296,7 @@ const ProfileSettings: React.FC = () => {
                   !userData.externalLinks?.portfolio && <p>No external links added yet.</p>}
                 {canEditProfile && (
                   <button
-                    className='button button-primary'
+                    className='edit-profile-button'
                     onClick={() => {
                       setEditLinksMode(true);
                       setNewLinkedIn(userData.externalLinks?.linkedin || '');
@@ -376,11 +357,11 @@ const ProfileSettings: React.FC = () => {
                     placeholder='https://yourportfolio.com'
                   />
                 </label>
-                <button className='button button-primary' onClick={handleUpdateExternalLinks}>
+                <button className='edit-profile-button' onClick={handleUpdateExternalLinks}>
                   Save
                 </button>
                 <button
-                  className='button button-danger'
+                  className='edit-profile-button'
                   onClick={() => {
                     setEditLinksMode(false);
                     setLinkValidationError(null);
@@ -391,58 +372,7 @@ const ProfileSettings: React.FC = () => {
             )}
           </div>
 
-          <div className='stats-section'>
-            <h4>User Stats</h4>
-            <p>
-              <strong>Date Joined:</strong>{' '}
-              {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
-            </p>
-            <p>
-              <strong>Points Earned:</strong> {userData.points || 0}
-            </p>
-            <p>
-              <strong>Questions:</strong> {userStats?.questionsPosted || 0}
-            </p>
-            <p>
-              <strong>Answers:</strong> {userStats?.answersPosted || 0}
-            </p>
-            <p>
-              <strong>Communities:</strong> {userStats?.communitiesJoined || 0}
-            </p>
-            <p>
-              <strong>Quizzes Won:</strong> {userStats?.quizzesWon || 0} /{' '}
-              {userStats?.quizzesPlayed || 0}
-            </p>
-            {/* show/hide section based on toggleStatsVisibility */}
-            {(showStats || canEditProfile) && (
-              <>
-                <p>
-                  <strong>Points Earned:</strong> {userData.points || 0}
-                </p>
-                <p>
-                  <strong>Questions:</strong> {userStats?.questionsPosted || 0}
-                </p>
-                <p>
-                  <strong>Answers:</strong> {userStats?.answersPosted || 0}
-                </p>
-                <p>
-                  <strong>Communities:</strong> {userStats?.communitiesJoined || 0}
-                </p>
-
-                <p>
-                  <strong>Quizzes Won:</strong> {userStats?.quizzesWon || 0} /{' '}
-                  {userStats?.quizzesPlayed || 0}
-                </p>
-              </>
-            )}
-            {canEditProfile && (
-              <button className='button button-primary' onClick={toggleStatsVisibility}>
-                {showStats ? 'Unpublish Stats' : 'Publish Stats'}
-              </button>
-            )}
-          </div>
-
-          <button className='button button-primary' onClick={handleViewCollectionsPage}>
+          <button className='view-collections-btn' onClick={handleViewCollectionsPage}>
             View Collections
           </button>
 
@@ -509,7 +439,75 @@ const ProfileSettings: React.FC = () => {
       <div className='profile-right-column'>
         <WorkExperienceList username={userData.username} />
 
-        <h4>Badges</h4>
+        <div className='stats-section'>
+          <h2>User Stats</h2>
+
+          <div className='stats-grid'>
+            {/* Date Joined Stat Box */}
+            <div className='stat-box'>
+              <div className='stat-label'>Date Joined</div>
+              <div className='stat-value'>
+                {userData.dateJoined
+                  ? new Date(userData.dateJoined).toLocaleDateString('en-US', {
+                      month: 'short',
+                      year: 'numeric',
+                    })
+                  : 'N/A'}
+              </div>
+            </div>
+
+            {/* Points Stat Box */}
+            {(showStats || canEditProfile) && (
+              <div className='stat-box'>
+                <div className='stat-label'>Points</div>
+                <div className='stat-value'>{userData.points || 0}</div>
+              </div>
+            )}
+
+            {/* Questions Stat Box */}
+            {(showStats || canEditProfile) && (
+              <div className='stat-box'>
+                <div className='stat-label'>Questions</div>
+                <div className='stat-value'>{userStats?.questionsPosted || 0}</div>
+              </div>
+            )}
+
+            {/* Answers Stat Box */}
+            {(showStats || canEditProfile) && (
+              <div className='stat-box'>
+                <div className='stat-label'>Answers</div>
+                <div className='stat-value'>{userStats?.answersPosted || 0}</div>
+              </div>
+            )}
+
+            {/* Communities Stat Box */}
+            {(showStats || canEditProfile) && (
+              <div className='stat-box'>
+                <div className='stat-label'>Communities</div>
+                <div className='stat-value'>{userStats?.communitiesJoined || 0}</div>
+              </div>
+            )}
+
+            {/* Quizzes Stat Box */}
+            {(showStats || canEditProfile) && (
+              <div className='stat-box'>
+                <div className='stat-label'>Quizzes Won</div>
+                <div className='stat-value'>
+                  {userStats?.quizzesWon || 0} / {userStats?.quizzesPlayed || 0}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Publish/Unpublish Stats Button */}
+          {canEditProfile && (
+            <button className='edit-profile-button' onClick={toggleStatsVisibility}>
+              {showStats ? 'Unpublish Stats' : 'Publish Stats'}
+            </button>
+          )}
+        </div>
+
+        <h2 id='badges-profile-title'>Badges</h2>
         <Badges badges={badges} />
       </div>
     </div>

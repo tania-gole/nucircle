@@ -43,7 +43,7 @@ describe('Work Experience Service', () => {
     it('should create a new work experience successfully', async () => {
       jest.spyOn(WorkExperienceModel, 'create').mockResolvedValue(mockWorkExperience as any);
 
-      const result = await WorkExperienceModel.create(mockWorkExperienceInput);
+      const result = await createWorkExperience(mockWorkExperienceInput);
 
       expect(WorkExperienceModel.create).toHaveBeenCalledWith({
         ...mockWorkExperienceInput,
@@ -77,10 +77,7 @@ describe('Work Experience Service', () => {
     it('should delete a work experience successfully', async () => {
       jest.spyOn(WorkExperienceModel, 'findOneAndDelete').mockResolvedValue(mockWorkExperience);
 
-      const result = await WorkExperienceModel.findOneAndDelete({
-        _id: mockId.toString(),
-        username: 'testuser',
-      });
+      const result = await deleteWorkExperience(mockId.toString(), 'testuser');
       expect(result).toEqual(mockWorkExperience);
       expect(WorkExperienceModel.findOneAndDelete).toHaveBeenCalledWith({
         _id: mockId.toString(),
