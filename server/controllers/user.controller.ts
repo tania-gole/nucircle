@@ -1,4 +1,3 @@
-// server/controllers/user.controller.ts
 import express, { Request, Response, Router } from 'express';
 import {
   SignupRequest,
