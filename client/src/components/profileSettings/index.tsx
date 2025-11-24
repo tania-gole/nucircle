@@ -101,21 +101,14 @@ const ProfileSettings: React.FC = () => {
           <h2>
             {userData.firstName} {userData.lastName}
           </h2>
+          <div className='profile-username'>@ {userData.username}</div>
 
           {successMessage && <p className='success-message'>{successMessage}</p>}
           {errorMessage && <p className='error-message'>{errorMessage}</p>}
 
-          <h4>General Information</h4>
-          <p>
-            <strong>Username:</strong> {userData.username}
-          </p>
-
           <div className='profile-info-section'>
             {!editProfileMode && (
               <div>
-                <p>
-                  <strong>Name:</strong> {userData.firstName} {userData.lastName}
-                </p>
                 <p>
                   <strong>Major:</strong> {userData.major || 'Not specified'}
                 </p>

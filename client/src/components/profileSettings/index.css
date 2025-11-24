@@ -260,3 +260,11 @@
   gap: 1rem;
   margin-top: 1.5rem;
 }
+
+.profile-username {
+  font-size: 18px;
+  color: #777777;
+  margin-top: -20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}

@@ -5,6 +5,8 @@ import { io, Socket } from 'socket.io-client';
 // const SOCKET_URL = window.location.origin;
 
 let socket: Socket | null = null;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
 /**
  * Custom hook to manage Socket.IO connection for real-time communication.
@@ -71,7 +73,7 @@ export const useSocket = (username: string | null): void => {
     // Connect if not connected
     if (!socketRef.current || !socketRef.current.connected) {
       console.log('[useSocket] Creating new socket connection for:', username);
-      socket = io(window.location.origin, {
+      socket = io(SOCKET_URL, {
         path: '/socket.io',
         transports: ['websocket', 'polling'],
       });
