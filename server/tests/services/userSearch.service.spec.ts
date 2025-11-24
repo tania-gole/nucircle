@@ -46,14 +46,12 @@ describe('User Search and Filter Service', () => {
     };
     jest.spyOn(UserModel, 'find').mockReturnValue(mockFind as any);
 
-    // Mock WorkExperienceModel.find for enrichment (called with username)
     const mockWorkExpFind = {
       select: jest.fn().mockReturnThis(),
       lean: jest.fn().mockResolvedValue([]),
     };
     jest.spyOn(WorkExperienceModel, 'find').mockReturnValue(mockWorkExpFind as any);
 
-    // Mock CommunityModel.find for enrichment (called with participants)
     const mockCommunityFind = {
       select: jest.fn().mockReturnThis(),
       lean: jest.fn().mockResolvedValue([]),
