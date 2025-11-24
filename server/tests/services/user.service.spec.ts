@@ -7,10 +7,12 @@ import {
   loginUser,
   saveUser,
   updateUser,
+  updateUserOnlineStatus,
 } from '../../services/user.service';
 import { SafeDatabaseUser, User, UserLogin } from '../../types/types';
 import { user, safeUser } from '../mockData.models';
 import bcryptjs from 'bcryptjs';
+import { ObjectId } from 'mongodb';
 
 describe('User model', () => {
   beforeEach(() => {
@@ -60,6 +62,149 @@ describe('User model', () => {
       const saveError = await saveUser(user);
 
       expect('error' in saveError).toBe(true);
+    });
+  });
+});
+
+describe('updateUserOnlineStatus', () => {
+  const mockUsername = 'test_user';
+  const mockSocketId = 'socket_abc12345';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('User becomes ONLINE', () => {
+    it('should set status isOnline=true and store socketId', async () => {
+      const mockUser = {
+        _id: new ObjectId(),
+        username: mockUsername,
+        firstName: 'Test',
+        lastName: 'User',
+        isOnline: true,
+        socketId: mockSocketId,
+        lastSeen: new Date('2025-11-11'),
+      };
+
+      const mockSelect = jest.fn().mockResolvedValue(mockUser);
+      const mockFindOneAndUpdate = jest.fn().mockReturnValue({
+        select: mockSelect,
+      });
+      (UserModel.findOneAndUpdate as jest.Mock) = mockFindOneAndUpdate;
+
+      const result = await updateUserOnlineStatus(mockUsername, true, mockSocketId);
+
+      expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
+        { username: mockUsername },
+        {
+          $set: {
+            isOnline: true,
+            socketId: mockSocketId,
+          },
+        },
+        { new: true },
+      );
+
+      expect(mockSelect).toHaveBeenCalledWith('-password');
+      expect(result).toEqual(mockUser);
+    });
+  });
+
+  describe('User becomes OFFLINE', () => {
+    it('should set status isOnline=false, clear socketId, and record lastSeen', async () => {
+      const mockUser = {
+        _id: new ObjectId(),
+        username: mockUsername,
+        firstName: 'Test',
+        lastName: 'User',
+        isOnline: false,
+        socketId: null,
+        lastSeen: expect.any(Date),
+      };
+
+      const mockSelect = jest.fn().mockResolvedValue(mockUser);
+      const mockFindOneAndUpdate = jest.fn().mockReturnValue({
+        select: mockSelect,
+      });
+      (UserModel.findOneAndUpdate as jest.Mock) = mockFindOneAndUpdate;
+
+      const result = await updateUserOnlineStatus(mockUsername, false, null);
+
+      expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
+        { username: mockUsername },
+        {
+          $set: {
+            isOnline: false,
+            socketId: null,
+            lastSeen: expect.any(Date),
+          },
+        },
+        { new: true },
+      );
+
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should set lastSeen to current time when going offline', async () => {
+      const beforeTime = new Date();
+
+      const mockUser = {
+        _id: new ObjectId(),
+        username: mockUsername,
+        firstName: 'Test',
+        lastName: 'User',
+        isOnline: false,
+        socketId: null,
+        lastSeen: new Date(),
+      };
+
+      const mockSelect = jest.fn().mockResolvedValue(mockUser);
+      const mockFindOneAndUpdate = jest.fn().mockReturnValue({
+        select: mockSelect,
+      });
+      (UserModel.findOneAndUpdate as jest.Mock) = mockFindOneAndUpdate;
+
+      await updateUserOnlineStatus(mockUsername, false, null);
+
+      const afterTime = new Date();
+
+      const updateCall = mockFindOneAndUpdate.mock.calls[0][1].$set;
+      const lastSeenValue = updateCall.lastSeen;
+
+      expect(lastSeenValue.getTime()).toBeGreaterThanOrEqual(beforeTime.getTime());
+      expect(lastSeenValue.getTime()).toBeLessThanOrEqual(afterTime.getTime());
+    });
+  });
+
+  describe('Error handling', () => {
+    it('should return error when user not found', async () => {
+      const mockSelect = jest.fn().mockResolvedValue(null);
+      const mockFindOneAndUpdate = jest.fn().mockReturnValue({
+        select: mockSelect,
+      });
+      (UserModel.findOneAndUpdate as jest.Mock) = mockFindOneAndUpdate;
+
+      const result = await updateUserOnlineStatus(mockUsername, true, mockSocketId);
+
+      expect(result).toHaveProperty('error');
+      expect((result as { error: string }).error).toContain(
+        'Error updating this users online status',
+      );
+    });
+
+    it('should handle database errors', async () => {
+      const mockSelect = jest.fn().mockRejectedValue(new Error('Database connection failed'));
+      const mockFindOneAndUpdate = jest.fn().mockReturnValue({
+        select: mockSelect,
+      });
+      (UserModel.findOneAndUpdate as jest.Mock) = mockFindOneAndUpdate;
+
+      const result = await updateUserOnlineStatus(mockUsername, true, mockSocketId);
+
+      expect(result).toHaveProperty('error');
+      expect((result as { error: string }).error).toContain(
+        'Error occurred when updating this users status',
+      );
     });
   });
 });
