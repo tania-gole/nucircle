@@ -58,5 +58,61 @@
     "msgFrom": "n.wheeler",
     "msgDateTime": "2025-04-22T15:01:47Z",
     "type": "global"
+  },
+  "communityMessage1": {
+    "msg": "Welcome to the HubSpot community! Feel free to share co-op experiences and tips.",
+    "msgFrom": "e.hopper",
+    "msgDateTime": "2025-04-20T10:00:00Z",
+    "type": "community",
+    "communityId": "community1"
+  },
+  "communityMessage2": {
+    "msg": "Has anyone interviewed with HubSpot recently? What were the questions like?",
+    "msgFrom": "w.byers",
+    "msgDateTime": "2025-04-20T11:30:00Z",
+    "type": "community",
+    "communityId": "community1"
+  },
+  "communityMessage3": {
+    "msg": "The technical round focused on React and API integrations. Brush up on hooks!",
+    "msgFrom": "m.wheeler",
+    "msgDateTime": "2025-04-20T12:15:00Z",
+    "type": "community",
+    "communityId": "community1"
+  },
+  "communityMessage4": {
+    "msg": "Don't forget to showcase your teamwork skills, HubSpot values collaboration.",
+    "msgFrom": "d.henderson",
+    "msgDateTime": "2025-04-20T14:00:00Z",
+    "type": "community",
+    "communityId": "community1"
+  },
+  "communityMessage5": {
+    "msg": "Thanks everyone! This is super helpful for my upcoming interview.",
+    "msgFrom": "e.munson",
+    "msgDateTime": "2025-04-20T15:30:00Z",
+    "type": "community",
+    "communityId": "community1"
+  },
+  "directMessage1": {
+    "msg": "Hey, can we schedule a 1:1 about the interview?",
+    "msgFrom": "e.hopper",
+    "msgTo": "m.wheeler",
+    "msgDateTime": "2025-04-21T09:00:00Z",
+    "type": "direct"
+  },
+  "directMessage2": {
+    "msg": "Sure! How about tomorrow at 2pm?",
+    "msgFrom": "m.wheeler",
+    "msgTo": "e.hopper",
+    "msgDateTime": "2025-04-21T09:05:00Z",
+    "type": "direct"
+  },
+  "directMessage3": {
+    "msg": "Perfect, see you then!",
+    "msgFrom": "e.hopper",
+    "msgTo": "m.wheeler",
+    "msgDateTime": "2025-04-21T09:10:00Z",
+    "type": "direct"
   }
 }
