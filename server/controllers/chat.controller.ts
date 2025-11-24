@@ -101,7 +101,16 @@ const chatController = (socket: FakeSOSocket) => {
             socket.to(recipientUser.socketId).emit('notification', {
               type: 'dm',
               from: msgFrom,
-              message: msg.slice(0, 30), // first 30 chars as preview of message
+              message: msg.slice(0, 35), // first 35 chars as preview of message
+            });
+          }
+        } else {
+          const myself = await getUserByUsername(msgFrom);
+          if (!('error' in myself) && myself.socketId) {
+            socket.to(myself.socketId).emit('notification', {
+              type: 'dm',
+              from: msgFrom,
+              message: msg.slice(0, 35),
             });
           }
         }

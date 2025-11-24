@@ -123,7 +123,16 @@ const useCommunityPage = () => {
     }
   }, [community?.participants]);
 
-  return { community, communityQuestions, user, handleDeleteCommunity, membersOnlineStatus };
+  const isPartOfCommunity = community ? community.participants.includes(user.username) : false;
+
+  return {
+    community,
+    communityQuestions,
+    user,
+    handleDeleteCommunity,
+    membersOnlineStatus,
+    isPartOfCommunity,
+  };
 };
 
 export default useCommunityPage;

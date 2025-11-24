@@ -88,6 +88,10 @@ const userSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
+    coopInterests: {
+      type: String,
+      default: '',
+    },
   },
   { collection: 'User' },
 );

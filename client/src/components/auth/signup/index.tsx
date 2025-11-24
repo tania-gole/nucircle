@@ -37,6 +37,7 @@ const Signup = () => {
                 placeholder='Enter your first name'
                 required
                 className='reg-input'
+                id='firstName-input'
               />
             </div>
             <div className='name-field'>
@@ -48,6 +49,7 @@ const Signup = () => {
                 placeholder='Enter your last name'
                 required
                 className='reg-input'
+                id='lastName-input'
               />
             </div>
           </div>
@@ -121,6 +123,7 @@ const Signup = () => {
               placeholder='Confirm your password'
               required
               className='reg-input'
+              id='confirm-password-input'
             />
             <div className='password-toggle-icon' onClick={togglePasswordVisibility}>
               {showPassword ? (

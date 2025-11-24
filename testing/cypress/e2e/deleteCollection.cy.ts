@@ -12,19 +12,19 @@ describe("Cypress Tests to verify deleting a collections", () => {
 
   it("9.1 | Delete an exisitng collections in the My Collections Page", () => {
     
-    loginUser('user123');
+    loginUser('e.hopper');
 
     goToMyCollections();
     
-    cy.get('.collections-title').should('contain', "Collections");
+    cy.get('.collection_title').should('contain', "Collections");
 
     // Verify some pre-seeded collections appear
-    verifyCollectionExists("React Favorites");
+    verifyCollectionExists("Behavioral Interview Prep");
 
-    deleteCollection("React Favorites");
+    deleteCollection("Behavioral Interview Prep");
 
     // Verify deletion
-    cy.get('.collection-name').should('not.contain', "React Favorites");
-
+    cy.contains("Behavioral Interview Prep").should('not.exist');
+    cy.get(".collection-card").should('not.exist');
   });
 });
