@@ -1,10 +1,13 @@
 import { goToCommunities, createCommunity, loginUser, setupTest, teardownTest } from '../support/helpers';
 
-const C1_NAME = "React Enthusiasts";
-const C2_NAME = "Backend Masters";
-const C3_NAME = "Data Science Hub";
-const C4_NAME = "DevOps Specialists";
-const C5_NAME = "TypeScript Champions";
+const C1_NAME = "HubSpot";
+const C2_NAME = "Microsoft";
+const C3_NAME = "Goldman Sachs";
+const C4_NAME = "Mass General Brigham";
+const C5_NAME = "Pre-Health & Medical Co-ops";
+const C6_NAME = "Deloitte";
+const C7_NAME = "Pre-Law & Policy";
+
 
 describe("Cypress Tests to verify display of all communities", () => {
 
@@ -19,7 +22,7 @@ describe("Cypress Tests to verify display of all communities", () => {
   it("4.1 | Displays all communities on the community page", () => {
     
     // login with seed data user
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // go to all communities page
     goToCommunities();
@@ -32,6 +35,8 @@ describe("Cypress Tests to verify display of all communities", () => {
       C3_NAME,
       C4_NAME,
       C5_NAME,
+      C6_NAME,
+      C7_NAME,
       C_NAME_NEW
     ];
 
@@ -44,7 +49,7 @@ describe("Cypress Tests to verify display of all communities", () => {
   });
 
   it("4.2 | Should search for a community", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
     goToCommunities();
     cy.get('.community-search').type(C1_NAME);
     cy.get('.community-card').should("contain", C1_NAME);

@@ -38,6 +38,7 @@ const WorkExperienceCard = ({
             <label className='field-label'>Title</label>
             <input
               className='input-field'
+              id='WE-title-input'
               type='text'
               value={formState.title}
               onChange={e => setFormState({ ...formState, title: e.target.value })}
@@ -48,6 +49,7 @@ const WorkExperienceCard = ({
             <label className='field-label'>Company</label>
             <input
               className='input-field'
+              id='WE-company-input'
               type='text'
               value={formState.company}
               onChange={e => setFormState({ ...formState, company: e.target.value })}
@@ -76,6 +78,7 @@ const WorkExperienceCard = ({
             <label className='field-label'>Location</label>
             <input
               className='input-field'
+              id='WE-location-input'
               type='text'
               value={formState.location}
               onChange={e => setFormState({ ...formState, location: e.target.value })}

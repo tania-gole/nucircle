@@ -258,7 +258,7 @@ const getFilterOptions = async (): Promise<{
 
 const updateUserProfile = async (
   username: string,
-  updates: { major?: string; graduationYear?: number },
+  updates: { major?: string; graduationYear?: number; coopInterests?: string; firstName?: string; lastName?: string },
 ): Promise<SafeDatabaseUser> => {
   const res = await api.patch(`${USER_API_URL}/updateProfile`, {
     username,

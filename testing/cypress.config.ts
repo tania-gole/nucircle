@@ -1,20 +1,15 @@
 const { defineConfig } = require("cypress");
 require('dotenv').config();
 
-export default defineConfig({
-  // setupNodeEvents can be defined in either
-  // the e2e or component configuration
+module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       require("@cypress/code-coverage/task")(on, config);
       config.env = {
         ...process.env,
         ...config.env,
+        MONGODB_URI: 'mongodb://127.0.0.1:27017',
       };
-      // include any other plugin code...
-
-      // It's IMPORTANT to return the config object
-      // with any changed environment variables
       return config;
     },
   },
