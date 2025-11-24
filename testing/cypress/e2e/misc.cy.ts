@@ -1,4 +1,3 @@
-import { Q1_DESC, Q2_DESC, Q3_DESC, Q4_DESC, A3_TXT, A4_TXT, Q10_DESC } from '../../../server/testData/post_strings';
 import { 
   loginUser, 
   setupTest, 
@@ -11,6 +10,12 @@ import {
   waitForQuestionsToLoad 
 } from '../support/helpers';
 
+const Q1_DESC = "How do I know if a company’s culture will be a good fit?";
+const Q2_DESC = "How important is LinkedIn when applying for internships?";
+const Q3_DESC = "Balancing co-op work and classes — how do you manage it?";
+const Q4_DESC = "What’s the best way to network at company info sessions?";
+const Q5_DESC = "How to tailor my resume for consulting vs. tech roles?";
+
 describe("Cypress Tests for verifying active order and initial test data", () => {
   beforeEach(() => {
     setupTest();
@@ -21,7 +26,7 @@ describe("Cypress Tests for verifying active order and initial test data", () =>
   });
 
   it("12.1 | Adds a question, clicks active button, verifies the sequence", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // Create a new test question
     createQuestion('Test Question A', 'Test Question A Text', 'javascript');
@@ -60,38 +65,28 @@ describe("Cypress Tests for verifying active order and initial test data", () =>
     cy.get('.postTitle').eq(2).should('contain', expectedActiveOrder[2]);
   });
 
-  it("12.2 | Checks if seeded answers exist in Q3 (Webpack) answers page", () => {
-    loginUser('user123');
+  it("12.2 | Checks if seeded answers exist in Q3 answers page", () => {
+    loginUser('e.hopper');
 
     // Navigate to Q3 (Webpack configuration question)
     cy.contains(Q3_DESC).click();
     
-    // Verify the seeded answer exists (A3_TXT)
-    // The answer should contain webpack configuration help
-    cy.get('.answerText').should('contain', 'webpack');
-    cy.get('.answerText').should('contain', 'babel-loader');
-    
     // Check specific content from A3_TXT
-    cy.get('.answerText').should('contain', 'The error you\'re seeing with webpack is because you need to configure babel-loader properly to handle the latest JavaScript features. Update your webpack.config.js file like')
+    cy.get('.answer-text').should('contain', 'Block off time for yourself just like you would for class. I also found it helpful to use separate calendars for work and school so I could visually see my free time. And don’t underestimate the power of sleep.')
   });
 
-  it("12.3 | Checks if seeded answer exists in Q4 (PostgreSQL) answers page", () => {
-    loginUser('user123');
+  it("12.3 | Checks if seeded answer exists in Q4 answers page", () => {
+    loginUser('e.hopper');
     
     // Navigate to Q4 (PostgreSQL optimization question)
     cy.contains(Q4_DESC).click();
-    
-    // Verify the seeded answer exists (A4_TXT)
-    // The answer should contain PostgreSQL optimization advice
-    cy.get('.answerText').invoke('text').should('contain', 'PostgreSQL');
-    cy.get('.answerText').invoke('text').should('contain', 'CREATE INDEX');
-    
+
     // Check specific content from A4_TXT
-    cy.get('.answerText').should('contain', 'Your PostgreSQL query is performing poorly because it\'s missing proper indexing. For this specific query pattern, you should add an index on the columns you\'re frequently filtering by.');
+    cy.get('.answer-text').should('contain', 'Ask genuine questions about the speaker’s work — people love talking about their experiences. Follow up with a short LinkedIn message afterward. Even a quick \'thanks for sharing your insights\' can go a long way.');
   });
 
   it("12.4 | Verifies that questions with no answers appear correctly", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
     createQuestion('Test Question A', 'Test Question A Text', 'javascript');
     
     // Check unanswered questions
@@ -102,22 +97,22 @@ describe("Cypress Tests for verifying active order and initial test data", () =>
     cy.get('.postTitle').should('have.length.at.least', 1);
     
     // Verify they show "0 answers"
-    cy.get('.postStats').first().should('contain', '0 answers');
+    cy.get('.postStats').first().should('contain', '0');
   });
 
   it("12.5 | Verifies question view counts are tracked correctly", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
     
     // Click on a question to view it
-    cy.contains(Q10_DESC).click();
+    cy.contains(Q5_DESC).click();
     
     // Go back to questions list
     goToQuestions();
     
     // The view count should have increased
     // Find the question and check its view count is greater than 0
-    cy.contains(Q10_DESC).parent().parent().within(() => {
-      cy.get('.postStats').should('contain', 'views');
+    cy.contains(Q5_DESC).parent().parent().within(() => {
+      cy.get('.postStats').should('contain', '5');
       // Note: The exact view count will depend on seed data
     });
   });

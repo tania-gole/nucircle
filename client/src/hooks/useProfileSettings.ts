@@ -39,6 +39,9 @@ const useProfileSettings = () => {
   const [editProfileMode, setEditProfileMode] = useState(false);
   const [newMajor, setNewMajor] = useState('');
   const [newGradYear, setNewGradYear] = useState<string | number>('');
+  const [newCoopInterests, setNewCoopInterests] = useState('');
+  const [newFirstName, setNewFirstName] = useState('');
+  const [newLastName, setNewLastName] = useState('');
   const [showStats, setShowStats] = useState(true);
   const [editLinksMode, setEditLinksMode] = useState(false);
   const [newLinkedIn, setNewLinkedIn] = useState('');
@@ -170,9 +173,12 @@ const useProfileSettings = () => {
     if (!username) return;
 
     try {
-      const updates: { major?: string; graduationYear?: number } = {};
+      const updates: { major?: string; graduationYear?: number; coopInterests?: string; firstName?: string; lastName?: string } = {};
       if (newMajor.trim()) updates.major = newMajor;
       if (newGradYear) updates.graduationYear = parseInt(newGradYear.toString());
+      if (newCoopInterests !== undefined) updates.coopInterests = newCoopInterests;
+      if (newFirstName.trim()) updates.firstName = newFirstName;
+      if (newLastName.trim()) updates.lastName = newLastName;
 
       const updatedUser = await updateUserProfile(username, updates);
       setUserData(updatedUser);
@@ -327,6 +333,12 @@ const useProfileSettings = () => {
     setNewMajor,
     newGradYear,
     setNewGradYear,
+    newCoopInterests,
+    setNewCoopInterests,
+    newFirstName,
+    setNewFirstName,
+    newLastName,
+    setNewLastName,
     handleUpdateProfile,
     showStats,
     toggleStatsVisibility,

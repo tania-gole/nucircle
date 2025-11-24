@@ -51,24 +51,23 @@
 
 .community-chat-container {
   display: flex;
-  align-items: center;
+  align-items: right;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 0px;
+  margin: 12px 0;
 }
 
 .community-chat-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background-color: #82c0ff; 
   color: white;
   text-decoration: none;
   border-radius: 15px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
-  
   transition: background-color 0.2s ease;
 }
 

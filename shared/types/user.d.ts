@@ -63,6 +63,7 @@ export interface User extends UserSignup {
     github?: string;
     portfolio?: string;
   };
+  coopInterests?: string;
 }
 
 /**

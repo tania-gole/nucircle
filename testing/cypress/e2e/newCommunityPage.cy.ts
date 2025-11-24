@@ -10,7 +10,7 @@ describe("NewCommunityPage", () => {
   });
 
   it("15.1 | Create a new community with the form", () => {
-    loginUser("user123");
+    loginUser("e.hopper");
     goToCommunities();
 
     const communityName = "Page Create Community";
@@ -18,12 +18,12 @@ describe("NewCommunityPage", () => {
 
     cy.get('.new-community-button').click();
     // Use expected classnames instead of placeholder selectors
-    cy.get('.new-community-input').eq(0).type(communityName);
-    cy.get('.new-community-input').eq(1).type(communityDesc);
+    cy.get('.new-community-input').type(communityName);
+    cy.get('.new-community-textarea').type(communityDesc);
     cy.get('.new-community-submit').click();
 
     // We should land on the community page for the new id
     cy.url().should('include', '/communities/');
-    verifyCommunityDetailsDisplayed(communityName, communityDesc, ["user123"]);
+    verifyCommunityDetailsDisplayed(communityName, communityDesc, ["e.hopper"]);
   });
 });

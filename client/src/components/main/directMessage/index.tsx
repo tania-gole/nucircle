@@ -44,6 +44,7 @@ const DirectMessage = () => {
           ))}
           <div className='create-chat-icon'>
             <svg
+              id='create-chat-svg'
               onClick={() => setShowCreatePanel(true)}
               width='50'
               height='50'

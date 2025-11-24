@@ -11,8 +11,14 @@ import { NavLink } from 'react-router-dom';
  * members, and questions.
  */
 const CommunityPage = () => {
-  const { community, communityQuestions, user, handleDeleteCommunity, membersOnlineStatus } =
-    useCommunityPage();
+  const {
+    community,
+    communityQuestions,
+    user,
+    handleDeleteCommunity,
+    membersOnlineStatus,
+    isPartOfCommunity,
+  } = useCommunityPage();
   if (!community) {
     return <div className='loading'>Loading...</div>;
   }
@@ -49,24 +55,26 @@ const CommunityPage = () => {
       </main>
 
       <div className='community-sidebar'>
+        <h2 className='community-title'>{community.name}</h2>
         <div className='community-chat-container'>
-          <h2 className='community-title'>{community.name}</h2>
-          <NavLink
-            to={`/messaging/community-messages/${community._id}`}
-            className='community-chat-btn'>
-            <svg
-              width='22'
-              height='21'
-              viewBox='0 0 26 25'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'>
-              <path
-                d='M2.14062 22.9166V4.16665C2.14062 3.59373 2.35025 3.10328 2.76951 2.69529C3.18877 2.28731 3.69277 2.08331 4.28152 2.08331H21.4087C21.9974 2.08331 22.5014 2.28731 22.9207 2.69529C23.3399 3.10328 23.5496 3.59373 23.5496 4.16665V16.6666C23.5496 17.2396 23.3399 17.73 22.9207 18.138C22.5014 18.546 21.9974 18.75 21.4087 18.75H6.42241L2.14062 22.9166ZM5.51253 16.6666H21.4087V4.16665H4.28152V17.8385L5.51253 16.6666Z'
-                fill='#fff'
-              />
-            </svg>
-            Chat
-          </NavLink>
+          {isPartOfCommunity && (
+            <NavLink
+              to={`/messaging/community-messages/${community._id}`}
+              className='community-chat-btn'>
+              <svg
+                width='22'
+                height='21'
+                viewBox='0 0 26 25'
+                fill='none'
+                xmlns='http://www.w3.org/2000/svg'>
+                <path
+                  d='M2.14062 22.9166V4.16665C2.14062 3.59373 2.35025 3.10328 2.76951 2.69529C3.18877 2.28731 3.69277 2.08331 4.28152 2.08331H21.4087C21.9974 2.08331 22.5014 2.28731 22.9207 2.69529C23.3399 3.10328 23.5496 3.59373 23.5496 4.16665V16.6666C23.5496 17.2396 23.3399 17.73 22.9207 18.138C22.5014 18.546 21.9974 18.75 21.4087 18.75H6.42241L2.14062 22.9166ZM5.51253 16.6666H21.4087V4.16665H4.28152V17.8385L5.51253 16.6666Z'
+                  fill='#fff'
+                />
+              </svg>
+              Chat
+            </NavLink>
+          )}
         </div>
         <p className='community-description'>{community.description}</p>
 

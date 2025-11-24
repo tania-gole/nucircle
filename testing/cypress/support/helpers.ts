@@ -10,14 +10,21 @@
  */
 export const loginUser = (username: string, password: string = 'securePass123!') => {
   cy.visit('http://localhost:4530');
-  cy.contains('Welcome to FakeStackOverflow!');
+  cy.contains('Please login to continue to NUCircle');
   cy.get('#username-input').type(username);
   cy.get('#password-input').type(password);
-  cy.contains('Submit').click();
+  cy.contains('Log in').click();
   // Wait for redirect to home page
   cy.url().should('include', '/home');
+  cy.get('.welcome-popup-button').click();
 };
 
+/**
+ * Logs out the currently logged-in user
+ */
+export const logoutUser = () => {
+  cy.get('.logout-button').click();
+}
 /**
  * Seeds the database with test data
  */
@@ -51,7 +58,7 @@ export const teardownTest = () => {
  * Navigates to the Ask Question page
  */
 export const goToAskQuestion = () => {
-  cy.contains('Ask a Question').click();
+  cy.contains('Ask Question').click();
   cy.url().should('include', '/new/question');
 };
 
@@ -125,12 +132,11 @@ export const goToCollections = () => {
  * @param text - Question content
  * @param tags - Space-separated tags
  */
-export const createCommunity = (title: string, desc: string, isPrivate: boolean) => {
+export const createCommunity = (title: string, desc: string, isPublic: boolean) => {
   cy.get('.new-community-button').click();
-  // Use expected classnames instead of placeholder selectors
-  cy.get('.new-community-input').eq(0).type(title);
-  cy.get('.new-community-input').eq(1).type(desc);
-  if (isPrivate) {cy.get('.new-community-checkbox-label input[type="checkbox"]').check();};
+  cy.get('.new-community-input').type(title);
+  cy.get('.new-community-textarea').type(desc);
+  if (!isPublic) { cy.get('.checkbox-wrapper').click();};
   cy.get('.new-community-submit').click();
 };
 
@@ -148,6 +154,13 @@ export const viewCommunityCard = (CommunityName:string) => {
   cy.contains('.community-card-title', CommunityName).closest('.community-card').contains('button', 'View Community').click();
 };
 
+/**
+ * Navigates to the Community Messages page
+ */
+export const goToCommunityMessages = () => {
+  cy.contains('Messaging').click();
+  cy.contains('Community Messages').click();
+}
 
 /**
  * Waits for questions to load and verifies the page is ready
@@ -161,7 +174,7 @@ export const waitForQuestionsToLoad = () => {
  * @param questionTitle - The title of the question to click on
  */
 export const openSaveToCollectionModal = (questionTitle: string) => {
-  cy.get('.question_mid').contains('.postTitle', questionTitle).parents('.question_mid').parents('.question').find('.collections-btn').click();
+  cy.contains('.postTitle', questionTitle).closest('.question').find('.collections-btn').click();
 };
 
 /**
@@ -306,28 +319,26 @@ export const createNewCollection = (
   isPrivate: boolean = false
 ) => {
   // Fill using expected classnames instead of placeholders
-  cy.get('.new-collection-input').eq(0)
+  cy.get('.new-collection-input')
     .should('exist')
     .clear()
     .type(name);
 
-  cy.get('.new-collection-input').eq(1)
+  cy.get('.new-collection-textarea')
     .should('exist')
     .clear()
     .type(description);
 
   // Handle privacy checkbox
-  const checkboxSelector = '.new-collection-checkbox input[type="checkbox"]';
+  const checkboxSelector = '.checkbox-wrapper';
   cy.get(checkboxSelector).then(($checkbox) => {
     if (isPrivate) {
-      cy.wrap($checkbox).check({ force: true });
-    } else {
-      cy.wrap($checkbox).uncheck({ force: true });
-    }
+      cy.wrap($checkbox).click({ force: true });
+    } 
   });
 
   // Submit the form
-  cy.get('.new-collection-btn').should('exist').click({ force: true });
+  cy.get('.new-collection-submit').should('exist').click({ force: true });
 };
 
 /**
@@ -336,16 +347,10 @@ export const createNewCollection = (
  */
 export const deleteCollection = (name: string) => {
   goToMyCollections();
-
-   cy.get('.collection-card').contains('.collection-name', name).then(($nameEl) => {
-    // Go back to a stable parent context before clicking
-    cy.wrap($nameEl)
-      .closest('.collection-card')
-      .find('.delete-collection-button')
-      .click({ force: true });
-  });
-  // Verify deletion
-  cy.get('.collection-name').should('not.contain', name);
+  cy.get('.collection-card').contains('.main-collection-name', name).click();
+  cy.get('.delete-collection-button').click({ force: true });
+  cy.contains('Are you sure you want to delete this collection? This action cannot be undone.').should('exist');
+  cy.get('.button-danger').click({ force: true });
 };
 
 /**
@@ -363,7 +368,7 @@ export const verifyCollectionVisible = (name: string) => {
 export const verifyCollectionExists = (collectionName: string) => {
   cy.get('.collections-list').should('exist');
   cy.get('.collection-card').should('exist');
-  cy.get('.collection-name').contains(collectionName).should('be.visible');
+  cy.get('.main-collection-name').contains(collectionName).should('be.visible');
 };
 
 /**
@@ -371,7 +376,7 @@ export const verifyCollectionExists = (collectionName: string) => {
  * @param name - Name of the collection to open
  */
 export const goToCollection = (name: string) => {
-  cy.get('.collection-card').contains('.collection-name', name).click({ force: true });
+  cy.get('.collection-card').contains('.main-collection-name', name).click({ force: true });
   cy.url().should('include', '/collections/');
   cy.get('.collection-page').should('exist');
 };
@@ -387,8 +392,96 @@ export const verifyCollectionPageDetails = (name: string, username?: string) => 
   cy.get('.collection-description').should('exist');
   cy.get('.collection-meta').should('exist');
   cy.get('.questions-list').should('exist');
-
   if (username) {
     cy.get('.collection-meta').should('contain', username);
   }
 };
+
+/**
+ * Navigates to the user list page
+ */
+export const goToUsers = () => {
+  cy.contains('Users').click();
+  cy.url().should('include', '/users');
+};
+
+/**
+ * Verifies user has online indicator
+ * @param username - The username to check
+ * @param shouldBeOnline - true if user should be online
+ */
+export const verifyUserOnlineStatus = (username: string, shouldBeOnline: boolean) => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
+    if (shouldBeOnline) {
+      cy.get('.online-indicator').should('exist');
+    } else {
+      cy.get('.online-indicator').should('not.exist');
+    }
+  });
+};
+
+/**
+ * Sends a quiz invitation to a user
+ * @param username - Username to challenge
+ */
+export const sendQuizInvite = (username: string) => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
+    cy.get('.challenge-button').click();
+  });
+};
+
+/**
+ * Verifies challenge button state for a user
+ * @param username - The username to check
+ * @param shouldBeVisible - If button should be visible
+ */
+export const verifyChallengeButtonState = (username: string, shouldBeVisible: boolean) => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
+    if (shouldBeVisible) {
+      cy.get('.challenge-button').should('be.visible');
+    } else {
+      cy.get('.challenge-button').should('not.exist');
+    }
+  });
+};
+
+export const acceptQuizInvite = () => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.accept-invite-button').click();
+};
+
+export const declineQuizInvite = () => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.decline-invite-button').click();
+};
+
+/**
+ * Verifies quiz invitation modal is displayed
+ * @param challengerUsername - The username of the challenger
+ */
+export const verifyQuizInviteModal = (challengerUsername: string) => {
+  cy.get('.quiz-invite-modal').should('be.visible');
+  cy.get('.quiz-invite-modal').should('contain', challengerUsername);
+  cy.get('.accept-invite-button').should('be.visible');
+  cy.get('.decline-invite-button').should('be.visible');
+};
+
+/*
+ * Adds a new work experience entry using the work experience form.
+ */
+export const addWorkExperience = () => {
+  cy.contains("+ Add").click();
+    cy.get('input[name="title"]').type("Software Engineering Co-op");
+    cy.get('input[name="company"]').type("OpenAI");
+    cy.get('select[name="type"]').select("Co-op");
+    cy.get('input[name="location"]').type("Boston, MA");
+    cy.get('input[name="startDate"]').type("2024-01-10");
+    cy.get('textarea[name="description"]').type("Worked on machine learning infrastructure.");
+    cy.contains("Save").click();
+}
+
+export const editWorkExperience = (field: string, value: string) => {
+  cy.get(".edit-button").click();
+  cy.get(field).clear().type(value);
+  cy.contains("Save").click();
+}
