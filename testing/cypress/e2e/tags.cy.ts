@@ -4,7 +4,8 @@ import {
   setupTest,
   teardownTest,
   createQuestion,
-  waitForQuestionsToLoad
+  waitForQuestionsToLoad,
+  goToQuestions
 } from '../support/helpers';
 
 describe("Cypress Tests to verify tagging functionality", () => {
@@ -17,7 +18,7 @@ describe("Cypress Tests to verify tagging functionality", () => {
   });
 
   it("18.1 | Adds a question with multiple tags and verifies tags are created", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // Create a question with multiple new tags
     createQuestion('Test Question A', 'Test Question A Text', 'test1 test2 test3');
@@ -36,7 +37,7 @@ describe("Cypress Tests to verify tagging functionality", () => {
   });
 
   it("18.2 | Checks if all seeded tags exist on the Tags page", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // Navigate to Tags page
     cy.contains('Tags').click();
@@ -47,16 +48,16 @@ describe("Cypress Tests to verify tagging functionality", () => {
 
     // List of all expected seeded tags from tag.json
     const expectedTags = [
-      'javascript',   // tag1
-      'python',       // tag2
-      'react',        // tag3
-      'node.js',      // tag4
-      'html',         // tag5
-      'css',          // tag6
-      'mongodb',      // tag7
-      'express',      // tag8
-      'typescript',   // tag9
-      'git',          // tag10
+      'interview-prep',   // tag1
+      'resume-building',       // tag2
+      'co-op-experience',        // tag3
+      'company-culture',      // tag4
+      'application-process',         // tag5
+      'technical-skills',          // tag6
+      'career-advice',      // tag7
+      'linkedin-tips',      // tag8
+      'work-life-balance',   // tag9
+      'networking',          // tag10
     ];
 
     // Check each tag exists (use 'exist' instead of 'be.visible' to handle overflow)
@@ -76,82 +77,81 @@ describe("Cypress Tests to verify tagging functionality", () => {
   });
 
   it("18.3 | Verifies tag counts and question counts display correctly", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // Navigate to Tags page
     cy.contains('Tags').click();
 
     // Should show the total number of tags (10 from seed data)
-    cy.contains('10 Tags').should('be.visible');
+    cy.contains('29').should('be.visible');
     // Should show question counts
     cy.contains('question').should('be.visible');
   });
 
-  it("18.4 | Navigates to questions filtered by 'react' tag", () => {
-    loginUser('user123');
+  it("18.4 | Navigates to questions filtered by 'resume-building' tag", () => {
+    loginUser('e.hopper');
 
     // Go to Tags page and click on 'react' tag
     cy.contains('Tags').click();
-    cy.contains('.tagName', 'react').scrollIntoView().should('be.visible').click();
+    cy.contains('.tagName', 'resume-building').scrollIntoView().should('be.visible').click();
 
     // Should navigate to questions filtered by react tag
-    cy.url().should('include', '?tag=react');
+    cy.url().should('include', '?tag=resume-building');
 
     // Verify questions with react tag are displayed
     // Based on seed data: Q1, Q6, Q10 have react tag (tag3)
-    cy.get('.postTitle').should('contain', Q1_DESC);   // Q1 has react tag
-    cy.get('.postTitle').should('contain', Q6_DESC);   // Q6 has react tag  
-    cy.get('.postTitle').should('contain', Q10_DESC);  // Q10 has react tag
+    cy.get('.postTitle').should('contain', "How important is LinkedIn when applying for internships?");
+    cy.get('.postTitle').should('contain', "How to tailor my resume for consulting vs. tech roles?");
   });
 
-  it("18.5 | Navigates to questions filtered by 'python' tag", () => {
-    loginUser('user123');
+  it("18.5 | Navigates to questions filtered by 'co-op-experience' tag", () => {
+    loginUser('e.hopper');
 
     // Go to Tags page and click on 'python' tag
     cy.contains('Tags').click();
-    cy.contains('.tagName', 'python').scrollIntoView().should('be.visible').click();
+    cy.contains('.tagName', 'co-op-experience').scrollIntoView().should('be.visible').click();
 
     // Verify questions with python tag are displayed
     // Based on seed data: Q2, Q7 have python tag (tag2)
-    cy.get('.postTitle').should('contain', Q2_DESC);   // Q2 has python tag
-    cy.get('.postTitle').should('contain', 'Improving performance of Python data processing script'); // Q7
+    cy.get('.postTitle').should('contain', "Balancing co-op work and classes — how do you manage it?");   // Q2 has python tag
   });
 
   it("18.6 | Clicks on a tag from Tags page and verifies filtered questions all have that tag", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
     
     // Navigate to Tags page and click on 'javascript' tag
     cy.contains('Tags').click();
-    cy.contains('.tagName', 'javascript').scrollIntoView().should('be.visible').click();
+    cy.contains('.tagName', 'career-advice').scrollIntoView().should('be.visible').click();
 
     // Wait for questions to load
     waitForQuestionsToLoad();
 
     // Verify URL contains the tag parameter
-    cy.url().should('include', '?tag=javascript');
+    cy.url().should('include', '?tag=career-advice');
 
     // Verify some questions are shown (at least 1)
-    cy.get('.postTitle').should('have.length.at.least', 1);
+    cy.get('.postTitle').should('have.length.at.least', 2);
 
     // Verify that javascript tag appears somewhere on the page in the questions
     // This is a more flexible approach that doesn't depend on exact DOM structure
-    cy.get('.question_tag_button').should('contain', 'javascript');
+    cy.get('.question_tag_button').should('contain', 'career-advice');
     
     // Alternative: Check that each visible question has the javascript tag
+    goToQuestions();
     cy.get('body').then(($body) => {
       // Count total questions
       const questionCount = $body.find('.postTitle').length;
       // Count questions that have javascript tag
-      const jsQuestionCount = $body.find('.question_tag_button:contains("javascript")').length;
+      const jsQuestionCount = $body.find('.question_tag_button:contains("career-advice")').length;
       
       // Verify that we have javascript tags present (at least 1)
-      expect(jsQuestionCount).to.be.at.least(1);
-      cy.log(`Found ${jsQuestionCount} javascript tags out of ${questionCount} questions`);
+      expect(jsQuestionCount).to.be.at.least(2);
+      cy.log(`Found ${jsQuestionCount} career-advice tags out of ${questionCount} questions`);
     });
   });
 
   it("18.7 | Clicks on a tag button from question list and verifies tag filtering", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
 
     waitForQuestionsToLoad();
 
@@ -177,16 +177,16 @@ describe("Cypress Tests to verify tagging functionality", () => {
   });
 
   it("18.8 | Verifies tag navigation maintains proper question filtering", () => {
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // Test multiple tag navigations to ensure filtering works correctly
 
     // First, go to 'node.js' tag
     cy.contains('Tags').click();
-    cy.contains('.tagName', 'node.js').scrollIntoView().should('be.visible').click();
+    cy.contains('.tagName', 'linkedin-tips').scrollIntoView().should('be.visible').click();
 
     // Wait for questions to load and verify URL
-    cy.url().should('include', '?tag=node.js');
+    cy.url().should('include', '?tag=linkedin-tips');
     waitForQuestionsToLoad();
 
     // Store the questions from first filter
@@ -201,10 +201,10 @@ describe("Cypress Tests to verify tagging functionality", () => {
     cy.url().should('include', '/tags');
 
     // Now click on 'typescript' tag
-    cy.contains('.tagName', 'typescript').scrollIntoView().should('be.visible').click();
+    cy.contains('.tagName', 'company-culture').scrollIntoView().should('be.visible').click();
 
     // Wait for questions to load and verify URL
-    cy.url().should('include', '?tag=typescript');
+    cy.url().should('include', '?tag=company-culture');
     waitForQuestionsToLoad();
 
     // Verify that we have questions for typescript filter

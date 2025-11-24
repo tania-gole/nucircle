@@ -1,20 +1,33 @@
 import { createCommunity, verifyCommunityDetailsDisplayed, verifyCommunityDetailsNotDisplayed, goToCommunities, viewCommunityCard, loginUser, setupTest, teardownTest } from '../support/helpers';
 
-const C1_NAME = "React Enthusiasts";
-const C1_DESC = "A community dedicated to all things React, from beginner questions to advanced patterns and performance optimizations. Share your projects, ask for help, and collaborate on solving React challenges.";
-const C1_MEMBERS = ["reactexpert",
-      "reactninja",
-      "newbiereactdev",
-      "reactlearner",
-      "frontenddev",
-      "user123",
-      "user345",
-      "typescriptfan",
-      "jsdeveloper"];
+const C1_NAME = "HubSpot";
+const C1_DESC = "A community for students who have completed or are applying for HubSpot co-ops. Discuss interview tips, tech stack insights, and what it’s like to work in a collaborative, fast-paced marketing tech company.";
+const C1_MEMBERS = ["e.hopper",
+      "w.byers",
+      "m.wheeler",
+      "d.henderson",
+      "e.munson",
+      "vecna",
+      "b.hargrove",
+      "s.harrington",
+      "m.mayfield", 
+      "n.wheeler",  
+      "j.tribbiani",
+      "l.sinclair"];
 
-const C5_NAME = "TypeScript Champions";
-const C5_DESC = "Private community for TypeScript experts to discuss advanced type systems, compiler optimizations, and enterprise-level TypeScript architecture. By invitation only.";
-const C5_MEMBERS = ["typescriptfan", "reactexpert", "edgecaseexpert", "user345", "webpackwizard"];
+const C5_NAME = "Pre-Health & Medical Co-ops";
+const C5_DESC = "A space for students interested in healthcare, pre-med, nursing, or research co-ops. Discuss hospital experiences, lab rotations, and application strategies for medical or healthcare-related co-ops.";
+const C5_MEMBERS = [
+    "e.munson",
+    "vecna",
+    "b.hargrove",
+    "s.harrington",
+    "m.mayfield",
+    "n.wheeler",
+    "j.hopper",
+    "l.sinclair",
+    "j.gergich",
+    "r.green"];
 
 describe("Cypress Tests to verify display of community information", () => {
 
@@ -28,7 +41,7 @@ describe("Cypress Tests to verify display of community information", () => {
 
   it("6.1 | Displays community card for selected community", () => {
     
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // go to all communities page
     goToCommunities();
@@ -43,7 +56,7 @@ describe("Cypress Tests to verify display of community information", () => {
 
   it("6.2 | Does not display private community information", () => {
     
-    loginUser('user123');
+    loginUser('e.hopper');
 
     // go to all communities page
     goToCommunities();

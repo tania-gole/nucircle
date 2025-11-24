@@ -12,13 +12,13 @@ describe("Cypress Tests to verify viewing all collections", () => {
 
   it("3.1 | Displays the exisitng collections in the My Collections Page", () => {
     
-    loginUser('user123');
+    loginUser('e.hopper');
 
     goToMyCollections();
     
-    cy.get('.collections-title').should('contain', "Collections");
+    cy.get('.collection_title').should('contain', "Collections");
 
     // Verify some pre-seeded collections appear
-    verifyCollectionExists("React Favorites");
+    verifyCollectionExists("Behavioral Interview Prep");
   });
 });

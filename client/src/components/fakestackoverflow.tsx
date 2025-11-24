@@ -61,8 +61,6 @@ const ProtectedRoute = ({
 
   return (
     <UserContext.Provider value={{ user, socket }}>
-      {/* <NotificationListener />
-      <Notifications /> */}
       <QuizInvitationHandler />
       {children}
     </UserContext.Provider>
