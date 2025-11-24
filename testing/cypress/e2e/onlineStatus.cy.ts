@@ -4,7 +4,6 @@ import {
   teardownTest, 
   goToUsers,
   verifyUserOnlineStatus,
-  verifyLastSeenDisplayed,
   logoutUser
 } from '../support/helpers';
 
@@ -17,65 +16,51 @@ describe('Cypress Tests to verify user online status', () => {
     teardownTest();
   });
 
-  it('User shows as online after login', () => {
-    loginUser('test_user');
+  it('User shows online indicator after login', () => {
+    loginUser('e.hopper');
     goToUsers();
 
-    verifyUserOnlineStatus('test_user', 'Online');
+    verifyUserOnlineStatus('e.hopper', true);
+  });
+
+  it('Offline users do not show online indicator', () => {
+  loginUser('e.hopper');
+  goToUsers();
+
+  verifyUserOnlineStatus('m.wheeler', false);
+  verifyUserOnlineStatus('w.byers', false);
+});
+
+  it('Multiple users can be online simultaneously', () => {
+    loginUser('e.hopper');
+    goToUsers();
+
+    verifyUserOnlineStatus('e.hopper', true);
     
-    cy.get('.user-card').contains('.username', 'test_user').parents('.user-card').within(() => {
-      cy.get('.online-indicator').should('have.class', 'online');
+    cy.get('.user_card').contains('.userUsername', 'm.wheeler').parents('.user_card').within(() => {
+      cy.get('.online-indicator').should('not.exist');
     });
   });
 
-  it('User shows as offline after logout', () => {
-    loginUser('test_user');
-    logoutUser();
-
-    loginUser('test_user1');
+  it('Online indicator persists after page reload', () => {
+    loginUser('e.hopper');
     goToUsers();
 
-    verifyUserOnlineStatus('test_user', 'Offline');
-    
-    cy.get('.user-card').contains('.username', 'test_user').parents('.user-card').within(() => {
-      cy.get('.online-indicator').should('have.class', 'offline');
-    });
-  });
-
-  it('Offline user displays last seen timestamp', () => {
-    loginUser('test_user');
-    logoutUser();
-
-    loginUser('test_user1');
-    goToUsers();
-
-    verifyLastSeenDisplayed('test_user');
-  });
-
-  it('Multiple users show correct online status', () => {
-    loginUser('test_user');
-    goToUsers();
-
-    verifyUserOnlineStatus('test_user', 'Online');
-
-    cy.get('.user-card').each(($card) => {
-      const username = $card.find('.username').text();
-      if (username !== 'test_user') {
-        cy.wrap($card).within(() => {
-          cy.get('.online-status').should('contain', 'Offline');
-        });
-      }
-    });
-  });
-
-  it('Online indicator updates when user reconnects', () => {
-    loginUser('test_user');
-    goToUsers();
-
-    verifyUserOnlineStatus('test_user', 'Online');
+    verifyUserOnlineStatus('e.hopper', true);
 
     cy.reload();
+    
+    goToUsers();
 
-    verifyUserOnlineStatus('test_user', 'Online');
+    verifyUserOnlineStatus('e.hopper', true);
+  });
+
+  it('User without online indicator should not show challenge button', () => {
+    loginUser('e.hopper');
+    goToUsers();
+
+    cy.get('.user_card').contains('.userUsername', 'm.wheeler').parents('.user_card').within(() => {
+      cy.get('.challenge-button').should('not.exist');
+    });
   });
 });

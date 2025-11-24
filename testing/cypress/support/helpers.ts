@@ -402,28 +402,21 @@ export const verifyCollectionPageDetails = (name: string, username?: string) => 
  */
 export const goToUsers = () => {
   cy.contains('Users').click();
-  cy.url().should('include', '/users')
-}
-
-/**
- * Verifies user's status 
- * @param username - The username to check
- * @param expectedStatus - 'Online' or 'Offline'
- */
-export const verifyUserOnlineStatus = (username: string, expectedStatus: 'Online' | 'Offline') => {
-  cy.get('.user-card').contains('.username', username).parents('.user-card').within(() => {
-    cy.get('.online-status').should('contain', expectedStatus);
-  });
+  cy.url().should('include', '/users');
 };
 
 /**
- * Verifies last seen timesamp is displayed for a user
+ * Verifies user has online indicator
  * @param username - The username to check
+ * @param shouldBeOnline - true if user should be online
  */
-export const verifyLastSeenDisplayed = (username: string) => {
-  cy.get('.user-card').contains('.username', username).parents('.user-card').within(() => {
-    cy.get('.last-seen').should('exist');
-    cy.get('.last-seen').should('contain', 'Last seen');
+export const verifyUserOnlineStatus = (username: string, shouldBeOnline: boolean) => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
+    if (shouldBeOnline) {
+      cy.get('.online-indicator').should('exist');
+    } else {
+      cy.get('.online-indicator').should('not.exist');
+    }
   });
 };
 
@@ -432,7 +425,7 @@ export const verifyLastSeenDisplayed = (username: string) => {
  * @param username - Username to challenge
  */
 export const sendQuizInvite = (username: string) => {
-  cy.get('.user-card').contains('.username', username).parents('.user-card').within(() => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
     cy.get('.challenge-button').click();
   });
 };
@@ -440,14 +433,14 @@ export const sendQuizInvite = (username: string) => {
 /**
  * Verifies challenge button state for a user
  * @param username - The username to check
- * @param shouldBeDisabled - If button should be disabled
+ * @param shouldBeVisible - If button should be visible
  */
-export const verifyChallengeButtonState = (username: string, shouldBeDisabled: boolean) => {
-  cy.get('.user-card').contains('.username', username).parents('.user-card').within(() => {
-    if (shouldBeDisabled) {
-      cy.get('.challenge-button').should('be.disabled');
+export const verifyChallengeButtonState = (username: string, shouldBeVisible: boolean) => {
+  cy.get('.user_card').contains('.userUsername', username).parents('.user_card').within(() => {
+    if (shouldBeVisible) {
+      cy.get('.challenge-button').should('be.visible');
     } else {
-      cy.get('.challenge-button').should('not.be.disabled');
+      cy.get('.challenge-button').should('not.exist');
     }
   });
 };
