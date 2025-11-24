@@ -20,6 +20,21 @@ export const loginUser = (username: string, password: string = 'securePass123!')
 };
 
 /**
+ * Logs in a user assuming a prior login has occurred in the same test
+ * @param username - The username to log in with
+ * @param password - The password to log in with (defaults to 'password123')
+ */
+export const subsequentLoginUser = (username: string, password: string = 'securePass123!') => {
+  cy.visit('http://localhost:4530');
+  cy.contains('Please login to continue to NUCircle');
+  cy.get('#username-input').type(username);
+  cy.get('#password-input').type(password);
+  cy.contains('Log in').click();
+  // Wait for redirect to home page
+  cy.url().should('include', '/home');
+};
+
+/**
  * Logs out the currently logged-in user
  */
 export const logoutUser = () => {
@@ -60,6 +75,14 @@ export const teardownTest = () => {
 export const goToAskQuestion = () => {
   cy.contains('Ask Question').click();
   cy.url().should('include', '/new/question');
+};
+
+/**
+ * Navigates to the current user's profile by clicking the profile button in the upper right
+ */
+export const goToMyProfile = () => {
+  cy.get('.profile-image').click();
+  cy.url().should('include', '/user/');
 };
 
 /**
