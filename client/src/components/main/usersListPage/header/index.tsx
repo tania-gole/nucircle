@@ -135,7 +135,6 @@ const UsersListHeader = ({
               <label>Career Goals:</label>
               <input
                 type='text'
-                placeholder='e.g., data science, finance'
                 value={filters.careerGoals || ''}
                 onChange={e => updateFilter('careerGoals', e.target.value)}
               />
@@ -148,7 +147,6 @@ const UsersListHeader = ({
               <label>Technical Interests:</label>
               <input
                 type='text'
-                placeholder='e.g., machine learning, react'
                 value={filters.technicalInterests || ''}
                 onChange={e => updateFilter('technicalInterests', e.target.value)}
               />

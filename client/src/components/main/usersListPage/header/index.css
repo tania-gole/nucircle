@@ -353,6 +353,16 @@
   color: #4f5866;
 }
 
+.filter-column input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  cursor: text;
+  color: #4f5866;
+}
+
 .filter-column select:focus {
   outline: none;
   border-color: #4caf50;
