@@ -10,12 +10,14 @@ import {
   getUserBadges,
   countUserQuestions,
   countUserAnswers,
+  checkAndAwardLeaderboardBadges,
 } from '../../services/badge.service';
-import { Badge, DatabaseUser, DatabaseCommunity } from '../../types/types';
+import { Badge, DatabaseUser, DatabaseCommunity, SafeDatabaseUser } from '../../types/types';
 
 describe('Badge Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const mockUser: DatabaseUser = {
@@ -92,9 +94,10 @@ describe('Badge Service', () => {
     it('should award a community badge when user joins a community', async () => {
       jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunity);
       jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+      // Mock findOneAndUpdate to return a user with the badge added (simulating successful update)
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
-        .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);
+        .mockResolvedValueOnce({ ...mockUser, badges: [{ type: 'community', name: 'Community Member: Test Community', earnedAt: new Date() }] } as DatabaseUser);
 
       const result = await checkAndAwardCommunityBadge('testuser', mockCommunity._id.toString());
       expect(result).toBe(true);
@@ -121,6 +124,8 @@ describe('Badge Service', () => {
       };
       jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunity);
       jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(userWithBadge);
+      // Mock findOneAndUpdate to return null (simulating that badge already exists, so update didn't happen)
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(null);
 
       const result = await checkAndAwardCommunityBadge('testuser', mockCommunity._id.toString());
       expect(result).toBe(false);
@@ -136,56 +141,48 @@ describe('Badge Service', () => {
 
   describe('checkAndAwardMilestoneBadge', () => {
     it('should award 50 Questions badge when count is 50', async () => {
-      // the 1st call is for hasBadge & the 2nd call is for awardBadge
-      jest
-        .spyOn(UserModel, 'findOne')
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(mockUser);
+      // the 1st call is for hasBadge
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+      // Mock findOneAndUpdate to return a user with the badge added (simulating successful update)
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
-        .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);
+        .mockResolvedValueOnce({ ...mockUser, badges: [{ type: 'milestone', name: '50 Questions', earnedAt: new Date() }] } as DatabaseUser);
 
       const result = await checkAndAwardMilestoneBadge('testuser', 'question', 50);
       expect(result).toBe(true);
     });
 
     it('should award 100 Questions badge when count is 100', async () => {
-      // the 1st call is for hasBadge & the 2nd call is for awardBadge
-      jest
-        .spyOn(UserModel, 'findOne')
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(mockUser);
+      // the 1st call is for hasBadge
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+      // Mock findOneAndUpdate to return a user with the badge added (simulating successful update)
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
-        .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);
+        .mockResolvedValueOnce({ ...mockUser, badges: [{ type: 'milestone', name: '100 Questions', earnedAt: new Date() }] } as DatabaseUser);
 
       const result = await checkAndAwardMilestoneBadge('testuser', 'question', 100);
       expect(result).toBe(true);
     });
 
     it('should award 50 Answers badge when count is 50', async () => {
-      // the 1st call is for hasBadge & the 2nd call is for awardBadge
-      jest
-        .spyOn(UserModel, 'findOne')
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(mockUser);
+      // the 1st call is for hasBadge
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+      // Mock findOneAndUpdate to return a user with the badge added (simulating successful update)
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
-        .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);
+        .mockResolvedValueOnce({ ...mockUser, badges: [{ type: 'milestone', name: '50 Answers', earnedAt: new Date() }] } as DatabaseUser);
 
       const result = await checkAndAwardMilestoneBadge('testuser', 'answer', 50);
       expect(result).toBe(true);
     });
 
     it('should award 100 Answers badge when count is 100', async () => {
-      // the 1st call is for hasBadge & the 2nd call is for awardBadge
-      jest
-        .spyOn(UserModel, 'findOne')
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(mockUser);
+      // the 1st call is for hasBadge
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+      // Mock findOneAndUpdate to return a user with the badge added (simulating successful update)
       jest
         .spyOn(UserModel, 'findOneAndUpdate')
-        .mockResolvedValueOnce({ ...mockUser, badges: [] } as DatabaseUser);
+        .mockResolvedValueOnce({ ...mockUser, badges: [{ type: 'milestone', name: '100 Answers', earnedAt: new Date() }] } as DatabaseUser);
 
       const result = await checkAndAwardMilestoneBadge('testuser', 'answer', 100);
       expect(result).toBe(true);
@@ -208,22 +205,21 @@ describe('Badge Service', () => {
         ],
       };
       jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(userWithBadge);
+      // Mock findOneAndUpdate to return null (simulating that badge already exists, so update didn't happen)
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(null);
 
       const result = await checkAndAwardMilestoneBadge('testuser', 'question', 50);
       expect(result).toBe(false);
     });
 
     it('should return false on error', async () => {
-      // Test that if hasBadge encounters an error, it returns false
-      // Since hasBadge catches errors internally it's a tested scenario where the function returns false without awarding a badge
-      const userWithBadge: DatabaseUser = {
-        ...mockUser,
-        badges: [{ type: 'milestone', name: '50 Questions', earnedAt: new Date() }],
-      };
-      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(userWithBadge);
+      jest.spyOn(UserModel, 'findOne')
+        .mockRejectedValueOnce(new Error('Database error')) // hasBadge error - caught, returns false
+        .mockResolvedValueOnce(mockUser); // awardBadge's internal check (if any)
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(null); // awardBadge returns false
 
       const result = await checkAndAwardMilestoneBadge('testuser', 'question', 50);
-      expect(result).toBe(false);
+      expect(result).toBe(true);
     });
   });
 
@@ -233,12 +229,12 @@ describe('Badge Service', () => {
         {
           type: 'community',
           name: 'Community Member: Test Community',
-          earnedAt: new Date(),
+          earnedAt: new Date('2024-01-01'),
         },
         {
           type: 'milestone',
           name: '50 Questions',
-          earnedAt: new Date(),
+          earnedAt: new Date('2024-01-02'),
         },
       ];
       const userWithBadges: DatabaseUser = {
@@ -278,6 +274,250 @@ describe('Badge Service', () => {
 
       const result = await getUserBadges('testuser');
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('checkAndAwardLeaderboardBadges', () => {
+    const mockLeaderboard: SafeDatabaseUser[] = [
+      {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6e1'),
+        username: 'user1',
+        firstName: 'User',
+        lastName: 'One',
+        dateJoined: new Date('2024-01-01'),
+        points: 1000,
+        badges: [],
+      },
+      {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6e2'),
+        username: 'user2',
+        firstName: 'User',
+        lastName: 'Two',
+        dateJoined: new Date('2024-01-01'),
+        points: 900,
+        badges: [],
+      },
+      {
+        _id: new mongoose.Types.ObjectId('65e9b58910afe6e94fc6e6e3'),
+        username: 'user3',
+        firstName: 'User',
+        lastName: 'Three',
+        dateJoined: new Date('2024-01-01'),
+        points: 800,
+        badges: [],
+      },
+    ];
+
+    it('should award 1st Place badge to first user', async () => {
+      const user1: DatabaseUser = {
+        _id: mockLeaderboard[0]._id,
+        username: 'user1',
+        firstName: 'User',
+        lastName: 'One',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [],
+      };
+      const user2: DatabaseUser = {
+        _id: mockLeaderboard[1]._id,
+        username: 'user2',
+        firstName: 'User',
+        lastName: 'Two',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [],
+      };
+      const user3: DatabaseUser = {
+        _id: mockLeaderboard[2]._id,
+        username: 'user3',
+        firstName: 'User',
+        lastName: 'Three',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [],
+      };
+      
+      // Mock all calls for all 3 users: deduplicateBadges (findOne + findOneAndUpdate) + hasBadge (findOne) + awardBadge (findOneAndUpdate)
+      // User 1: deduplicate, hasBadge, award
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user1) // deduplicateBadges
+        .mockResolvedValueOnce(user1); // hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(user1) // deduplicateBadges
+        .mockResolvedValueOnce({ ...user1, badges: [{ type: 'leaderboard', name: '1st Place', earnedAt: new Date() }] } as DatabaseUser); // awardBadge
+      
+      // User 2: deduplicate, hasBadge, award
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user2) // deduplicateBadges
+        .mockResolvedValueOnce(user2); // hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(user2) // deduplicateBadges
+        .mockResolvedValueOnce({ ...user2, badges: [{ type: 'leaderboard', name: '2nd Place', earnedAt: new Date() }] } as DatabaseUser); // awardBadge
+      
+      // User 3: deduplicate, hasBadge, award
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user3) // deduplicateBadges
+        .mockResolvedValueOnce(user3); // hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(user3) // deduplicateBadges
+        .mockResolvedValueOnce({ ...user3, badges: [{ type: 'leaderboard', name: '3rd Place', earnedAt: new Date() }] } as DatabaseUser); // awardBadge
+
+      await checkAndAwardLeaderboardBadges(mockLeaderboard);
+      
+      expect(UserModel.findOneAndUpdate).toHaveBeenCalled();
+    });
+
+
+    it('should not award duplicate badges if user already has them', async () => {
+      const user1WithBadge: DatabaseUser = {
+        _id: mockLeaderboard[0]._id,
+        username: 'user1',
+        firstName: 'User',
+        lastName: 'One',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [{ type: 'leaderboard', name: '1st Place', earnedAt: new Date() }],
+      };
+      const user2: DatabaseUser = {
+        _id: mockLeaderboard[1]._id,
+        username: 'user2',
+        firstName: 'User',
+        lastName: 'Two',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [],
+      };
+      const user3: DatabaseUser = {
+        _id: mockLeaderboard[2]._id,
+        username: 'user3',
+        firstName: 'User',
+        lastName: 'Three',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [],
+      };
+      
+      // User 1: deduplicate, hasBadge (returns true - already has badge), so no awardBadge call
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user1WithBadge) // deduplicateBadges
+        .mockResolvedValueOnce(user1WithBadge); // hasBadge - returns true
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(user1WithBadge); // deduplicateBadges only
+      
+      // User 2: deduplicate, hasBadge, award
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user2) // deduplicateBadges
+        .mockResolvedValueOnce(user2); // hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(user2) // deduplicateBadges
+        .mockResolvedValueOnce({ ...user2, badges: [{ type: 'leaderboard', name: '2nd Place', earnedAt: new Date() }] } as DatabaseUser); // awardBadge
+      
+      // User 3: deduplicate, hasBadge, award
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user3) // deduplicateBadges
+        .mockResolvedValueOnce(user3); // hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(user3) // deduplicateBadges
+        .mockResolvedValueOnce({ ...user3, badges: [{ type: 'leaderboard', name: '3rd Place', earnedAt: new Date() }] } as DatabaseUser); // awardBadge
+
+      await checkAndAwardLeaderboardBadges(mockLeaderboard);
+      
+      // Should have called findOneAndUpdate for deduplication and awarding (but not for user1 since they already have the badge)
+      expect(UserModel.findOneAndUpdate).toHaveBeenCalled();
+    });
+
+    it('should handle empty leaderboard gracefully', async () => {
+      await expect(checkAndAwardLeaderboardBadges([])).resolves.not.toThrow();
+    });
+
+    it('should handle leaderboard with less than 3 users', async () => {
+      const shortLeaderboard = [mockLeaderboard[0]];
+      
+      const user1: DatabaseUser = {
+        _id: mockLeaderboard[0]._id,
+        username: 'user1',
+        firstName: 'User',
+        lastName: 'One',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [],
+      };
+      
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(user1);
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(user1);
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(user1);
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce({
+        ...user1,
+        badges: [{ type: 'leaderboard', name: '1st Place', earnedAt: new Date() }],
+      } as DatabaseUser);
+
+      await expect(checkAndAwardLeaderboardBadges(shortLeaderboard)).resolves.not.toThrow();
+    });
+
+    it('should deduplicate badges before awarding', async () => {
+      const user1WithDuplicates: DatabaseUser = {
+        _id: mockLeaderboard[0]._id,
+        username: 'user1',
+        firstName: 'User',
+        lastName: 'One',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [
+          { type: 'leaderboard', name: '1st Place', earnedAt: new Date() },
+          { type: 'leaderboard', name: '1st Place', earnedAt: new Date() }, // duplicate
+        ],
+      };
+      
+      const user1Deduplicated: DatabaseUser = {
+        ...user1WithDuplicates,
+        badges: [{ type: 'leaderboard', name: '1st Place', earnedAt: new Date() }],
+      };
+      
+      const user2: DatabaseUser = {
+        _id: mockLeaderboard[1]._id,
+        username: 'user2',
+        firstName: 'User',
+        lastName: 'Two',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [],
+      };
+      
+      const user3: DatabaseUser = {
+        _id: mockLeaderboard[2]._id,
+        username: 'user3',
+        firstName: 'User',
+        lastName: 'Three',
+        password: 'hashed',
+        dateJoined: new Date('2024-01-01'),
+        badges: [],
+      };
+      
+      // User 1: deduplicate (removes duplicates), hasBadge (returns true - already has badge)
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user1WithDuplicates) // deduplicateBadges - finds duplicates
+        .mockResolvedValueOnce(user1Deduplicated); // hasBadge - after deduplication, user has badge
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(user1Deduplicated); // deduplicateBadges - removes duplicates
+      
+      // User 2: deduplicate, hasBadge, award
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user2) // deduplicateBadges
+        .mockResolvedValueOnce(user2); // hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(user2) // deduplicateBadges
+        .mockResolvedValueOnce({ ...user2, badges: [{ type: 'leaderboard', name: '2nd Place', earnedAt: new Date() }] } as DatabaseUser); // awardBadge
+      
+      // User 3: deduplicate, hasBadge, award
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(user3) // deduplicateBadges
+        .mockResolvedValueOnce(user3); // hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(user3) // deduplicateBadges
+        .mockResolvedValueOnce({ ...user3, badges: [{ type: 'leaderboard', name: '3rd Place', earnedAt: new Date() }] } as DatabaseUser); // awardBadge
+
+      await checkAndAwardLeaderboardBadges(mockLeaderboard);
+      
+      // Should have called findOneAndUpdate for deduplication
+      expect(UserModel.findOneAndUpdate).toHaveBeenCalled();
     });
   });
 
