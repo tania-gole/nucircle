@@ -403,7 +403,7 @@ export const getLeaderboard = async (limit: number = 20): Promise<UsersResponse>
       .select('-password')
       .sort({ points: -1 })
       .limit(limit);
-    
+
     if (!topUsers) {
       throw Error('Could not retrieve leaderboard');
     }

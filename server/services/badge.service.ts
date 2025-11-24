@@ -30,28 +30,24 @@ export const hasBadge = async (username: string, badgeName: string): Promise<boo
  * @returns Promise resolving to void
  */
 const deduplicateBadges = async (username: string): Promise<void> => {
-  try {
-    const user = await UserModel.findOne({ username });
-    if (!user || !user.badges || user.badges.length === 0) {
-      return;
-    }
-
-    // Create a map to track unique badges by name, keeping the first occurrence
-    const uniqueBadges: Badge[] = [];
-    const seenNames = new Set<string>();
-
-    for (const badge of user.badges) {
-      if (!seenNames.has(badge.name)) {
-        seenNames.add(badge.name);
-        uniqueBadges.push(badge);
-      }
-    }
-
-    // Update user with deduplicated badges
-    await UserModel.findOneAndUpdate({ username }, { badges: uniqueBadges }, { new: true });
-  } catch (error) {
-    console.error('Error deduplicating badges:', error);
+  const user = await UserModel.findOne({ username });
+  if (!user || !user.badges || user.badges.length === 0) {
+    return;
   }
+
+  // Create a map to track unique badges by name, keeping the first occurrence
+  const uniqueBadges: Badge[] = [];
+  const seenNames = new Set<string>();
+
+  for (const badge of user.badges) {
+    if (!seenNames.has(badge.name)) {
+      seenNames.add(badge.name);
+      uniqueBadges.push(badge);
+    }
+  }
+
+  // Update user with deduplicated badges
+  await UserModel.findOneAndUpdate({ username }, { badges: uniqueBadges }, { new: true });
 };
 
 /**
@@ -67,12 +63,12 @@ const awardBadge = async (username: string, badge: Badge): Promise<boolean> => {
     // Use MongoDB query to atomically check if badge exists and add if it doesn't
     // This prevents race conditions that could lead to duplicates
     const result = await UserModel.findOneAndUpdate(
-      { 
+      {
         username,
-        'badges.name': { $ne: badge.name } // Only update if badge name doesn't exist
+        'badges.name': { $ne: badge.name }, // Only update if badge name doesn't exist
       },
       { $push: { badges: badge } },
-      { new: true }
+      { new: true },
     );
 
     return result !== null;
@@ -220,34 +216,29 @@ export const countUserAnswers = async (username: string): Promise<number> => {
 export const checkAndAwardLeaderboardBadges = async (
   leaderboard: SafeDatabaseUser[],
 ): Promise<void> => {
-  try {
-    // Award badges to top 3 positions
-    const positions = [
-      { index: 0, badgeName: '1st Place' },
-      { index: 1, badgeName: '2nd Place' },
-      { index: 2, badgeName: '3rd Place' },
-    ];
+  // Award badges to top 3 positions
+  const positions = [
+    { index: 0, badgeName: '1st Place' },
+    { index: 1, badgeName: '2nd Place' },
+    { index: 2, badgeName: '3rd Place' },
+  ];
 
-    for (const { index, badgeName } of positions) {
-      if (leaderboard[index] && leaderboard[index].username) {
-        const username = leaderboard[index].username;
-        
-        // First, deduplicate any existing badges for this user
-        await deduplicateBadges(username);
-        
-        // Check if user already has this badge
-        if (!(await hasBadge(username, badgeName))) {
-          const badge: Badge = {
-            type: 'leaderboard',
-            name: badgeName,
-            earnedAt: new Date(),
-          };
-          await awardBadge(username, badge);
-        }
+  for (const { index, badgeName } of positions) {
+    if (leaderboard[index] && leaderboard[index].username) {
+      const username = leaderboard[index].username;
+
+      // First, deduplicate any existing badges for this user
+      await deduplicateBadges(username);
+
+      // Check if user already has this badge
+      if (!(await hasBadge(username, badgeName))) {
+        const badge: Badge = {
+          type: 'leaderboard',
+          name: badgeName,
+          earnedAt: new Date(),
+        };
+        await awardBadge(username, badge);
       }
     }
-  } catch (error) {
-    // Silently fail - badge awarding shouldn't break leaderboard fetching
-    console.error('Error awarding leaderboard badges:', error);
   }
 };
