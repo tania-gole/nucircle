@@ -89,11 +89,6 @@ const messageController = (socket: FakeSOSocket) => {
       await message.save();
 
       // Emit live update
-      // eslint-disable-next-line no-console
-      console.log('[DEBUG] Emitting reactionUpdated:', { messageId, reactions: message.reactions });
-      // eslint-disable-next-line no-console
-      console.log('[DEBUG] Broadcasting reactionUpdated to all clients');
-
       socket.emit('reactionUpdated', {
         messageId,
         reactions: message.reactions,
@@ -104,8 +99,6 @@ const messageController = (socket: FakeSOSocket) => {
         reactions: message.reactions,
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('[ERROR] toggleReaction failed:', err);
       res.status(500).json({ error: 'Failed to toggle reaction' });
     }
   };

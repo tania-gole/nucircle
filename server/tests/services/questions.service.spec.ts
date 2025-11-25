@@ -23,10 +23,14 @@ import {
 } from '../mockData.models';
 
 import * as badgeService from '../../services/badge.service';
+import * as pointService from '../../services/point.service';
 
 jest.mock('../../services/badge.service', () => ({
   countUserQuestions: jest.fn(),
   checkAndAwardMilestoneBadge: jest.fn(),
+}));
+jest.mock('../../services/point.service', () => ({
+  awardPointsToUser: jest.fn(),
 }));
 
 describe('Question model', () => {
@@ -389,7 +393,32 @@ describe('Question model', () => {
       expect(result.views).toEqual([]);
       expect(result.answers.length).toEqual(0);
     });
+    test('saveQuestion should award 10 points to user', async () => {
+      const mockQn = {
+        title: 'New Question Title',
+        text: 'New Question Text',
+        tags: [tag1, tag2],
+        askedBy: 'question3_user',
+        askDateTime: new Date('2024-06-06'),
+        answers: [],
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        comments: [],
+        community: null,
+      };
 
+      jest.spyOn(QuestionModel, 'create').mockResolvedValue({
+        ...mockQn,
+        _id: new mongoose.Types.ObjectId(),
+      } as unknown as ReturnType<typeof QuestionModel.create<DatabaseQuestion>>);
+      (badgeService.countUserQuestions as jest.Mock).mockResolvedValue(1);
+      (badgeService.checkAndAwardMilestoneBadge as jest.Mock).mockResolvedValue(undefined);
+
+      await saveQuestion(mockQn);
+
+      expect(pointService.awardPointsToUser).toHaveBeenCalledWith('question3_user', 10);
+    });
     test('saveQuestion should return error when unable to save question', async () => {
       const mockQn = {
         title: 'New Question Title',

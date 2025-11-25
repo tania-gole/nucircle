@@ -84,6 +84,10 @@ const userSchema: Schema = new Schema(
       type: Number,
       default: null,
     },
+    coopInterests: {
+      type: String,
+      default: '',
+    },
     showStats: {
       type: Boolean,
       default: true,
@@ -101,6 +105,14 @@ const userSchema: Schema = new Schema(
         type: String,
         default: '',
       },
+    },
+    careerGoals: {
+      type: String,
+      default: '',
+    },
+    technicalInterests: {
+      type: String,
+      default: '',
     },
   },
   { collection: 'User' },

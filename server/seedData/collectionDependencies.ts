@@ -10,7 +10,7 @@ import { TriviaQuestionDocument } from '../models/triviaQuestion.model';
 export const collectionDependencies = {
   tag: [],
   user: [],
-  message: [],
+  message: ['community'],
   comment: [],
   triviaQuestion: [],
   answer: ['comment'],

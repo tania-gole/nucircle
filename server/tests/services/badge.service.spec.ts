@@ -614,4 +614,166 @@ describe('Badge Service', () => {
       expect(result).toBe(0);
     });
   });
+
+  describe('deduplicateBadges edge cases', () => {
+    it('should handle user with empty badges array', async () => {
+      const userWithEmptyBadges: DatabaseUser = {
+        ...mockUser,
+        badges: [],
+      };
+      // checkAndAwardLeaderboardBadges calls findOne multiple times:
+      // 1. deduplicateBadges -> findOne
+      // 2. hasBadge -> findOne
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(userWithEmptyBadges) // for deduplicateBadges
+        .mockResolvedValueOnce(userWithEmptyBadges); // for hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(userWithEmptyBadges);
+
+      // This tests the deduplicateBadges function indirectly through leaderboard badges
+      const leaderboard: SafeDatabaseUser[] = [
+        {
+          _id: mockUser._id,
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          dateJoined: new Date('2024-01-01'),
+          points: 1000,
+          badges: [],
+        },
+      ];
+
+      await checkAndAwardLeaderboardBadges(leaderboard);
+
+      // Should not throw error
+      expect(UserModel.findOne).toHaveBeenCalled();
+    }, 10000);
+
+    it('should handle user with undefined badges', async () => {
+      const userWithoutBadges = { ...mockUser, badges: undefined };
+      // checkAndAwardLeaderboardBadges calls:
+      // 1. deduplicateBadges -> findOne (returns userWithoutBadges)
+      // 2. hasBadge -> findOne (returns userWithoutBadges, badges is undefined so returns false)
+      // 3. awardBadge -> findOneAndUpdate (awards badge)
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(userWithoutBadges as DatabaseUser) // for deduplicateBadges
+        .mockResolvedValueOnce(userWithoutBadges as DatabaseUser); // for hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(userWithoutBadges as DatabaseUser); // for deduplicateBadges (if badges exist)
+      // awardBadge also calls findOneAndUpdate, but we need to mock it separately
+      jest.spyOn(UserModel, 'findOneAndUpdate')
+        .mockResolvedValueOnce(userWithoutBadges as DatabaseUser); // for awardBadge
+
+      const leaderboard: SafeDatabaseUser[] = [
+        {
+          _id: mockUser._id,
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          dateJoined: new Date('2024-01-01'),
+          points: 1000,
+          badges: [],
+        },
+      ];
+
+      await expect(checkAndAwardLeaderboardBadges(leaderboard)).resolves.not.toThrow();
+    }, 10000);
+  });
+
+  describe('awardBadge error handling', () => {
+    it('should return false when awardBadge encounters database error', async () => {
+      jest.spyOn(CommunityModel, 'findById').mockResolvedValueOnce(mockCommunity);
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockRejectedValueOnce(new Error('Database error'));
+
+      const result = await checkAndAwardCommunityBadge('testuser', mockCommunity._id.toString());
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('checkAndAwardMilestoneBadge edge cases', () => {
+    it('should not award badge if count is not 50 or 100', async () => {
+      const result = await checkAndAwardMilestoneBadge('testuser', 'question', 25);
+      expect(result).toBe(false);
+    });
+
+    it('should not award badge if count is 51 (between milestones)', async () => {
+      const result = await checkAndAwardMilestoneBadge('testuser', 'question', 51);
+      expect(result).toBe(false);
+    });
+
+    it('should not award badge if count is 99 (between milestones)', async () => {
+      const result = await checkAndAwardMilestoneBadge('testuser', 'question', 99);
+      expect(result).toBe(false);
+    });
+
+    it('should handle error in hasBadge check gracefully', async () => {
+      // checkAndAwardMilestoneBadge calls:
+      // 1. countUserAnswers -> AnswerModel.countDocuments (returns 50)
+      // 2. hasBadge -> UserModel.findOne (rejects with error)
+      // hasBadge catches error and returns false (meaning "user doesn't have badge")
+      // Then checkAndAwardMilestoneBadge checks !hasBadge = !false = true
+      // So it calls awardBadge -> UserModel.findOneAndUpdate
+      // awardBadge succeeds, so function returns true
+      jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(50);
+      // Mock findOne: first call (hasBadge) rejects, second call (awardBadge) succeeds
+      jest.spyOn(UserModel, 'findOne')
+        .mockRejectedValueOnce(new Error('Database error')) // for hasBadge - returns false
+        .mockResolvedValueOnce(mockUser); // for awardBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(mockUser);
+
+      const result = await checkAndAwardMilestoneBadge('testuser', 'question', 50);
+      // When hasBadge errors, it returns false (no badge), so function proceeds to award badge
+      // and returns true
+      expect(result).toBe(true);
+    }, 10000);
+  });
+
+  describe('checkAndAwardLeaderboardBadges edge cases', () => {
+    it('should handle leaderboard with missing username', async () => {
+      const leaderboardWithMissingUsername: SafeDatabaseUser[] = [
+        {
+          _id: mockUser._id,
+          username: undefined as any,
+          firstName: 'Test',
+          lastName: 'User',
+          dateJoined: new Date('2024-01-01'),
+          points: 1000,
+          badges: [],
+        },
+      ];
+
+      await expect(checkAndAwardLeaderboardBadges(leaderboardWithMissingUsername)).resolves.not.toThrow();
+    });
+
+    it('should handle leaderboard with null user at position', async () => {
+      const userWithBadges: DatabaseUser = {
+        ...mockUser,
+        badges: [],
+      };
+      // checkAndAwardLeaderboardBadges only processes first 3 positions
+      // It checks if leaderboard[index] && leaderboard[index].username exists
+      // So null/undefined entries are skipped
+      // Only the first user will be processed, which calls findOne twice
+      jest.spyOn(UserModel, 'findOne')
+        .mockResolvedValueOnce(userWithBadges) // for deduplicateBadges
+        .mockResolvedValueOnce(userWithBadges); // for hasBadge
+      jest.spyOn(UserModel, 'findOneAndUpdate').mockResolvedValueOnce(userWithBadges);
+
+      const leaderboard: SafeDatabaseUser[] = [
+        {
+          _id: mockUser._id,
+          username: 'user1',
+          firstName: 'User',
+          lastName: 'One',
+          dateJoined: new Date('2024-01-01'),
+          points: 1000,
+          badges: [],
+        },
+        null as any,
+        undefined as any,
+      ];
+
+      await expect(checkAndAwardLeaderboardBadges(leaderboard)).resolves.not.toThrow();
+    }, 10000);
+  });
 });

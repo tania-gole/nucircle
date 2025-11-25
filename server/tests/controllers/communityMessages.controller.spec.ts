@@ -13,6 +13,8 @@ jest.mock('../../middleware/auth', () => ({
   },
 }));
 
+jest.mock('../../models/messages.model');
+
 const addCommunityMessageSpy = jest.spyOn(communityService, 'addCommunityMessage');
 const getCommunityMessagesSpy = jest.spyOn(communityService, 'getCommunityMessages');
 
@@ -56,19 +58,42 @@ describe('Community Messages Controller', () => {
         communityId: COMMUNITY_ID,
       });
     });
-    test('should return error if message creation fails', async () => {
-      addCommunityMessageSpy.mockResolvedValue({ error: 'Failed to add message' } as any);
+
+    test('should return 400 if communityID is missing (branch coverage)', async () => {
+      const response = await supertest(app).post('/api/community/messages/addMessage').send({
+        messageToAdd: requestMessage,
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.text).toBe('Community ID is required');
+    });
+
+    test('should handle exception when adding message', async () => {
+      addCommunityMessageSpy.mockRejectedValue(new Error('Database connection failed'));
+
       const response = await supertest(app).post('/api/community/messages/addMessage').send({
         messageToAdd: requestMessage,
         communityID: COMMUNITY_ID,
       });
 
       expect(response.status).toBe(500);
-      expect(response.text).toContain('Error when adding a message: Failed to add message');
+      expect(response.text).toContain('Error when adding a message');
+    });
+
+    test('should return error if message creation returns {error}', async () => {
+      addCommunityMessageSpy.mockResolvedValue({ error: 'Failed to add message' });
+
+      const response = await supertest(app).post('/api/community/messages/addMessage').send({
+        messageToAdd: requestMessage,
+        communityID: COMMUNITY_ID,
+      });
+
+      expect(response.status).toBe(500);
+      expect(response.text).toBe('Error when adding a message: Failed to add message');
     });
   });
 
-  describe('GET /api/communityMessages/:communityID', () => {
+  describe('GET /api/community/messages/getMessages/:communityID', () => {
     test('should return all messages for a community, sorted by date', async () => {
       const message1: DatabaseMessage = {
         _id: new mongoose.Types.ObjectId(),
@@ -107,6 +132,28 @@ describe('Community Messages Controller', () => {
           msgDateTime: message2.msgDateTime.toISOString(),
         },
       ]);
+    });
+
+    test('should return empty array when no messages exist', async () => {
+      getCommunityMessagesSpy.mockResolvedValue([]);
+
+      const response = await supertest(app).get(
+        `/api/community/messages/getMessages/${COMMUNITY_ID}`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([]);
+    });
+
+    test('should handle errors when fetching messages', async () => {
+      getCommunityMessagesSpy.mockRejectedValue(new Error('Database error'));
+
+      const response = await supertest(app).get(
+        `/api/community/messages/getMessages/${COMMUNITY_ID}`,
+      );
+
+      expect(response.status).toBe(500);
+      expect(response.text).toBe('Error when fetching community messages: Database error');
     });
   });
 });

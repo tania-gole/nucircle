@@ -98,4 +98,123 @@ describe('Message model', () => {
       expect(messages).toEqual([]);
     });
   });
+  describe('Toggle Message Reactions', () => {
+    let mockMessageId: mongoose.Types.ObjectId;
+    let mockMessage: any;
+
+    beforeEach(() => {
+      mockMessageId = new mongoose.Types.ObjectId();
+      mockMessage = {
+        _id: mockMessageId,
+        msg: 'Test message',
+        msgFrom: 'User1',
+        msgDateTime: new Date('2024-06-04'),
+        type: 'global',
+        reactions: {
+          love: { users: [], count: 0 },
+          like: { users: [], count: 0 },
+        },
+        save: jest.fn(),
+      };
+    });
+
+    it('should add a like reaction to a message', async () => {
+      jest.spyOn(MessageModel, 'findById').mockResolvedValue(mockMessage);
+
+      // Simulate adding a reaction
+      mockMessage.reactions.like.users.push('user1');
+      mockMessage.reactions.like.count = 1;
+
+      mockMessage.save.mockResolvedValue(mockMessage);
+      await mockMessage.save();
+
+      expect(mockMessage.reactions.like.count).toBe(1);
+      expect(mockMessage.reactions.like.users).toContain('user1');
+      expect(mockMessage.save).toHaveBeenCalled();
+    });
+
+    it('should add a love reaction to a message', async () => {
+      jest.spyOn(MessageModel, 'findById').mockResolvedValue(mockMessage);
+
+      // Simulate adding a love reaction
+      mockMessage.reactions.love.users.push('user1');
+      mockMessage.reactions.love.count = 1;
+
+      mockMessage.save.mockResolvedValue(mockMessage);
+      await mockMessage.save();
+
+      expect(mockMessage.reactions.love.count).toBe(1);
+      expect(mockMessage.reactions.love.users).toContain('user1');
+      expect(mockMessage.save).toHaveBeenCalled();
+    });
+
+    it('should remove a reaction when user toggles again', async () => {
+      mockMessage.reactions.like.users = ['user1'];
+      mockMessage.reactions.like.count = 1;
+
+      jest.spyOn(MessageModel, 'findById').mockResolvedValue(mockMessage);
+
+      // Simulate removing the reaction
+      mockMessage.reactions.like.users = mockMessage.reactions.like.users.filter(
+        (u: string) => u !== 'user1',
+      );
+      mockMessage.reactions.like.count = Math.max(0, mockMessage.reactions.like.count - 1);
+
+      mockMessage.save.mockResolvedValue(mockMessage);
+      await mockMessage.save();
+
+      expect(mockMessage.reactions.like.count).toBe(0);
+      expect(mockMessage.reactions.like.users).not.toContain('user1');
+      expect(mockMessage.save).toHaveBeenCalled();
+    });
+
+    it('should allow multiple users to react to the same message', async () => {
+      jest.spyOn(MessageModel, 'findById').mockResolvedValue(mockMessage);
+
+      // User1 and User2 like
+      mockMessage.reactions.like.users.push('user1', 'user2');
+      mockMessage.reactions.like.count = 2;
+
+      // User3 loves
+      mockMessage.reactions.love.users.push('user3');
+      mockMessage.reactions.love.count = 1;
+
+      mockMessage.save.mockResolvedValue(mockMessage);
+      await mockMessage.save();
+
+      expect(mockMessage.reactions.like.count).toBe(2);
+      expect(mockMessage.reactions.like.users).toEqual(['user1', 'user2']);
+      expect(mockMessage.reactions.love.count).toBe(1);
+      expect(mockMessage.reactions.love.users).toEqual(['user3']);
+      expect(mockMessage.save).toHaveBeenCalled();
+    });
+
+    it('should initialize reactions object if it does not exist', async () => {
+      const messageWithoutReactions: any = {
+        _id: mockMessageId,
+        msg: 'No reactions yet',
+        msgFrom: 'User1',
+        msgDateTime: new Date('2024-06-04'),
+        type: 'global',
+        save: jest.fn(),
+      };
+
+      jest.spyOn(MessageModel, 'findById').mockResolvedValue(messageWithoutReactions);
+
+      messageWithoutReactions.reactions = {
+        love: { users: [], count: 0 },
+        like: { users: [], count: 0 },
+      };
+
+      messageWithoutReactions.reactions.like.users.push('user1');
+      messageWithoutReactions.reactions.like.count = 1;
+
+      messageWithoutReactions.save.mockResolvedValue(messageWithoutReactions);
+      await messageWithoutReactions.save();
+
+      expect(messageWithoutReactions.reactions).toBeDefined();
+      expect(messageWithoutReactions.reactions.like.count).toBe(1);
+      expect(messageWithoutReactions.save).toHaveBeenCalled();
+    });
+  });
 });

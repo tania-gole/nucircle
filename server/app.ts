@@ -45,13 +45,32 @@ const io: FakeSOSocket = new Server(server, {
       'http://localhost:4530',
       'http://localhost:3000',
       'http://localhost:5173',
+      'https://fall25-project-m-a-r-t-514.onrender.com',
     ],
     credentials: true,
+    methods: ['GET', 'POST'],
   },
+  transports: ['websocket', 'polling'], // Explicitly set transports
+  allowEIO3: true, // Allow Engine.IO v3 clients
+  pingTimeout: 60000, // Increase timeout for slower connections
+  pingInterval: 25000,
 });
 
 function connectDatabase() {
-  return mongoose.connect(MONGO_URL).catch(err => console.log('MongoDB connection error: ', err));
+  const options = {
+    serverSelectionTimeoutMS: 10000, // 10 second timeout
+    socketTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  };
+  
+  return mongoose.connect(MONGO_URL, options)
+    .then(() => {
+      console.log('Successfully connected to MongoDB');
+    })
+    .catch(err => {
+      console.error('MongoDB connection error: ', err);
+      throw err;
+    });
 }
 
 function startServer() {

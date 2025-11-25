@@ -380,6 +380,162 @@ describe('Chat Controller', () => {
       expect(response.status).toBe(500);
       expect(response.text).toBe('Error adding a message to chat: Service error');
     });
+
+    it('should handle notification when recipient is not found (only myself)', async () => {
+      const chatId = new mongoose.Types.ObjectId();
+      const messagePayload: Message = {
+        msg: 'Hello!',
+        msgFrom: 'user1',
+        msgDateTime: new Date('2025-01-01'),
+        type: 'direct',
+      };
+
+      const messageResponse = {
+        _id: new mongoose.Types.ObjectId(),
+        ...messagePayload,
+        user: {
+          _id: new mongoose.Types.ObjectId(),
+          username: 'user1',
+        },
+      };
+
+      const chatResponse: DatabaseChat = {
+        _id: chatId,
+        participants: ['user1', 'user1'], // Same user in both positions
+        messages: [messageResponse._id],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+      };
+
+      const populatedChatResponse: PopulatedDatabaseChat = {
+        _id: chatId,
+        participants: ['user1', 'user1'],
+        messages: [messageResponse],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+      };
+
+      const getUserResponse: SafeDatabaseUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'user1',
+        dateJoined: new Date(),
+        firstName: 'User',
+        lastName: 'One',
+        socketId: 'fake-socket-id',
+      };
+
+      saveMessageSpy.mockResolvedValue(messageResponse);
+      addMessageSpy.mockResolvedValue(chatResponse);
+      populateDocumentSpy.mockResolvedValue(populatedChatResponse);
+      getUserByUsernameSpy.mockResolvedValue(getUserResponse);
+
+      const response = await supertest(app)
+        .post(`/api/chat/${chatId}/addMessage`)
+        .send(messagePayload);
+
+      expect(response.status).toBe(200);
+    });
+
+    it('should handle notification when getUserByUsername returns error for recipient', async () => {
+      const chatId = new mongoose.Types.ObjectId();
+      const messagePayload: Message = {
+        msg: 'Hello!',
+        msgFrom: 'user1',
+        msgDateTime: new Date('2025-01-01'),
+        type: 'direct',
+      };
+
+      const messageResponse = {
+        _id: new mongoose.Types.ObjectId(),
+        ...messagePayload,
+        user: {
+          _id: new mongoose.Types.ObjectId(),
+          username: 'user1',
+        },
+      };
+
+      const chatResponse: DatabaseChat = {
+        _id: chatId,
+        participants: ['user1', 'user2'],
+        messages: [messageResponse._id],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+      };
+
+      const populatedChatResponse: PopulatedDatabaseChat = {
+        _id: chatId,
+        participants: ['user1', 'user2'],
+        messages: [messageResponse],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+      };
+
+      saveMessageSpy.mockResolvedValue(messageResponse);
+      addMessageSpy.mockResolvedValue(chatResponse);
+      populateDocumentSpy.mockResolvedValue(populatedChatResponse);
+      getUserByUsernameSpy.mockResolvedValue({ error: 'User not found' });
+
+      const response = await supertest(app)
+        .post(`/api/chat/${chatId}/addMessage`)
+        .send(messagePayload);
+
+      expect(response.status).toBe(200);
+    });
+
+    it('should handle notification when recipient has no socketId', async () => {
+      const chatId = new mongoose.Types.ObjectId();
+      const messagePayload: Message = {
+        msg: 'Hello!',
+        msgFrom: 'user1',
+        msgDateTime: new Date('2025-01-01'),
+        type: 'direct',
+      };
+
+      const messageResponse = {
+        _id: new mongoose.Types.ObjectId(),
+        ...messagePayload,
+        user: {
+          _id: new mongoose.Types.ObjectId(),
+          username: 'user1',
+        },
+      };
+
+      const chatResponse: DatabaseChat = {
+        _id: chatId,
+        participants: ['user1', 'user2'],
+        messages: [messageResponse._id],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+      };
+
+      const populatedChatResponse: PopulatedDatabaseChat = {
+        _id: chatId,
+        participants: ['user1', 'user2'],
+        messages: [messageResponse],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+      };
+
+      const getUserResponse: SafeDatabaseUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'user2',
+        dateJoined: new Date(),
+        firstName: 'User',
+        lastName: 'Two',
+        socketId: undefined, // No socketId
+      };
+
+      saveMessageSpy.mockResolvedValue(messageResponse);
+      addMessageSpy.mockResolvedValue(chatResponse);
+      populateDocumentSpy.mockResolvedValue(populatedChatResponse);
+      getUserByUsernameSpy.mockResolvedValue(getUserResponse);
+
+      const response = await supertest(app)
+        .post(`/api/chat/${chatId}/addMessage`)
+        .send(messagePayload);
+
+      expect(response.status).toBe(200);
+    });
   });
 
   describe('GET /chat/:chatId', () => {
@@ -499,6 +655,18 @@ describe('Chat Controller', () => {
       expect(addParticipantSpy).toHaveBeenCalledWith(chatId, userId);
     });
 
+    it('should return 401 if userId does not match authenticated user', async () => {
+      const chatId = new mongoose.Types.ObjectId().toString();
+      const wrongUserId = '';
+
+      const response = await supertest(app)
+        .post(`/api/chat/${chatId}/addParticipant`)
+        .send({ username: wrongUserId });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid username parameter');
+    });
+
     it('should return 400 if userId is missing', async () => {
       const chatId = new mongoose.Types.ObjectId().toString();
       const response = await supertest(app).post(`/api/chat/${chatId}/addParticipant`).send({}); // Missing userId
@@ -587,6 +755,15 @@ describe('Chat Controller', () => {
           updatedAt: populatedChats[0].updatedAt.toISOString(),
         },
       ]);
+    });
+
+    it('should return 401 if username does not match authenticated user', async () => {
+      const username = 'user2';
+
+      const response = await supertest(app).get(`/api/chat/getChatsByUser/${username}`);
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid username parameter');
     });
 
     it('should return 500 if populateDocument fails for any chat', async () => {
