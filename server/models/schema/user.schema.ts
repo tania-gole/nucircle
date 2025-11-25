@@ -6,11 +6,24 @@ import { Schema } from 'mongoose';
  * This schema defines the structure for storing users in the database.
  * Each User includes the following fields:
  * - `username`: The username of the user.
+ * - `firstName`: The user's first name.
+ * - `lastName`: The user's last name.
  * - `password`: The encrypted password securing the user's account.
  * - `dateJoined`: The date the user joined the platform.
+ * - `biography`: A brief biography of the user.
  * - `isOnline`: The boolean status indicating if the user is currently online.
  * - `socketId`: The socket.io connection ID for real-time communication.
  * - `lastSeen`: The last time the user was active on the platform.
+ * - `badges`: An array of badges earned by the user, each with a type, name, and earned date.
+ * - `hasSeenWelcomeMessage`: A boolean indicating if the user has seen the welcome message.
+ * - `points`: The total points accumulated by the user.
+ * - `major`: The user's academic major.
+ * - `graduationYear`: The user's expected graduation year.
+ * - `showStats`: A boolean indicating if the user wants to display their stats publicly.
+ * - `externalLinks`: An object containing links to the user's LinkedIn, GitHub, and portfolio.
+ * - `coopInterests`: A description of the user's cooperative education interests.
+ * - `careerGoals`: A description of the user's career goals.
+ * - `technicalInterests`: A description of the user's technical interests.
  */
 const userSchema: Schema = new Schema(
   {
