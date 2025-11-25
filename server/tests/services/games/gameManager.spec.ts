@@ -1,6 +1,6 @@
-import NimModel from '../../../models/nim.model';
+import GameModel from '../../../models/games.model';
 import GameManager from '../../../services/games/gameManager';
-import NimGame from '../../../services/games/nim';
+import TriviaGame from '../../../services/games/trivia';
 import { GameType } from '../../../types/types';
 
 jest.mock('nanoid', () => ({
@@ -39,16 +39,16 @@ describe('GameManager', () => {
 
     it('should return the gameID for a successfully created game', async () => {
       jest
-        .spyOn(NimModel, 'create')
+        .spyOn(GameModel, 'create')
         .mockResolvedValue(
-          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new TriviaGame('testUser').toModel() as unknown as ReturnType<typeof GameModel.create>,
         );
 
       const gameManager = GameManager.getInstance();
-      const gameID = await gameManager.addGame('Nim', 'testUser');
+      const gameID = await gameManager.addGame('Trivia', 'testUser');
 
       expect(gameID).toEqual('testGameID');
-      expect(mapSetSpy).toHaveBeenCalledWith(gameID, expect.any(NimGame));
+      expect(mapSetSpy).toHaveBeenCalledWith(gameID, expect.any(TriviaGame));
     });
 
     it('should return an error for an invalid game type', async () => {
@@ -62,11 +62,11 @@ describe('GameManager', () => {
     });
 
     it('should return an error for a database error', async () => {
-      jest.spyOn(NimModel, 'create').mockRejectedValueOnce(() => new Error('database error'));
+      jest.spyOn(GameModel, 'create').mockRejectedValueOnce(() => new Error('database error'));
 
       const gameManager = GameManager.getInstance();
       // casting string for error testing purposes
-      const error = await gameManager.addGame('Nim', 'testUser');
+      const error = await gameManager.addGame('Trivia', 'testUser');
 
       expect(mapSetSpy).not.toHaveBeenCalled();
       expect(error).toHaveProperty('error');
@@ -78,14 +78,14 @@ describe('GameManager', () => {
 
     it('should remove the game with the provided gameID', async () => {
       jest
-        .spyOn(NimModel, 'create')
+        .spyOn(GameModel, 'create')
         .mockResolvedValue(
-          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new TriviaGame('testUser').toModel() as unknown as ReturnType<typeof GameModel.create>,
         );
 
       // assemble
       const gameManager = GameManager.getInstance();
-      const gameID = await gameManager.addGame('Nim', 'testUser');
+      const gameID = await gameManager.addGame('Trivia', 'testUser');
       expect(gameManager.getActiveGameInstances().length).toEqual(1);
 
       if (typeof gameID === 'string') {
@@ -124,18 +124,18 @@ describe('GameManager', () => {
     it('should return the game if it exists', async () => {
       // assemble
       jest
-        .spyOn(NimModel, 'create')
+        .spyOn(GameModel, 'create')
         .mockResolvedValue(
-          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new TriviaGame('testUser').toModel() as unknown as ReturnType<typeof GameModel.create>,
         );
 
-      const gameID = await gameManager.addGame('Nim', 'testUser');
+      const gameID = await gameManager.addGame('Trivia', 'testUser');
 
       if (typeof gameID === 'string') {
         // act
         const game = gameManager.getGame(gameID);
 
-        expect(game).toBeInstanceOf(NimGame);
+        expect(game).toBeInstanceOf(TriviaGame);
         expect(mapGetSpy).toHaveBeenCalledWith(gameID);
       }
     });
@@ -157,18 +157,18 @@ describe('GameManager', () => {
 
     it('should return active games', async () => {
       jest
-        .spyOn(NimModel, 'create')
+        .spyOn(GameModel, 'create')
         .mockResolvedValue(
-          new NimGame('testUser').toModel() as unknown as ReturnType<typeof NimModel.create>,
+          new TriviaGame('testUser').toModel() as unknown as ReturnType<typeof GameModel.create>,
         );
       // assemble
       const gameManager = GameManager.getInstance();
-      await gameManager.addGame('Nim', 'testUser');
+      await gameManager.addGame('Trivia', 'testUser');
 
       // act
       const games = gameManager.getActiveGameInstances();
       expect(games.length).toEqual(1);
-      expect(games[0]).toBeInstanceOf(NimGame);
+      expect(games[0]).toBeInstanceOf(TriviaGame);
     });
   });
 });

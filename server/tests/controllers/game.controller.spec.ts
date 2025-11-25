@@ -5,11 +5,10 @@ import { io as Client, type Socket as ClientSocket } from 'socket.io-client';
 import { AddressInfo } from 'net';
 import { app } from '../../app';
 import GameManager from '../../services/games/gameManager';
-import { FakeSOSocket, GameInstance, NimGameState } from '../../types/types';
+import { FakeSOSocket, GameInstance, TriviaGameState } from '../../types/types';
 import * as util from '../../services/game.service';
 import gameController from '../../controllers/game.controller';
-import NimGame from '../../services/games/nim';
-import { MAX_NIM_OBJECTS } from '../../types/constants';
+import TriviaGame from '../../services/games/trivia';
 
 // mock jwt auth to always authenticate successfully
 jest.mock('../../middleware/auth', () => ({
@@ -39,11 +38,11 @@ describe('POST /create', () => {
 
       const response = await supertest(app)
         .post('/api/games/create')
-        .send({ gameType: 'Nim', createdBy: 'testUser' });
+        .send({ gameType: 'Trivia', createdBy: 'testUser' });
 
       expect(response.status).toEqual(200);
       expect(response.text).toEqual(JSON.stringify('testGameID'));
-      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
+      expect(addGameSpy).toHaveBeenCalledWith('Trivia', 'testUser');
     });
   });
 
@@ -81,11 +80,11 @@ describe('POST /create', () => {
 
       const response = await supertest(app)
         .post('/api/games/create')
-        .send({ gameType: 'Nim', createdBy: 'testUser' });
+        .send({ gameType: 'Trivia', createdBy: 'testUser' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when creating game: test error');
-      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
+      expect(addGameSpy).toHaveBeenCalledWith('Trivia', 'testUser');
     });
 
     it('should return 500 if addGame throws an error', async () => {
@@ -93,11 +92,11 @@ describe('POST /create', () => {
 
       const response = await supertest(app)
         .post('/api/games/create')
-        .send({ gameType: 'Nim', createdBy: 'testUser' });
+        .send({ gameType: 'Trivia', createdBy: 'testUser' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when creating game: test error');
-      expect(addGameSpy).toHaveBeenCalledWith('Nim', 'testUser');
+      expect(addGameSpy).toHaveBeenCalledWith('Trivia', 'testUser');
     });
   });
 });
@@ -107,11 +106,19 @@ describe('POST /join', () => {
 
   describe('200 OK Requests', () => {
     it('should return 200 with a game state when successful', async () => {
-      const gameState: GameInstance<NimGameState> = {
-        state: { moves: [], status: 'WAITING_TO_START', remainingObjects: MAX_NIM_OBJECTS },
+      const gameState: GameInstance<TriviaGameState> = {
+        state: {
+          status: 'WAITING_TO_START',
+          currentQuestionIndex: 0,
+          questions: [],
+          player1Answers: [],
+          player2Answers: [],
+          player1Score: 0,
+          player2Score: 0,
+        },
         gameID: '65e9b716ff0e892116b2de01',
         players: ['user1'],
-        gameType: 'Nim',
+        gameType: 'Trivia',
       };
       joinGameSpy.mockResolvedValueOnce(gameState);
 
@@ -190,11 +197,20 @@ describe('POST /leave', () => {
 
   describe('200 OK Requests', () => {
     it('should return 200 with a success message when successful', async () => {
-      const gameState: GameInstance<NimGameState> = {
-        state: { moves: [], status: 'OVER', winners: ['user1'], remainingObjects: MAX_NIM_OBJECTS },
+      const gameState: GameInstance<TriviaGameState> = {
+        state: {
+          status: 'OVER',
+          winners: ['user1'],
+          currentQuestionIndex: 0,
+          questions: [],
+          player1Answers: [],
+          player2Answers: [],
+          player1Score: 0,
+          player2Score: 0,
+        },
         gameID: '65e9b716ff0e892116b2de01',
         players: ['user1'],
-        gameType: 'Nim',
+        gameType: 'Trivia',
       };
       leaveGameSpy.mockResolvedValueOnce(gameState);
 
@@ -271,11 +287,19 @@ describe('POST /leave', () => {
 describe('GET /games', () => {
   // findGames is the default export in the file
   const findGamesSpy = jest.spyOn(util, 'default');
-  const gameState: GameInstance<NimGameState> = {
-    state: { moves: [], status: 'WAITING_TO_START', remainingObjects: MAX_NIM_OBJECTS },
+  const gameState: GameInstance<TriviaGameState> = {
+    state: {
+      status: 'WAITING_TO_START',
+      currentQuestionIndex: 0,
+      questions: [],
+      player1Answers: [],
+      player2Answers: [],
+      player1Score: 0,
+      player2Score: 0,
+    },
     gameID: 'testGameID',
     players: ['user1'],
-    gameType: 'Nim',
+    gameType: 'Trivia',
   };
 
   describe('200 OK Requests', () => {
@@ -284,11 +308,11 @@ describe('GET /games', () => {
 
       const response = await supertest(app)
         .get('/api/games/games')
-        .query({ gameType: 'Nim', status: 'WAITING_TO_START' });
+        .query({ gameType: 'Trivia', status: 'WAITING_TO_START' });
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([gameState]);
-      expect(findGamesSpy).toHaveBeenCalledWith('Nim', 'WAITING_TO_START');
+      expect(findGamesSpy).toHaveBeenCalledWith('Trivia', 'WAITING_TO_START');
     });
 
     it('should return 200 with an empty game state array when successful', async () => {
@@ -296,11 +320,11 @@ describe('GET /games', () => {
 
       const response = await supertest(app)
         .get('/api/games/games')
-        .query({ gameType: 'Nim', status: 'IN_PROGRESS' });
+        .query({ gameType: 'Trivia', status: 'IN_PROGRESS' });
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([]);
-      expect(findGamesSpy).toHaveBeenCalledWith('Nim', 'IN_PROGRESS');
+      expect(findGamesSpy).toHaveBeenCalledWith('Trivia', 'IN_PROGRESS');
     });
   });
 
@@ -310,7 +334,7 @@ describe('GET /games', () => {
 
       const response = await supertest(app)
         .get('/api/games/games')
-        .query({ gameType: 'Nim', status: 'WAITING_TO_START' });
+        .query({ gameType: 'Trivia', status: 'WAITING_TO_START' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when getting games: test error');
@@ -324,9 +348,8 @@ describe('playMove & socket handlers', () => {
   let clientSocket: ClientSocket;
   let serverSocket: ServerSocket;
 
-  let mockNimGame: NimGame;
+  let mockTriviaGame: TriviaGame;
   let getGameSpy: jest.SpyInstance;
-  let applyMoveSpy: jest.SpyInstance;
   let toModelSpy: jest.SpyInstance;
   let saveGameStateSpy: jest.SpyInstance;
   let removeGameSpy: jest.SpyInstance;
@@ -350,24 +373,27 @@ describe('playMove & socket handlers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockNimGame = new NimGame('testUser');
-    mockNimGame.join('player1');
-    mockNimGame.join('player2');
+    mockTriviaGame = new TriviaGame('testUser');
+    mockTriviaGame.join('player1');
+    mockTriviaGame.join('player2');
 
     getGameSpy = jest.spyOn(mockGameManager, 'getGame');
-    applyMoveSpy = jest.spyOn(mockNimGame, 'applyMove');
-    toModelSpy = jest.spyOn(mockNimGame, 'toModel').mockReturnValue({
+    toModelSpy = jest.spyOn(mockTriviaGame, 'toModel').mockReturnValue({
       state: {
-        moves: [],
-        remainingObjects: 0,
         status: 'IN_PROGRESS',
+        currentQuestionIndex: 0,
+        questions: [],
+        player1Answers: [],
+        player2Answers: [],
+        player1Score: 0,
+        player2Score: 0,
       },
       gameID: '',
       players: [],
-      gameType: 'Nim',
+      gameType: 'Trivia',
     });
 
-    saveGameStateSpy = jest.spyOn(mockNimGame, 'saveGameState').mockResolvedValue(undefined);
+    saveGameStateSpy = jest.spyOn(mockTriviaGame, 'saveGameState').mockResolvedValue(undefined);
     removeGameSpy = jest.spyOn(mockGameManager, 'removeGame');
   });
 
@@ -464,7 +490,6 @@ describe('playMove & socket handlers', () => {
       error: 'Game requested does not exist',
     });
     expect(getGameSpy).toHaveBeenCalledWith('game123');
-    expect(applyMoveSpy).not.toHaveBeenCalled();
     expect(toModelSpy).not.toHaveBeenCalled();
     expect(saveGameStateSpy).not.toHaveBeenCalled();
     expect(removeGameSpy).not.toHaveBeenCalled();

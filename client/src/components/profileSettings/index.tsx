@@ -70,7 +70,20 @@ const ProfileSettings: React.FC = () => {
     );
   }
 
-  if (!userData) {
+  // Show error message if there's an error, even if userData is null
+  if (errorMessage && !userData) {
+    return (
+      <div className='profile-settings'>
+        <div className='profile-card'>
+          <h2>Error Loading Profile</h2>
+          <p className='error-message'>{errorMessage}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Only show "No user data found" if loading is complete, there's no error, and no data
+  if (!userData && !loading && !errorMessage) {
     return (
       <div className='profile-settings'>
         <div className='profile-card'>
@@ -80,14 +93,9 @@ const ProfileSettings: React.FC = () => {
     );
   }
 
+  // If we still don't have userData at this point, don't render the rest
   if (!userData) {
-    return (
-      <div className='profile-settings'>
-        <div className='profile-card'>
-          <h2>No user data found. Make sure the username parameter is correct.</h2>
-        </div>
-      </div>
-    );
+    return null;
   }
   return (
     <div className='profile-settings'>

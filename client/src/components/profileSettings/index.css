@@ -144,6 +144,8 @@
   flex-direction: column;
   gap: 0.75rem;
   margin: 1rem 0;
+  position: relative;
+  z-index: 1;
 }
 
 .profile-edit-actions {
@@ -167,6 +169,9 @@
   transition: all 0.3s ease;
   margin-right: 0.5rem;
   box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 .profile-settings .button-primary {

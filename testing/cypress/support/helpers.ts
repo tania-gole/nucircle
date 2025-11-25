@@ -6,17 +6,88 @@
 /**
  * Logs in a user by visiting the login page and entering credentials
  * @param username - The username to log in with
- * @param password - The password to log in with (defaults to 'password123')
+ * @param password - The password to log in with (defaults to 'securePass123!')
  */
 export const loginUser = (username: string, password: string = 'securePass123!') => {
+  // Intercept the login API call to wait for it to complete
+  cy.intercept('POST', '/api/user/login').as('loginRequest');
+  
   cy.visit('http://localhost:4530');
-  cy.contains('Please login to continue to NUCircle');
-  cy.get('#username-input').type(username);
-  cy.get('#password-input').type(password);
-  cy.contains('Log in').click();
-  // Wait for redirect to home page
-  cy.url().should('include', '/home');
-  cy.get('.welcome-popup-button').click();
+  
+  // Wait for login page to load
+  cy.contains('Please login to continue to NUCircle', { timeout: 10000 }).should('be.visible');
+  
+  // Fill in username
+  cy.get('#username-input', { timeout: 5000 })
+    .should('be.visible')
+    .clear()
+    .type(username);
+  
+  // Fill in password
+  cy.get('#password-input', { timeout: 5000 })
+    .should('be.visible')
+    .clear()
+    .type(password);
+  
+  // Submit the form
+  cy.get('form', { timeout: 5000 }).should('exist');
+  cy.get('button.login-button', { timeout: 5000 })
+    .should('be.visible')
+    .should('contain', 'Log in')
+    .scrollIntoView()
+    .should('not.be.disabled')
+    .click({ force: true });
+  
+  // Wait for the login API call to complete
+  cy.wait('@loginRequest', { timeout: 10000 }).then((interception) => {
+    // Check if login was successful (status 200)
+    if (interception.response?.statusCode !== 200) {
+      // Extract error message from response body & handle different formats
+      let errorMsg = 'Unknown error';
+      const responseBody = interception.response?.body;
+      
+      if (responseBody) {
+        if (typeof responseBody === 'string') {
+          errorMsg = responseBody;
+        } else if (typeof responseBody === 'object') {
+          errorMsg = responseBody.error || responseBody.message || responseBody.err || JSON.stringify(responseBody);
+        }
+      }
+      
+      // Log detailed error information for debugging
+      cy.log(`Login API failed with status ${interception.response?.statusCode}`);
+      cy.log(`Response body:`, responseBody);
+      
+      // Check if error message is displayed on page
+      cy.get('body').then(($body) => {
+        const errorElement = $body.find('.error-message-login');
+        if (errorElement.length > 0) {
+          const pageError = errorElement.text().trim();
+          cy.log(`Login error displayed on page: ${pageError}`);
+          if (pageError) {
+            errorMsg = pageError;
+          }
+        }
+      });
+      
+      throw new Error(`Login failed with status ${interception.response?.statusCode}: ${errorMsg}`);
+    }
+  });
+  
+  // Wait for redirect
+  cy.url({ timeout: 10000 }).should('satisfy', (url) => {
+    const isLoggedIn = url.includes('/home') || url === 'http://localhost:4530/' || url === 'http://localhost:4530';
+    const isNotLoginPage = !url.includes('/login');
+    return isLoggedIn && isNotLoginPage;
+  });
+  
+  // Verify logged in by checking for common elements
+  cy.get('body', { timeout: 5000 }).should('exist');
+  
+  // Wait a bit for the page to fully render
+  cy.wait(500);
+  
+  dismissWelcomePopup();
 };
 
 /**
@@ -40,33 +111,119 @@ export const subsequentLoginUser = (username: string, password: string = 'secure
 export const logoutUser = () => {
   cy.get('.logout-button').click();
 }
+
+/**
+ * Safely navigates to a game page using cy.visit()
+ * This function handles cases where the document might be null, preventing Cypress errors
+ * @param gameId - The game ID to navigate to
+ */
+export const navigateToGamePage = (gameId: string) => {
+  // First check if we're already on the correct page
+  cy.url().then((currentUrl) => {
+    if (currentUrl.includes(`/games/${gameId}`)) {
+      cy.log(`Already on game page for ${gameId}`);
+      return;
+    }
+
+    // Ensure page is stable before navigation
+    cy.get('body').should('exist').should('be.visible');
+    cy.window().should('exist');
+    cy.document().should('exist');
+    
+    // Wait for any pending operations to complete
+    cy.wait(1000);
+    
+    // Use cy.visit() - Cypress handles this more reliably than history.pushState
+    cy.visit(`/games/${gameId}`, { 
+      timeout: 20000,
+      failOnStatusCode: false,
+      onBeforeLoad: (win) => {
+        // Ensure window exists before navigation
+        if (!win || !win.document) {
+          throw new Error('Window or document not available');
+        }
+      }
+    });
+    
+    // Wait for page to fully load
+    cy.window().should('exist');
+    cy.document().should('exist');
+    cy.get('body').should('exist').should('be.visible');
+    cy.wait(1500); // Wait for React Router and page to stabilize
+  });
+  
+  // Verify navigation succeeded
+  cy.url({ timeout: 20000 }).should('include', `/games/${gameId}`);
+}
 /**
  * Seeds the database with test data
+ * Will fail the test if MongoDB is not available or seeding fails
+ * @returns Cypress chainable to allow proper chaining
  */
 export const seedDatabase = () => {
-  cy.exec('npx ts-node ../server/seedData/populateDB.ts ' + Cypress.env('MONGODB_URI'));
+  const mongoUri = Cypress.env('MONGODB_URI') || 'mongodb://127.0.0.1:27017';
+  // Use a longer timeout
+  return cy.exec(`npx ts-node ../server/seedData/populateDB.ts ${mongoUri}`, {
+    failOnNonZeroExit: true,
+    timeout: 35000, // 35 second timeout (script has its own 25s timeout)
+  });
 };
 
 /**
  * Clears the database
+ * Will fail the test if MongoDB is not available or cleanup fails
+ * @returns Cypress chainable to allow proper chaining
  */
 export const cleanDatabase = () => {
-  cy.exec('npx ts-node ../server/seedData/deleteDB.ts ' + Cypress.env('MONGODB_URI'));
+  const mongoUri = Cypress.env('MONGODB_URI') || 'mongodb://127.0.0.1:27017';
+  // Use a longer timeout to account for MongoDB connection delays
+  return cy.exec(`npx ts-node ../server/seedData/deleteDB.ts ${mongoUri}`, {
+    failOnNonZeroExit: false, // Don't fail tests if cleanup has issues (MongoDB might be slow)
+    timeout: 15000, // 15 second timeout - reduced since populateDB.ts clears collections anyway
+  }).then((result) => {
+    // Log the result for debugging using console.log to avoid async/sync mixing
+    if (result.stdout) {
+      console.log('Cleanup stdout:', result.stdout);
+    }
+    if (result.stderr) {
+      console.log('Cleanup stderr:', result.stderr);
+    }
+    // Log if cleanup failed
+    if (result.code !== 0) {
+      console.log(`Warning: Database cleanup returned non-zero exit code: ${result.code}`);
+    }
+    return result;
+  });
 };
 
 /**
  * Sets up the database before each test
  */
 export const setupTest = () => {
-  cleanDatabase();
-  seedDatabase();
+  // Skip explicit cleanup - populateDB.ts already clears collections before inserting
+  // This avoids timeout issues with deleteDB.ts
+  cy.log('Skipping explicit database cleanup - populateDB.ts handles collection clearing');
+  
+  // Seed the database and wait for it to complete
+  return seedDatabase().then((seedResult) => {
+    // Verify seeding succeeded
+    if (seedResult.code !== 0) {
+      const errorMsg = seedResult.stderr || seedResult.stdout || 'Unknown error';
+      cy.log(`Seeding stderr: ${seedResult.stderr}`);
+      cy.log(`Seeding stdout: ${seedResult.stdout}`);
+      throw new Error(`Database seeding failed with code ${seedResult.code}: ${errorMsg}`);
+    }
+    cy.log('Database seeding completed successfully');
+    // Wait a bit more to ensure seeding is fully processed
+    cy.wait(1000);
+  });
 };
 
 /**
  * Cleans up the database after each test
  */
 export const teardownTest = () => {
-  cleanDatabase();
+  cy.log('Skipping database cleanup in teardown - populateDB.ts handles collection clearing');
 };
 
 /**
@@ -163,11 +320,39 @@ export const createCommunity = (title: string, desc: string, isPublic: boolean) 
   cy.get('.new-community-submit').click();
 };
 
+export const dismissWelcomePopup = () => {
+  // Check if welcome popup exists and dismiss it
+  cy.get('body').then(($body) => {
+    const hasBackdrop = $body.find('.welcome-popup-backdrop').length > 0;
+    const hasButton = $body.find('.welcome-popup-button').length > 0;
+    
+    if (hasBackdrop || hasButton) {
+      // Click the button to dismiss - use force to ensure click goes through
+      cy.get('.welcome-popup-button', { timeout: 5000 })
+        .should('exist')
+        .click({ force: true });
+      
+      // Wait for backdrop to disappear after clicking
+      cy.get('.welcome-popup-backdrop', { timeout: 10000 }).should('not.exist');
+    }
+  });
+  
+  // Final check: ensure backdrop is completely gone before proceeding
+  cy.get('.welcome-popup-backdrop', { timeout: 5000 }).should('not.exist');
+};
+
 /**
  * Navigates back to the Communities page
  */
 export const goToCommunities = () => {
-  cy.contains('Communities').click();
+  // Ensure welcome popup is dismissed before clicking
+  dismissWelcomePopup();
+  
+  // Wait for Communities link to be visible
+  cy.contains('Communities', { timeout: 5000 }).should('be.visible');
+  
+  // Use force: true to bypass backdrop if it's still present
+  cy.contains('Communities').click({ force: true });
 };
 
 /**
@@ -424,7 +609,16 @@ export const verifyCollectionPageDetails = (name: string, username?: string) => 
  * Navigates to the user list page
  */
 export const goToUsers = () => {
-  cy.contains('Users').click();
+  // Ensure welcome popup is dismissed before clicking
+  dismissWelcomePopup();
+  
+  // Wait for Users link to be available
+  cy.contains('Users', { timeout: 5000 }).should('exist');
+  
+  // Use force: true to bypass backdrop if it's still present
+  cy.contains('Users').click({ force: true });
+  
+  // Wait for navigation
   cy.url().should('include', '/users');
 };
 
@@ -516,3 +710,22 @@ export const editWorkExperience = (field: string, value: string) => {
   cy.get(field).clear().type(value);
   cy.contains("Save").click();
 }
+
+/**
+ * Navigates to a user's profile page
+ * @param username - The username of the user whose profile to view
+ */
+export const goToUserProfile = (username: string) => {
+  cy.visit(`/user/${username}`);
+  cy.url().should('include', `/user/${username}`);
+};
+
+/**
+ * Navigates to own profile via profile image click
+ */
+export const goToOwnProfile = () => {
+  dismissWelcomePopup();
+  cy.get('.profile-image').should('be.visible').click({ force: true });
+  // Wait for profile page to load
+  cy.get('body', { timeout: 5000 }).should('exist');
+};

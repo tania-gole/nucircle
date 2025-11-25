@@ -598,7 +598,7 @@ paths:
           schema:
             $ref: '#/components/schemas/GameType'
           required: false
-          description: Filter games by type (e.g., Nim).
+          description: Filter games by type (e.g., Trivia).
         - in: query
           name: status
           schema:
@@ -1340,8 +1340,7 @@ components:
     # --------------------
     GameType:
       type: string
-      enum: # Based on known game types like 'Nim'
-        - Nim
+      enum: # Based on known game types
         - Trivia
       description: The type of game to create.
 
