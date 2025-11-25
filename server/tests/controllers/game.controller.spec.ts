@@ -971,7 +971,6 @@ describe('playMove tiebreaker logic', () => {
     });
 
     it('should return 401 if createdBy does not match authenticated user', async () => {
-      const originalAuth = jest.requireMock('../../middleware/auth').default;
       addGameSpy.mockResolvedValueOnce('testGameID');
       const response = await supertest(app)
         .post('/api/games/create')
@@ -1250,7 +1249,7 @@ describe('playMove tiebreaker timer with undefined startTime', () => {
       player1Score: 5,
       player2Score: 5,
       isTiebreaker: true,
-      tiebreakerStartTime: undefined, // Key: undefined startTime
+      tiebreakerStartTime: undefined,
       player1: 'player1',
       player2: 'player2',
     };
@@ -1290,6 +1289,7 @@ describe('playMove tiebreaker timer with undefined startTime', () => {
     await new Promise(resolve => setTimeout(resolve, 200));
 
     expect(shouldSetTiebreakerTimerSpy).toHaveBeenCalled();
+    expect(saveGameStateSpy).toHaveBeenCalled();
     expect(markTiebreakerTimerSetSpy).not.toHaveBeenCalled();
 
     applyMoveSpy.mockRestore();
@@ -1401,6 +1401,9 @@ describe('playMove tiebreaker timer callback coverage', () => {
 
     expect(shouldSetTiebreakerTimerSpy).toHaveBeenCalled();
     expect(markTiebreakerTimerSetSpy).toHaveBeenCalled();
+    expect(checkTiebreakerTimerSpy).not.toHaveBeenCalled();
+    expect(saveGameStateSpy).toHaveBeenCalled();
+    expect(removeGameSpy).not.toHaveBeenCalled();
 
     applyMoveSpy.mockRestore();
   });
