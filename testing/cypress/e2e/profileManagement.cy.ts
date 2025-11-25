@@ -414,7 +414,7 @@ describe('Cypress Tests for Profile Management', () => {
     });
   });
 
-    describe('Search Users by Career Goals', () => {
+  describe('Search Users by Career Goals', () => {
     it('User can search for other users by single career goal', () => {
       loginUser('e.hopper');
       goToUsers();
@@ -794,6 +794,7 @@ describe('Cypress Tests for Profile Management', () => {
       cy.get('.filters-panel-header').should('not.exist');
     });
   });
+  
   describe('Profile Display of Career Goals and Technical Interests', () => {
     it('Other users can view career goals on profile', () => {
       // First user sets career goals

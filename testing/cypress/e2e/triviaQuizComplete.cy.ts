@@ -68,7 +68,7 @@ describe('Cypress Tests for Complete Trivia Quiz Flow', () => {
         cy.wait(1000); // Wait for any pending operations to complete
         
         // Use cy.visit() with error handling
-        cy.visit(`/games/${gameId}`, { 
+        cy.visit(`http://localhost:4530/games/${gameId}`, { 
           timeout: 20000,
           failOnStatusCode: false,
           onBeforeLoad: (win) => {
@@ -120,7 +120,7 @@ describe('Cypress Tests for Complete Trivia Quiz Flow', () => {
         cy.document().should('exist');
         cy.wait(1000); // Wait for any pending operations to complete
         
-        cy.visit(`/games/${gameId}`, { 
+        cy.visit(`http://localhost:4530/games/${gameId}`, { 
           timeout: 20000,
           failOnStatusCode: false,
           onBeforeLoad: (win) => {
@@ -159,7 +159,7 @@ describe('Cypress Tests for Complete Trivia Quiz Flow', () => {
     
     // Use cy.visit() instead of history.pushState() to avoid Cypress document tracking issues
     cy.get('@gameId').then((gameId) => {
-      cy.visit(`/games/${gameId}`, { 
+      cy.visit(`http://localhost:4530/games/${gameId}`, { 
         timeout: 10000,
         failOnStatusCode: false
       });
@@ -269,7 +269,7 @@ describe('Cypress Tests for Complete Trivia Quiz Flow', () => {
         cy.document().should('exist');
         cy.wait(1000); // Wait for any pending operations to complete
         
-        cy.visit(`/games/${gameId}`, { 
+        cy.visit(`http://localhost:4530/games/${gameId}`, { 
           timeout: 20000,
           failOnStatusCode: false,
           onBeforeLoad: (win) => {
@@ -316,7 +316,7 @@ describe('Cypress Tests for Complete Trivia Quiz Flow', () => {
         cy.document().should('exist');
         cy.wait(1000); // Wait for any pending operations to complete
         
-        cy.visit(`/games/${gameId}`, { 
+        cy.visit(`http://localhost:4530/games/${gameId}`, { 
           timeout: 20000,
           failOnStatusCode: false,
           onBeforeLoad: (win) => {
@@ -351,7 +351,7 @@ describe('Cypress Tests for Complete Trivia Quiz Flow', () => {
     cy.wait(2000);
     
     cy.get('@gameId').then((gameId) => {
-      cy.visit(`/games/${gameId}`, { 
+      cy.visit(`http://localhost:4530/games/${gameId}`, { 
         timeout: 10000,
         failOnStatusCode: false
       });
@@ -493,7 +493,7 @@ describe('Cypress Tests for Complete Trivia Quiz Flow', () => {
     cy.wait(2000);
     
     cy.get('@gameId').then((gameId) => {
-      cy.visit(`/games/${gameId}`, { 
+      cy.visit(`http://localhost:4530/games/${gameId}`, { 
         timeout: 10000,
         failOnStatusCode: false
       });
@@ -640,7 +640,7 @@ describe('Cypress Tests for Complete Trivia Quiz Flow', () => {
     cy.wait(2000);
     
     cy.get('@gameId').then((gameId) => {
-      cy.visit(`/games/${gameId}`, { 
+      cy.visit(`http://localhost:4530/games/${gameId}`, { 
         timeout: 10000,
         failOnStatusCode: false
       });
