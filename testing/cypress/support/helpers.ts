@@ -8,23 +8,30 @@
  * @param username - The username to log in with
  * @param password - The password to log in with (defaults to 'password123')
  */
+/**
+ * Logs in a user by visiting the login page and entering credentials
+ * @param username - The username to log in with
+ * @param password - The password to log in with (defaults to 'securePass123!')
+ */
 export const loginUser = (username: string, password: string = 'securePass123!') => {
   cy.visit('http://localhost:4530');
+  cy.wait(500);
   cy.contains('Please login to continue to NUCircle');
-  cy.get('#username-input').type(username);
-  cy.get('#password-input').type(password);
+  cy.get('#username-input').clear().type(username);
+  cy.get('#password-input').clear().type(password);
   cy.contains('Log in').click();
-  // Wait for redirect to home page
-  cy.url().should('include', '/home');
-  cy.get('.welcome-popup-button').click();
+  cy.url().should('include', '/home', { timeout: 10000 }); 
+  cy.get('.welcome-popup-button', { timeout: 10000 }).click();
 };
-
 /**
  * Logs out the currently logged-in user
  */
 export const logoutUser = () => {
   cy.get('.logout-button').click();
-}
+  cy.url().should('eq', 'http://localhost:4530/', { timeout: 10000 });
+  cy.wait(1000);
+  cy.contains('Please login to continue to NUCircle');
+};
 /**
  * Seeds the database with test data
  */

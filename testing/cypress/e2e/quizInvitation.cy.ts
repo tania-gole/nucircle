@@ -33,7 +33,6 @@ describe('Cypress Tests to verify quiz invitation system', () => {
     loginUser('e.hopper');
     goToUsers();
 
-    // Verify no challenge button on own card
     verifyChallengeButtonState('e.hopper', false);
   });
 
