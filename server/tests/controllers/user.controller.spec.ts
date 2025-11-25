@@ -129,6 +129,10 @@ describe('Test userController', () => {
       });
     });
 
+    // Note: Testing biography ?? '' branch is difficult because OpenAPI validation
+    // may require biography field. The branch coverage for this line may be
+    // achieved through other means or may be considered edge case coverage.
+
     it('should return hasSeenWelcomeMessage as false for new users', async () => {
       const mockReqBody = {
         username: mockUser.username,

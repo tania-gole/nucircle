@@ -4,6 +4,7 @@ import { Server as HTTPServer, createServer } from 'http';
 import { io as Client, type Socket as ClientSocket } from 'socket.io-client';
 import { AddressInfo } from 'net';
 import { app } from '../../app';
+import GameModel from '../../models/games.model';
 import GameManager from '../../services/games/gameManager';
 import { FakeSOSocket, GameInstance, TriviaGameState } from '../../types/types';
 import * as util from '../../services/game.service';

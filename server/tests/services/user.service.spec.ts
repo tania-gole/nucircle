@@ -213,6 +213,38 @@ describe('updateUserOnlineStatus', () => {
         'Error occurred when updating this users status',
       );
     });
+
+    it('should use default socketId parameter when not provided', async () => {
+      const mockUser = {
+        _id: new ObjectId(),
+        username: mockUsername,
+        firstName: 'Test',
+        lastName: 'User',
+        isOnline: true,
+        socketId: null,
+      };
+
+      const mockSelect = jest.fn().mockResolvedValue(mockUser);
+      const mockFindOneAndUpdate = jest.fn().mockReturnValue({
+        select: mockSelect,
+      });
+      (UserModel.findOneAndUpdate as jest.Mock) = mockFindOneAndUpdate;
+
+      // Call without socketId parameter to test default
+      const result = await updateUserOnlineStatus(mockUsername, true);
+
+      expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
+        { username: mockUsername },
+        {
+          $set: {
+            isOnline: true,
+            socketId: null, // Default value
+          },
+        },
+        { new: true },
+      );
+      expect(result).not.toHaveProperty('error');
+    });
   });
 });
 
@@ -381,6 +413,23 @@ describe('loginUser', () => {
     const loginError = await loginUser(credentials);
 
     expect('error' in loginError).toBe(true);
+  });
+
+  it('should handle non-Error exceptions in loginUser', async () => {
+    // Mock findOne to throw a non-Error value (string)
+    jest.spyOn(UserModel, 'findOne').mockRejectedValueOnce('String error' as any);
+
+    const credentials: UserLogin = {
+      username: user.username,
+      password: user.password,
+    };
+
+    const loginError = await loginUser(credentials);
+
+    expect('error' in loginError).toBe(true);
+    if ('error' in loginError) {
+      expect(loginError.error).toBe('Authentication failed');
+    }
   });
 });
 

@@ -261,4 +261,198 @@ describe('POST /addAnswer', () => {
 
     expect(response.status).toBe(500);
   });
+
+  it('should return database error if fetchQuestionById returns an error', async () => {
+    const validQid = new mongoose.Types.ObjectId();
+    const mockReqBody = {
+      qid: validQid,
+      ans: {
+        text: 'This is a test answer',
+        ansBy: '65e9b716ff0e892116b2de01',
+        ansDateTime: new Date('2024-06-03'),
+      },
+    };
+
+    const mockAnswer = {
+      _id: new ObjectId('507f191e810c19729de860ea'),
+      text: 'This is a test answer',
+      ansBy: '65e9b716ff0e892116b2de01',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [],
+    };
+
+    const mockQuestion = {
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: '65e9b716ff0e892116b2de01',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [mockAnswer._id],
+      comments: [],
+      community: null,
+    };
+
+    saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
+    addAnswerToQuestionSpy.mockResolvedValueOnce(mockQuestion);
+    popDocSpy.mockResolvedValueOnce({
+      _id: mockAnswer._id,
+      text: 'This is a test answer',
+      ansBy: '65e9b716ff0e892116b2de01',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [],
+    });
+    getQuestionSpy.mockResolvedValueOnce({ error: 'Question not found' });
+
+    const response = await supertest(app).post('/api/answer/addAnswer').send(mockReqBody);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when adding answer: Question not found');
+  });
+
+  it('should not send notification if user has no socketId', async () => {
+    const validQid = new mongoose.Types.ObjectId();
+    const validAid = new mongoose.Types.ObjectId();
+    const mockReqBody = {
+      qid: validQid,
+      ans: {
+        text: 'This is a test answer',
+        ansBy: '65e9b716ff0e892116b2de01',
+        ansDateTime: new Date('2024-06-03'),
+      },
+    };
+
+    const mockAnswer = {
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: '65e9b716ff0e892116b2de01',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [],
+    };
+
+    saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
+    addAnswerToQuestionSpy.mockResolvedValueOnce({
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: '65e9b716ff0e892116b2de01',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [mockAnswer._id],
+      comments: [],
+      community: null,
+    });
+
+    popDocSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: '65e9b716ff0e892116b2de01',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [],
+    });
+
+    getQuestionSpy.mockResolvedValueOnce({
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: 'testuser',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [mockAnswer],
+      comments: [],
+      community: null,
+    });
+
+    // User without socketId
+    getUserByUsernameSpy.mockResolvedValueOnce({
+      _id: new mongoose.Types.ObjectId(),
+      username: 'testuser',
+      dateJoined: new Date(),
+      firstName: 'Test',
+      lastName: 'User',
+      // socketId is undefined
+    });
+
+    const response = await supertest(app).post('/api/answer/addAnswer').send(mockReqBody);
+
+    expect(response.status).toBe(200);
+    expect(getUserByUsernameSpy).toHaveBeenCalledWith('testuser');
+  });
+
+  it('should not send notification if getUserByUsername returns an error', async () => {
+    const validQid = new mongoose.Types.ObjectId();
+    const validAid = new mongoose.Types.ObjectId();
+    const mockReqBody = {
+      qid: validQid,
+      ans: {
+        text: 'This is a test answer',
+        ansBy: '65e9b716ff0e892116b2de01',
+        ansDateTime: new Date('2024-06-03'),
+      },
+    };
+
+    const mockAnswer = {
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: '65e9b716ff0e892116b2de01',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [],
+    };
+
+    saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
+    addAnswerToQuestionSpy.mockResolvedValueOnce({
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: '65e9b716ff0e892116b2de01',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [mockAnswer._id],
+      comments: [],
+      community: null,
+    });
+
+    popDocSpy.mockResolvedValueOnce({
+      _id: validAid,
+      text: 'This is a test answer',
+      ansBy: '65e9b716ff0e892116b2de01',
+      ansDateTime: new Date('2024-06-03'),
+      comments: [],
+    });
+
+    getQuestionSpy.mockResolvedValueOnce({
+      _id: validQid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: 'testuser',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [mockAnswer],
+      comments: [],
+      community: null,
+    });
+
+    // getUserByUsername returns error
+    getUserByUsernameSpy.mockResolvedValueOnce({ error: 'User not found' });
+
+    const response = await supertest(app).post('/api/answer/addAnswer').send(mockReqBody);
+
+    expect(response.status).toBe(200);
+    expect(getUserByUsernameSpy).toHaveBeenCalledWith('testuser');
+  });
 });

@@ -53,6 +53,28 @@ describe('Work Experience Service', () => {
       expect(result).toEqual(mockWorkExperience);
       expect(WorkExperienceModel.create).toHaveBeenCalledTimes(1);
     });
+
+    it('should create a work experience with null endDate when endDate is falsy', async () => {
+      const workExperienceWithoutEndDate: WorkExperience = {
+        ...mockWorkExperienceInput,
+        endDate: undefined as any,
+      };
+      const mockWorkExperienceWithoutEndDate = {
+        ...mockWorkExperience,
+        endDate: null,
+      };
+
+      jest.spyOn(WorkExperienceModel, 'create').mockResolvedValue(mockWorkExperienceWithoutEndDate as any);
+
+      const result = await createWorkExperience(workExperienceWithoutEndDate);
+
+      expect(WorkExperienceModel.create).toHaveBeenCalledWith({
+        ...workExperienceWithoutEndDate,
+        startDate: new Date(workExperienceWithoutEndDate.startDate).toISOString(),
+        endDate: null,
+      });
+      expect(result).toEqual(mockWorkExperienceWithoutEndDate);
+    });
     it('should return error when creation returns null', async () => {
       jest.spyOn(WorkExperienceModel, 'create').mockResolvedValueOnce(null as any);
 
@@ -181,6 +203,36 @@ describe('Work Experience Service', () => {
       );
       expect(result).toEqual(updatedExperienceWithNullDates);
       expect(WorkExperienceModel.findOneAndUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle empty string endDate correctly', async () => {
+      const updateDataWithEmptyEndDate = {
+        endDate: '',
+      };
+      const updatedExperienceWithNullEndDate = {
+        ...mockWorkExperience,
+        endDate: null,
+      };
+      jest
+        .spyOn(WorkExperienceModel, 'findOneAndUpdate')
+        .mockResolvedValue(updatedExperienceWithNullEndDate);
+
+      const result = await updateWorkExperience(
+        mockId.toString(),
+        'testuser',
+        updateDataWithEmptyEndDate,
+      );
+
+      expect(WorkExperienceModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: mockId.toString(), username: 'testuser' },
+        {
+          $set: {
+            endDate: null, // Empty string should become null
+          },
+        },
+        { new: true },
+      );
+      expect(result).toEqual(updatedExperienceWithNullEndDate);
     });
     it('should return error when update returns null', async () => {
       jest.spyOn(WorkExperienceModel, 'findOneAndUpdate').mockResolvedValueOnce(null);
