@@ -7,7 +7,9 @@
     "dateJoined": "2024-07-15T08:24:13Z",
     "biography": "Has telekinetic powers and a mysterious past. Loves Eggo waffles and protecting her friends from the Upside Down.", 
     "major": "Psychology",
-    "graduationYear": 2026
+    "graduationYear": 2026,
+    "careerGoals": " data science, finance",
+    "technicalInterests": " machine learning, react"
   },
   "will": {
     "firstName": "Will",
