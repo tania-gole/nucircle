@@ -357,7 +357,9 @@ describe('Community Controller', () => {
         .send(mockReqBody);
 
       expect(response.status).toBe(500);
-      expect(response.body.error).toContain('Error toggling community membership: Unexpected error');
+      expect(response.body.error).toContain(
+        'Error toggling community membership: Unexpected error',
+      );
     });
   });
 

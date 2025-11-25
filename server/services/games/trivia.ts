@@ -182,7 +182,10 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
 
   /**
    * TIEBREAKER FEATURE: Checks if the tiebreaker timer finished
-   * If 10 seconds have passed & both players haven't answered, the game is ended as a tie & the tie screen will be shown
+   * If 10 seconds have passed:
+   * - If both players haven't answered → tie
+   * - If one player answered correctly → they win
+   * - If one player answered incorrectly → tie
    * Returns true if the timer finished & the game was ended
    */
   public checkTiebreakerTimer(): boolean {
@@ -192,11 +195,67 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     const hasPlayer1Answer = this.state.tiebreakerPlayer1Answer !== undefined;
     const hasPlayer2Answer = this.state.tiebreakerPlayer2Answer !== undefined;
 
-    // If 10 seconds passed & both players haven't answered it is a tie officially
-    if (elapsed >= 10000 && !hasPlayer1Answer && !hasPlayer2Answer) {
+    // Only process if 10 seconds have passed
+    if (elapsed < 10000) return false;
+
+    // If both players haven't answered, it's a tie
+    if (!hasPlayer1Answer && !hasPlayer2Answer) {
       this._endTiebreakerAsTie();
       return true;
     }
+
+    // If both players answered, winner should already be determined by _processTiebreakerWinner
+    if (hasPlayer1Answer && hasPlayer2Answer) {
+      return false;
+    }
+
+    // Only one player answered - check if they got it correct
+    const tiebreakerIndex = this.state.questions.length - 1;
+    const correctAnswer = this._correctAnswers[tiebreakerIndex];
+    const { player1, player2 } = this.state;
+
+    if (hasPlayer1Answer && !hasPlayer2Answer) {
+      // Player 1 answered, player 2 didn't
+      const player1Correct = this.state.tiebreakerPlayer1Answer === correctAnswer;
+      if (player1Correct && player1) {
+        // Player 1 answered correctly → they win
+        const winners = [player1];
+        awardPointsToUser(player1, 10);
+        if (player2) awardPointsToUser(player2, 2);
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winners,
+          player1Score: this.state.player1Score + 1, // Increment winner's score
+        };
+        return true;
+      } else {
+        // Player 1 answered incorrectly → tie
+        this._endTiebreakerAsTie();
+        return true;
+      }
+    } else if (!hasPlayer1Answer && hasPlayer2Answer) {
+      // Player 2 answered, player 1 didn't
+      const player2Correct = this.state.tiebreakerPlayer2Answer === correctAnswer;
+      if (player2Correct && player2) {
+        // Player 2 answered correctly → they win
+        const winners = [player2];
+        awardPointsToUser(player2, 10);
+        if (player1) awardPointsToUser(player1, 2);
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winners,
+          player2Score: this.state.player2Score + 1, // Increment winner's score
+        };
+        return true;
+      } else {
+        // Player 2 answered incorrectly → tie
+        this._endTiebreakerAsTie();
+        return true;
+      }
+    }
+
     return false;
   }
 
@@ -234,18 +293,22 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
     const player2Correct = tiebreakerPlayer2Answer === correctAnswer;
 
     let winners: string[] = [];
+    let updatedPlayer1Score = this.state.player1Score;
+    let updatedPlayer2Score = this.state.player2Score;
 
     // Determine winner based on tiebreaker answers
     if (player1Correct && !player2Correct && player1) {
       winners = [player1];
+      updatedPlayer1Score = this.state.player1Score + 1; // Increment winner's score
       awardPointsToUser(player1, 10);
       if (player2) awardPointsToUser(player2, 2);
     } else if (player2Correct && !player1Correct && player2) {
       winners = [player2];
+      updatedPlayer2Score = this.state.player2Score + 1; // Increment winner's score
       awardPointsToUser(player2, 10);
       if (player1) awardPointsToUser(player1, 2);
     } else {
-      // Both correct or both wrong = tie
+      // Both correct or both wrong = tie (no score increment for tie)
       if (player1 && player2) {
         winners = [player1, player2];
         awardPointsToUser(player1, 10);
@@ -253,7 +316,13 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
       }
     }
 
-    this.state = { ...this.state, status: 'OVER', winners };
+    this.state = {
+      ...this.state,
+      status: 'OVER',
+      winners,
+      player1Score: updatedPlayer1Score,
+      player2Score: updatedPlayer2Score,
+    };
   }
 
   // Checks if game has ended and determines the winner

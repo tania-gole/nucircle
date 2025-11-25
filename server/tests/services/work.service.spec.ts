@@ -64,7 +64,9 @@ describe('Work Experience Service', () => {
         endDate: null,
       };
 
-      jest.spyOn(WorkExperienceModel, 'create').mockResolvedValue(mockWorkExperienceWithoutEndDate as any);
+      jest
+        .spyOn(WorkExperienceModel, 'create')
+        .mockResolvedValue(mockWorkExperienceWithoutEndDate as any);
 
       const result = await createWorkExperience(workExperienceWithoutEndDate);
 
