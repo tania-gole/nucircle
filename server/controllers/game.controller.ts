@@ -49,10 +49,6 @@ const gameController = (socket: FakeSOSocket) => {
         return;
       }
 
-      if (!createdBy) {
-        throw new Error('Creator username is required');
-      }
-
       const newGame = await GameManager.getInstance().addGame(gameType, createdBy);
 
       if (typeof newGame !== 'string') {
@@ -84,11 +80,6 @@ const gameController = (socket: FakeSOSocket) => {
         return;
       }
 
-      if (!playerID) {
-        res.status(400).send('Player ID is required');
-        return;
-      }
-
       const game = await GameManager.getInstance().joinGame(gameID, playerID);
 
       if ('error' in game) {
@@ -112,11 +103,6 @@ const gameController = (socket: FakeSOSocket) => {
       const { gameID, playerID } = req.body;
       if (playerID !== req.user!.username) {
         res.status(401).send('Invalid playerID parameter');
-        return;
-      }
-
-      if (!playerID) {
-        res.status(400).send('Player ID is required');
         return;
       }
 
@@ -189,11 +175,6 @@ const gameController = (socket: FakeSOSocket) => {
       const { gameID, username } = req.body;
       if (username !== req.user!.username) {
         res.status(401).send('Invalid username parameter');
-        return;
-      }
-
-      if (!username) {
-        res.status(400).send('Username is required to delete a game');
         return;
       }
 
