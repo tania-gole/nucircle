@@ -1,7 +1,6 @@
 import GameModel from '../../../models/games.model';
 import TriviaQuestionModel from '../../../models/triviaQuestion.model';
 import TriviaGame from '../../../services/games/trivia';
-import * as pointService from '../../../services/point.service';
 
 jest.mock('../../../services/point.service', () => ({
   awardPointsToUser: jest.fn().mockResolvedValue(100),
@@ -322,7 +321,6 @@ describe('TriviaGame tests', () => {
     });
 
     it('should record incorrect answer and not update score', async () => {
-      const correctAnswer = 0;
       await triviaGame.applyMove({
         playerID: 'player1',
         gameID: triviaGame.id,
@@ -397,7 +395,7 @@ describe('TriviaGame tests', () => {
       expect(tiebreakerGame.state.questions.length).toBe(10);
 
       // Answer all 10 questions with tied scores
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 10; i = i + 1) {
         const currentQuestionIndex = tiebreakerGame.state.currentQuestionIndex;
         expect(currentQuestionIndex).toBeLessThan(tiebreakerGame.state.questions.length);
         const currentQuestion = tiebreakerGame.state.questions[currentQuestionIndex];
@@ -422,7 +420,6 @@ describe('TriviaGame tests', () => {
     });
 
     it('should validate tiebreaker answer correctly', async () => {
-      const tiebreakerQuestion = tiebreakerGame.state.questions[10];
       await expect(
         tiebreakerGame.applyMove({
           playerID: 'player1',
@@ -564,7 +561,7 @@ describe('TriviaGame tests', () => {
 
     it('should end game with player1 as winner', async () => {
       // Player1 gets all correct, player2 gets none
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 10; i = i + 1) {
         const currentQuestionIndex = testGame.state.currentQuestionIndex;
         const currentQuestion = testGame.state.questions[currentQuestionIndex];
         await testGame.applyMove({
@@ -585,7 +582,7 @@ describe('TriviaGame tests', () => {
 
     it('should end game with player2 as winner', async () => {
       // Player2 gets all correct, player1 gets none
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 10; i = i + 1) {
         const currentQuestionIndex = testGame.state.currentQuestionIndex;
         const currentQuestion = testGame.state.questions[currentQuestionIndex];
         await testGame.applyMove({
@@ -606,7 +603,7 @@ describe('TriviaGame tests', () => {
 
     it('should end game in tie if scores equal after 10 questions', async () => {
       // Both get same score
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 10; i = i + 1) {
         const currentQuestionIndex = testGame.state.currentQuestionIndex;
         const currentQuestion = testGame.state.questions[currentQuestionIndex];
         await testGame.applyMove({

@@ -513,7 +513,7 @@ describe('POST /create authentication', () => {
     // So this test verifies the controller logic works when they don't match
     // We'll mock addGame to ensure it's not called if auth fails
     addGameSpy.mockResolvedValueOnce('testGameID');
-    
+
     const response = await supertest(app)
       .post('/api/games/create')
       .send({ gameType: 'Trivia', createdBy: 'test_user' }) // Match the default auth username
@@ -527,7 +527,7 @@ describe('POST /create authentication', () => {
   it('should return 500 if createdBy is missing and throws error', async () => {
     // When createdBy is missing, controller throws error which becomes 500
     addGameSpy.mockResolvedValueOnce('testGameID');
-    
+
     const response = await supertest(app)
       .post('/api/games/create')
       .send({ gameType: 'Trivia' })
@@ -567,7 +567,7 @@ describe('POST /join authentication', () => {
       gameType: 'Trivia',
     };
     joinGameSpy.mockResolvedValueOnce(mockGame);
-    
+
     const response = await supertest(app)
       .post('/api/games/join')
       .send({ gameID: 'testGameID', playerID: 'test_user' }) // Match default auth username
@@ -620,7 +620,7 @@ describe('POST /leave authentication', () => {
       gameType: 'Trivia',
     };
     leaveGameSpy.mockResolvedValueOnce(mockGame);
-    
+
     const response = await supertest(app)
       .post('/api/games/leave')
       .send({ gameID: 'testGameID', playerID: 'test_user' }) // Match default auth username
@@ -668,9 +668,7 @@ describe('POST /start', () => {
       };
       startGameSpy.mockResolvedValueOnce(gameState);
 
-      const response = await supertest(app)
-        .post('/api/games/start')
-        .send({ gameID: 'testGameID' });
+      const response = await supertest(app).post('/api/games/start').send({ gameID: 'testGameID' });
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(gameState);
@@ -681,9 +679,7 @@ describe('POST /start', () => {
     it('should return 500 if startGame fails', async () => {
       startGameSpy.mockResolvedValueOnce({ error: 'test error' });
 
-      const response = await supertest(app)
-        .post('/api/games/start')
-        .send({ gameID: 'testGameID' });
+      const response = await supertest(app).post('/api/games/start').send({ gameID: 'testGameID' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when starting game: test error');
@@ -692,9 +688,7 @@ describe('POST /start', () => {
     it('should return 500 if startGame throws an error', async () => {
       startGameSpy.mockRejectedValueOnce(new Error('test error'));
 
-      const response = await supertest(app)
-        .post('/api/games/start')
-        .send({ gameID: 'testGameID' });
+      const response = await supertest(app).post('/api/games/start').send({ gameID: 'testGameID' });
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when starting game: test error');
@@ -803,7 +797,7 @@ describe('POST /delete', () => {
       };
       findOneSpy.mockResolvedValueOnce(mockGameData as any);
       findOneAndDeleteSpy.mockResolvedValueOnce(mockGameData as any);
-      
+
       const response = await supertest(app)
         .post('/api/games/delete')
         .send({ gameID: 'testGameID', username: 'test_user' }) // Match default auth username
@@ -869,7 +863,6 @@ describe('playMove tiebreaker logic', () => {
   let mockTriviaGame: TriviaGame;
   let getGameSpy: jest.SpyInstance;
   let toModelSpy: jest.SpyInstance;
-  let saveGameStateSpy: jest.SpyInstance;
   let removeGameSpy: jest.SpyInstance;
   let shouldSetTiebreakerTimerSpy: jest.SpyInstance;
   let markTiebreakerTimerSetSpy: jest.SpyInstance;
@@ -899,7 +892,7 @@ describe('playMove tiebreaker logic', () => {
 
     getGameSpy = jest.spyOn(mockGameManager, 'getGame');
     toModelSpy = jest.spyOn(mockTriviaGame, 'toModel');
-    saveGameStateSpy = jest.spyOn(mockTriviaGame, 'saveGameState').mockResolvedValue(undefined);
+    jest.spyOn(mockTriviaGame, 'saveGameState').mockResolvedValue(undefined);
     removeGameSpy = jest.spyOn(mockGameManager, 'removeGame');
     shouldSetTiebreakerTimerSpy = jest.spyOn(mockTriviaGame, 'shouldSetTiebreakerTimer');
     markTiebreakerTimerSetSpy = jest.spyOn(mockTriviaGame, 'markTiebreakerTimerSet');

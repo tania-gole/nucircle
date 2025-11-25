@@ -62,8 +62,9 @@ function connectDatabase() {
     socketTimeoutMS: 10000,
     connectTimeoutMS: 10000,
   };
-  
-  return mongoose.connect(MONGO_URL, options)
+
+  return mongoose
+    .connect(MONGO_URL, options)
     .then(() => {
       console.log('Successfully connected to MongoDB');
     })

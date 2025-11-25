@@ -640,7 +640,7 @@ describe('GameManager', () => {
 
       // endGameByDisconnect has try-catch that silently handles errors, so it should not throw
       await gameManager.endGameByDisconnect('testID', 'player1', 'player2');
-      
+
       // If we get here without throwing, the error was handled silently
       expect(true).toBe(true);
     });

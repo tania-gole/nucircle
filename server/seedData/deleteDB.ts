@@ -6,8 +6,8 @@ import 'dotenv/config';
 // Use MONGODB_URI from environment or command line argument or fallback to default local MongoDB
 const MONGO_URL = process.env.MONGODB_URI || process.argv[2] || 'mongodb://127.0.0.1:27017';
 
-const dbName = 'fake_so';
-const mongoURL = `${MONGO_URL}/${dbName}`;
+const DB_NAME = 'fake_so';
+const A_MONGO_URL = `${MONGO_URL}/${DB_NAME}`;
 
 /**
  * Clears all collections from the connected MongoDB database.
@@ -23,7 +23,7 @@ const clearDatabase = async (): Promise<void> => {
     };
 
     // Connect to MongoDB
-    await mongoose.connect(mongoURL, options);
+    await mongoose.connect(A_MONGO_URL, options);
     console.log('Connected to MongoDB');
 
     // Drop the database
@@ -41,9 +41,9 @@ const clearDatabase = async (): Promise<void> => {
     console.error(`ERROR: ${err}`);
     // Ensure connection is closed even on error
     try {
-      if (mongoose.connection.readyState !== 0) {
+      if (mongoose.connection.readyState !== mongoose.ConnectionStates.disconnected) {
         await mongoose.connection.close();
-  }
+      }
     } catch (closeErr) {
       // Ignore close errors
     }

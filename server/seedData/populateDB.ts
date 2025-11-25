@@ -108,8 +108,8 @@ async function main(args: string[]) {
     for (const collectionName of IMPORT_ORDER) {
       const { model } = collectionMapping[collectionName];
       try {
-        // Cast to mongoose.Model<any> to ensure deleteMany is callable
-        await (model as mongoose.Model<any>).deleteMany({});
+        // Cast to mongoose.Model to ensure deleteMany is callable
+        await (model as unknown as mongoose.Model<mongoose.Document>).deleteMany({});
         console.log(`Cleared ${collectionName} collection`);
       } catch (err) {
         console.warn(`Warning: Could not clear ${collectionName} collection:`, err);
@@ -150,7 +150,7 @@ async function main(args: string[]) {
     console.error('Error populating database:', err);
     // Ensure connection is closed even on error
     try {
-      if (mongoose.connection.readyState !== 0) {
+      if (mongoose.connection.readyState !== mongoose.ConnectionStates.disconnected) {
         await mongoose.connection.close();
       }
     } catch (closeErr) {
