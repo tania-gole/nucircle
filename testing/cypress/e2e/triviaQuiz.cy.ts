@@ -152,7 +152,8 @@ describe('Cypress Tests for Trivia Quiz Feature', () => {
           // Verify it's in WAITING_TO_START status
           cy.contains('Status: WAITING_TO_START').should('exist');
           // Find and click the Join button
-          cy.get('button.btn-join-game', { timeout: 5000 })
+          cy.contains('Join Game', { timeout: 5000 })
+            .scrollIntoView()
             .should('be.visible')
             .should('contain', 'Join Game')
             .scrollIntoView()
@@ -244,7 +245,7 @@ describe('Cypress Tests for Trivia Quiz Feature', () => {
         .first()
         .within(() => {
           cy.contains('Status: WAITING_TO_START').should('exist');
-          cy.get('button.btn-join-game', { timeout: 5000 })
+          cy.get('.btn-join-game', { timeout: 5000 })
             .should('be.visible')
             .should('contain', 'Join Game')
             .scrollIntoView()
@@ -359,7 +360,7 @@ describe('Cypress Tests for Trivia Quiz Feature', () => {
           let foundGame = null;
           $items.each((index, element) => {
             const $el = Cypress.$(element);
-            if ($el.find('button.btn-join-game').length > 0) {
+            if ($el.find('.-game').length > 0) {
               foundGame = element;
               return false; // break
             }
@@ -373,7 +374,7 @@ describe('Cypress Tests for Trivia Quiz Feature', () => {
         })
         .within(() => {
           cy.contains('e.hopper').should('exist');
-          cy.get('button.btn-join-game', { timeout: 5000 })
+          cy.get('.btn-join-game', { timeout: 5000 })
             .should('be.visible')
             .should('contain', 'Join Game')
             .scrollIntoView()
@@ -592,7 +593,7 @@ describe('Cypress Tests for Trivia Quiz Feature', () => {
       .first()
       .within(() => {
         cy.contains('Status: WAITING_TO_START').should('exist');
-        cy.get('button.btn-join-game', { timeout: 5000 })
+        cy.get('.btn-join-game', { timeout: 5000 })
           .should('be.visible')
           .should('contain', 'Join Game')
           .scrollIntoView()
@@ -659,7 +660,7 @@ describe('Cypress Tests for Trivia Quiz Feature', () => {
       .first()
       .within(() => {
         cy.contains('Status: WAITING_TO_START').should('exist');
-        cy.get('button.btn-join-game', { timeout: 5000 })
+        cy.get('.btn-join-game', { timeout: 5000 })
           .should('be.visible')
           .should('contain', 'Join Game')
           .scrollIntoView()
@@ -1049,7 +1050,7 @@ describe('Cypress Tests for Trivia Quiz Feature', () => {
             .parents('.game-item')
             .first()
             .within(() => {
-              cy.get('button.btn-join-game', { timeout: 5000 })
+              cy.get('.btn-join-game', { timeout: 5000 })
                 .should('be.visible')
                 .click({ force: true });
             });

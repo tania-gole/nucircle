@@ -43,7 +43,7 @@ describe("Community Visit Streaks", () => {
 
   it("8.3 | Display streak information for community members", () => {
     // Login as m.wheeler (member of HubSpot community)
-    loginUser("m.wheeler", "P@ssw0rd345");
+    loginUser("d.henderson", "C0mplexP@ss456");
 
     // Visit HubSpot community
     goToCommunities();
@@ -120,7 +120,7 @@ describe("Community Visit Streaks", () => {
 
     // Third member visits
     cy.get(".logout-button").click();
-    loginUser("m.wheeler", "P@ssw0rd345");
+    loginUser("d.henderson", "C0mplexP@ss456");
     goToCommunities();
     viewCommunityCard("HubSpot");
     cy.contains("1 day in a row").should("exist");

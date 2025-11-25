@@ -27,7 +27,7 @@ describe("Points System", () => {
 
     // Check initial points (should be 0 for new user or existing points)
     goToMyProfile();
-    cy.contains("Points Earned:")
+    cy.contains("Points")
       .parent()
       .then(($el) => {
         const initialPointsText = $el.text();
@@ -45,7 +45,7 @@ describe("Points System", () => {
 
         // Navigate back to profile and verify points increased by 10
         goToMyProfile();
-        cy.contains("Points Earned:")
+        cy.contains("Points")
           .parent()
           .should("contain", initialPoints + 10);
       });
@@ -67,7 +67,7 @@ describe("Points System", () => {
 
     // Check initial points for answering user
     goToMyProfile();
-    cy.contains("Points Earned:").parent().then(($el) => {
+    cy.contains("Points").parent().then(($el) => {
       const initialPointsText = $el.text();
       const initialPoints = parseInt(initialPointsText.match(/\d+/)?.[0] || "0");
 
@@ -78,7 +78,7 @@ describe("Points System", () => {
 
       // Navigate back to profile and verify points increased by 15
       goToMyProfile();
-      cy.contains("Points Earned:").parent().should("contain", initialPoints + 15);
+      cy.contains("Points").parent().should("contain", initialPoints + 15);
     });
   });
 
@@ -88,7 +88,7 @@ describe("Points System", () => {
 
     // Check initial points
     goToMyProfile();
-    cy.contains("Points Earned:").parent().then(($el) => {
+    cy.contains("Points").parent().then(($el) => {
       const initialPointsText = $el.text();
       const initialPoints = parseInt(initialPointsText.match(/\d+/)?.[0] || "0");
 
@@ -99,17 +99,17 @@ describe("Points System", () => {
 
       // Navigate back to profile and verify points increased by 5
       goToMyProfile();
-      cy.contains("Points Earned:").parent().should("contain", initialPoints + 5);
+      cy.contains("Points").parent().should("contain", initialPoints + 5);
     });
   });
 
   it("9.4 | User accumulates points from multiple actions", () => {
     // Login as user
-    loginUser("m.wheeler", "P@ssw0rd345");
+    loginUser("d.henderson", "C0mplexP@ss456");
 
     // Check initial points
     goToMyProfile();
-    cy.contains("Points Earned:").parent().then(($el) => {
+    cy.contains("Points").parent().then(($el) => {
       const initialPointsText = $el.text();
       const initialPoints = parseInt(initialPointsText.match(/\d+/)?.[0] || "0");
 
@@ -133,7 +133,7 @@ describe("Points System", () => {
 
       // Verify total points increased by 30 (10 + 5 + 15)
       goToMyProfile();
-      cy.contains("Points Earned:").parent().should("contain", initialPoints + 30);
+      cy.contains("Points").parent().should("contain", initialPoints + 30);
     });
   });
 
@@ -146,15 +146,15 @@ describe("Points System", () => {
 
     // Verify points section exists and displays points
     cy.contains("User Stats").should("exist");
-    cy.contains("Points Earned:").should("exist");
-    cy.contains("Points Earned:").parent().invoke('text').should('match', /\d+/);
+    cy.contains("Points").should("exist");
+    cy.contains("Points").parent().invoke('text').should('match', /\d+/);
   });
 
   it("9.6 | Different users have independent point totals", () => {
     // First user earns points
     loginUser("e.hopper");
     goToMyProfile();
-    cy.contains("Points Earned:").parent().then(($el) => {
+    cy.contains("Points").parent().then(($el) => {
       const user1Points = $el.text().match(/\d+/)?.[0];
 
       // Ask a question as first user
@@ -171,7 +171,7 @@ describe("Points System", () => {
 
       // Check second user's points
       goToMyProfile();
-      cy.contains("Points Earned:").parent().then(($el2) => {
+      cy.contains("Points").parent().then(($el2) => {
         const user2Points = $el2.text().match(/\d+/)?.[0];
 
         // Ask a question as second user
@@ -184,7 +184,7 @@ describe("Points System", () => {
 
         // Verify second user's points increased
         goToMyProfile();
-        cy.contains("Points Earned:").parent().should("contain", parseInt(user2Points || "0") + 10);
+        cy.contains("Points").parent().should("contain", parseInt(user2Points || "0") + 10);
       });
     });
   });
@@ -203,7 +203,7 @@ describe("Points System", () => {
 
     // Check points
     goToMyProfile();
-    cy.contains("Points Earned:").parent().then(($el) => {
+    cy.contains("Points").parent().then(($el) => {
       const pointsEarned = $el.text().match(/\d+/)?.[0];
 
       // Logout
@@ -214,7 +214,7 @@ describe("Points System", () => {
 
       // Verify points are still there
       goToMyProfile();
-      cy.contains("Points Earned:").parent().should("contain", pointsEarned);
+      cy.contains("Points").parent().should("contain", pointsEarned);
     });
   });
 
