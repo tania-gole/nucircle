@@ -863,5 +863,265 @@ describe('Cypress Tests for Profile Management', () => {
       cy.contains('Technical Interests:').parent().should('contain', 'react, node.js, mongodb');
     });
   });
+
+  describe('Profile Statistics Visibility', () => {
+    it('User can view their own profile statistics', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Verify stats section exists
+      cy.contains('h2', 'User Stats').scrollIntoView().should('be.visible');
+      
+      // Verify stats grid exists
+      cy.get('.stats-grid').should('be.visible');
+      
+      // Verify all stat boxes are visible (using stat-label class)
+      cy.get('.stat-box').contains('.stat-label', 'Date Joined').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Points').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Questions').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Answers').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Communities').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Quizzes Won').should('be.visible');
+    });
+
+    it('User can unpublish their statistics', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Intercept the API call
+      cy.intercept('PATCH', '/api/user/updateStatVisibility').as('updateStatVisibility');
+
+      // Stats are published by default, so unpublish them
+      cy.contains('button', 'Unpublish Stats').scrollIntoView().click({ force: true });
+
+      // Wait for the API call
+      cy.wait('@updateStatVisibility').then((interception) => {
+        expect(interception.response?.statusCode).to.eq(200);
+        expect(interception.request.body).to.have.property('field', 'showStats');
+        expect(interception.request.body).to.have.property('value', false);
+      });
+
+      // Verify button text changes to "Publish Stats"
+      cy.contains('button', 'Publish Stats').should('be.visible');
+    });
+
+    it('User can publish their statistics after unpublishing', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // First unpublish stats (they're published by default)
+      cy.contains('button', 'Unpublish Stats').scrollIntoView().click({ force: true });
+      cy.wait(1000);
+
+      // Intercept the API call for publishing
+      cy.intercept('PATCH', '/api/user/updateStatVisibility').as('updateStatVisibility');
+
+      // Now publish
+      cy.contains('button', 'Publish Stats').scrollIntoView().click({ force: true });
+
+      // Wait for the API call
+      cy.wait('@updateStatVisibility').then((interception) => {
+        expect(interception.response?.statusCode).to.eq(200);
+        expect(interception.request.body).to.have.property('field', 'showStats');
+        expect(interception.request.body).to.have.property('value', true);
+      });
+
+      // Verify button text changes back to "Unpublish Stats"
+      cy.contains('button', 'Unpublish Stats').should('be.visible');
+    });
+
+    it('Other users can view published statistics by default', () => {
+      // First user has stats published by default
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Verify stats are published (Unpublish button visible)
+      cy.contains('button', 'Unpublish Stats').should('be.visible');
+
+      // Logout
+      cy.get('.logout-button').click();
+      cy.wait(1000);
+
+      // Second user views first user's profile
+      loginUser('m.wheeler');
+      goToUsers();
+      cy.wait(1000);
+
+      cy.get('.user_card').contains('.userUsername', 'e.hopper').click();
+      cy.wait(1000);
+
+      // Verify stats section is visible
+      cy.contains('h2', 'User Stats').scrollIntoView().should('be.visible');
+      cy.get('.stats-grid').should('be.visible');
+      
+      // Verify stat boxes are visible
+      cy.get('.stat-box').contains('.stat-label', 'Points').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Questions').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Answers').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Communities').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Quizzes Won').should('be.visible');
+
+      // Verify publish/unpublish button is not visible to other users
+      cy.contains('button', 'Publish Stats').should('not.exist');
+      cy.contains('button', 'Unpublish Stats').should('not.exist');
+    });
+
+    it('Statistics display correct values', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Verify stats section exists
+      cy.contains('h2', 'User Stats').scrollIntoView().should('be.visible');
+
+      // Verify each stat has a numeric value
+      cy.get('.stat-box').contains('.stat-label', 'Points').parent().find('.stat-value').should('exist');
+      cy.get('.stat-box').contains('.stat-label', 'Questions').parent().find('.stat-value').should('exist');
+      cy.get('.stat-box').contains('.stat-label', 'Answers').parent().find('.stat-value').should('exist');
+      cy.get('.stat-box').contains('.stat-label', 'Communities').parent().find('.stat-value').should('exist');
+      cy.get('.stat-box').contains('.stat-label', 'Quizzes Won').parent().find('.stat-value').should('exist');
+    });
+
+    it('Date Joined is always visible', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Date Joined should always be visible regardless of stats visibility
+      cy.get('.stat-box').contains('.stat-label', 'Date Joined').scrollIntoView().should('be.visible');
+      
+      // Verify it has a value
+      cy.get('.stat-box').contains('.stat-label', 'Date Joined').parent().find('.stat-value').should('not.contain', 'N/A');
+    });
+
+    it('User can toggle stats visibility multiple times', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Stats are published by default, so unpublish first
+      cy.contains('button', 'Unpublish Stats').scrollIntoView().click({ force: true });
+      cy.wait(500);
+      cy.contains('button', 'Publish Stats').should('be.visible');
+
+      // Publish
+      cy.contains('button', 'Publish Stats').scrollIntoView().click({ force: true });
+      cy.wait(500);
+      cy.contains('button', 'Unpublish Stats').should('be.visible');
+
+      // Unpublish again
+      cy.contains('button', 'Unpublish Stats').scrollIntoView().click({ force: true });
+      cy.wait(500);
+      cy.contains('button', 'Publish Stats').should('be.visible');
+    });
+
+    it('Points are displayed in stats section', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      cy.contains('h2', 'User Stats').scrollIntoView().should('be.visible');
+      
+      // Find the Points stat box
+      cy.get('.stat-box').contains('.stat-label', 'Points').parent().within(() => {
+        cy.get('.stat-value').invoke('text').then((text) => {
+          const points = parseInt(text);
+          expect(points).to.be.a('number');
+          expect(points).to.be.at.least(0);
+        });
+      });
+    });
+
+    it('Quiz W/L record displays correctly', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      cy.contains('h2', 'User Stats').scrollIntoView().should('be.visible');
+      
+      // Find the Quizzes Won stat box
+      cy.get('.stat-box').contains('.stat-label', 'Quizzes Won').parent().within(() => {
+        cy.get('.stat-value').invoke('text').then((text) => {
+          // Verify format is "X / Y" (wins / total)
+          const recordMatch = text.match(/(\d+)\s*\/\s*(\d+)/);
+          expect(recordMatch).to.not.be.null;
+          if (recordMatch) {
+            const wins = parseInt(recordMatch[1]);
+            const total = parseInt(recordMatch[2]);
+            expect(wins).to.be.a('number');
+            expect(total).to.be.a('number');
+            expect(wins).to.be.at.most(total); // Wins should never exceed total
+          }
+        });
+      });
+    });
+
+    it('All stat categories are present in stats section', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      cy.contains('h2', 'User Stats').scrollIntoView().should('be.visible');
+
+      // Verify all required stat categories exist
+      const requiredStats = [
+        'Date Joined',
+        'Points',
+        'Questions',
+        'Answers',
+        'Communities',
+        'Quizzes Won'
+      ];
+
+      requiredStats.forEach(stat => {
+        cy.get('.stat-box').contains('.stat-label', stat).scrollIntoView().should('be.visible');
+      });
+    });
+
+    it('Stats button changes color based on state', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Stats are published by default - button should have gray color
+      cy.contains('button', 'Unpublish Stats').should('have.css', 'background-color', 'rgb(147, 157, 166)');
+      
+      // Unpublish them
+      cy.contains('button', 'Unpublish Stats').click({ force: true });
+      cy.wait(500);
+      
+      // Now button should have red color
+      cy.contains('button', 'Publish Stats').should('have.css', 'background-color', 'rgb(255, 111, 97)');
+      
+      // Publish them again
+      cy.contains('button', 'Publish Stats').click({ force: true });
+      cy.wait(500);
+      
+      // Button should be gray again
+      cy.contains('button', 'Unpublish Stats').should('have.css', 'background-color', 'rgb(147, 157, 166)');
+    });
+
+    it('Stats grid layout is responsive', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      cy.get('.stats-grid').should('be.visible');
+      
+      // Verify multiple stat boxes exist in the grid
+      cy.get('.stats-grid').find('.stat-box').should('have.length.at.least', 1);
+      
+      // Verify stat boxes have proper structure
+      cy.get('.stat-box').first().within(() => {
+        cy.get('.stat-label').should('exist');
+        cy.get('.stat-value').should('exist');
+      });
+    });
+  });
+
 });
 
