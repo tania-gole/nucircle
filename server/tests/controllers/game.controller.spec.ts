@@ -124,7 +124,6 @@ describe('POST /create', () => {
       expect(response.text).toBe('Invalid createdBy parameter');
       expect(addGameSpy).not.toHaveBeenCalled();
     });
-
   });
 });
 
@@ -1192,7 +1191,9 @@ describe('playMove tiebreaker logic', () => {
 
     getGameSpy.mockReturnValue(mockTriviaGame);
     shouldSetTiebreakerTimerSpy.mockReturnValue(true);
-    const checkTiebreakerTimerSpy = jest.spyOn(mockTriviaGame, 'checkTiebreakerTimer').mockReturnValue(false);
+    const checkTiebreakerTimerSpy = jest
+      .spyOn(mockTriviaGame, 'checkTiebreakerTimer')
+      .mockReturnValue(false);
     toModelSpy.mockReturnValue({
       state: tiebreakerState,
       gameID: 'testGameID',
