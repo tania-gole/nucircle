@@ -5,6 +5,7 @@ import {
   goToUsers,
   goToOwnProfile,
   dismissWelcomePopup,
+  goToMyProfile,
 } from '../support/helpers';
 
 /**
@@ -12,6 +13,7 @@ import {
  * Tests:
  * - Creating/viewing/editing profile (name, major, graduation year, co-op interests, bio)
  * - External links (LinkedIn, GitHub, Portfolio)
+ * - Career Goals and Technical Interests
  */
 
 describe('Cypress Tests for Profile Management', () => {
@@ -323,6 +325,569 @@ describe('Cypress Tests for Profile Management', () => {
     cy.contains('Co-op Interests:').scrollIntoView().should('exist');
     cy.contains('Biography:').scrollIntoView().should('exist');
     cy.contains('External Links').scrollIntoView().should('exist');
+  });
+
+  describe('Update Career Goals and Technical Interests', () => {
+    it('User can update their career goals', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Click edit profile button
+      cy.contains('button', 'Edit Profile Info').click();
+      cy.wait(500);
+
+      // Update career goals
+      cy.get('input[placeholder*="data science, finance"]').clear().type('software engineering, product management');
+      
+      // Save changes
+      cy.contains('button', 'Save').click();
+      cy.wait(1000);
+
+      // Verify success message
+      cy.contains('Profile updated successfully!').should('exist');
+
+      // Verify the updated career goals are displayed
+      cy.contains('Career Goals:').parent().should('contain', 'software engineering, product management');
+    });
+
+    it('User can update their technical interests', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Click edit profile button
+      cy.contains('button', 'Edit Profile Info').click();
+      cy.wait(500);
+
+      // Update technical interests
+      cy.get('input[placeholder*="machine learning, web development"]').clear().type('react, typescript, node.js');
+      
+      // Save changes
+      cy.contains('button', 'Save').click();
+      cy.wait(1000);
+
+      // Verify success message
+      cy.contains('Profile updated successfully!').should('exist');
+
+      // Verify the updated technical interests are displayed
+      cy.contains('Technical Interests:').parent().should('contain', 'react, typescript, node.js');
+    });
+
+    it('User can update both career goals and technical interests together', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Click edit profile button
+      cy.contains('button', 'Edit Profile Info').click();
+      cy.wait(500);
+
+      // Update both fields
+      cy.get('input[placeholder*="data science, finance"]').clear().type('data science, finance');
+      cy.get('input[placeholder*="machine learning, web development"]').clear().type('python, machine learning, tensorflow');
+      
+      // Save changes
+      cy.contains('button', 'Save').click();
+      cy.wait(1000);
+
+      // Verify both fields are updated
+      cy.contains('Career Goals:').parent().should('contain', 'data science, finance');
+      cy.contains('Technical Interests:').parent().should('contain', 'python, machine learning, tensorflow');
+    });
+
+    it('User can clear their career goals', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Click edit profile button
+      cy.contains('button', 'Edit Profile Info').click();
+      cy.wait(500);
+
+      // Clear career goals
+      cy.get('input[placeholder*="data science, finance"]').clear();
+      
+      // Save changes
+      cy.contains('button', 'Save').click();
+      cy.wait(1000);
+
+      // Verify the field shows "Not specified"
+      cy.contains('Career Goals:').parent().should('contain', 'Not specified');
+    });
+
+    it('User can cancel editing career goals', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Get original career goals text
+      cy.contains('Career Goals:').parent().invoke('text').then((originalText) => {
+        // Click edit profile button
+        cy.contains('button', 'Edit Profile Info').click();
+        cy.wait(500);
+
+        // Change career goals
+        cy.get('input[placeholder*="data science, finance"]').clear().type('temporary change');
+        
+        // Cancel changes
+        cy.contains('button', 'Cancel').click();
+        cy.wait(500);
+
+        // Verify original text is unchanged
+        cy.contains('Career Goals:').parent().invoke('text').should('eq', originalText);
+      });
+    });
+  });
+
+    describe('Search Users by Career Goals', () => {
+    it('User can search for other users by single career goal', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter career goal filter (find by label in filter panel)
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('data science');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+      cy.get('.user_card').should('have.length.at.least', 1);
+    });
+
+    it('User can search for other users by multiple career goals (comma-separated)', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter multiple career goals
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('data science, software engineering');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+
+    it('Career goals search is case insensitive', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter career goal in uppercase
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('DATA SCIENCE');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+
+    it('Career goals search handles partial matches', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter partial career goal
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('science');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+  });
+
+  describe('Search Users by Technical Interests', () => {
+    it('User can search for other users by single technical interest', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter technical interest filter
+      cy.get('.filters-panel-header').contains('label', 'Technical Interests:').parent().find('input').type('machine learning');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+      cy.get('.user_card').should('have.length.at.least', 1);
+    });
+
+    it('User can search for other users by multiple technical interests', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter multiple technical interests
+      cy.get('.filters-panel-header').contains('label', 'Technical Interests:').parent().find('input').type('python, react, tensorflow');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+
+    it('Technical interests search is case insensitive', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter technical interest in mixed case
+      cy.get('.filters-panel-header').contains('label', 'Technical Interests:').parent().find('input').type('PYTHON');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+  });
+
+  describe('Combined Search with Career Goals and Technical Interests', () => {
+    it('User can combine career goals and technical interests filters', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter both filters
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('data science');
+      cy.get('.filters-panel-header').contains('label', 'Technical Interests:').parent().find('input').type('python');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+
+    it('User can combine career goals with major filter', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Select major
+      cy.get('.filters-panel-header').contains('label', 'Major:').parent().find('select').select('Computer Science');
+      
+      // Enter career goal
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('software engineering');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+
+    it('User can combine technical interests with graduation year filter', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Select graduation year
+      cy.get('.filters-panel-header').contains('label', 'Graduation Year:').parent().find('select').select('2025');
+      
+      // Enter technical interest
+      cy.get('.filters-panel-header').contains('label', 'Technical Interests:').parent().find('input').type('react');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+
+    it('User can combine name search with career goals filter', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Enter name search
+      cy.get('#user_search_bar').type('Mike');
+      
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter career goal
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('software');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+  });
+
+  describe('Clear Career Goals and Technical Interests Filters', () => {
+    it('User can clear career goals filter', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters and search
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('data science');
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Clear filters
+      cy.contains('button', 'Clear').click();
+      cy.wait(1500);
+
+      // Verify all users are shown again
+      cy.get('.user_card').should('have.length.at.least', 3);
+    });
+
+    it('User can clear technical interests filter', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters and search
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+      cy.get('.filters-panel-header').contains('label', 'Technical Interests:').parent().find('input').type('python');
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Clear filters
+      cy.contains('button', 'Clear').click();
+      cy.wait(1500);
+
+      // Verify all users are shown again
+      cy.get('.user_card').should('have.length.at.least', 3);
+    });
+
+    it('User can clear both career goals and technical interests filters together', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters and search with both
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('data science');
+      cy.get('.filters-panel-header').contains('label', 'Technical Interests:').parent().find('input').type('python');
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Clear filters
+      cy.contains('button', 'Clear').click();
+      cy.wait(1500);
+
+      // Verify all users are shown again
+      cy.get('.user_card').should('have.length.at.least', 3);
+    });
+  });
+
+  describe('Edge Cases and Validation', () => {
+    it('User can handle whitespace in career goals search', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter career goal with extra whitespace
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('  data science  ,  finance  ');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify results exist
+      cy.get('body').should('exist');
+    });
+
+    it('Empty career goals search returns all users', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Leave career goals empty and search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify all users are shown
+      cy.get('.user_card').should('have.length.at.least', 3);
+    });
+
+    it('Career goals with special characters are handled correctly', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Enter career goal with special characters
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').parent().find('input').type('C++ programming');
+      
+      // Click search
+      cy.contains('button', 'Search').click();
+      cy.wait(1500);
+
+      // Verify no error occurs
+      cy.get('body').should('exist');
+    });
+
+    it('User can toggle filters visibility', () => {
+      loginUser('e.hopper');
+      goToUsers();
+      cy.wait(1000);
+
+      // Open filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Verify filters are visible
+      cy.get('.filters-panel-header').should('be.visible');
+      cy.get('.filters-panel-header').contains('label', 'Career Goals:').should('be.visible');
+
+      // Close filters
+      cy.get('.filter-control-btn').first().click();
+      cy.wait(500);
+
+      // Verify filters are hidden
+      cy.get('.filters-panel-header').should('not.exist');
+    });
+  });
+  describe('Profile Display of Career Goals and Technical Interests', () => {
+    it('Other users can view career goals on profile', () => {
+      // First user sets career goals
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      cy.contains('button', 'Edit Profile Info').click();
+      cy.wait(500);
+      
+      // Find the Career Goals input within the profile-edit section
+      cy.get('.profile-edit').within(() => {
+        cy.contains('strong', 'Career Goals:').parent().find('input').clear({ force: true }).type('data science, AI research');
+      });
+      cy.contains('button', 'Save').click();
+      cy.wait(1000);
+
+      // Logout
+      cy.get('.logout-button').click();
+      cy.wait(1000);
+
+      // Second user views first user's profile
+      loginUser('m.wheeler');
+      goToUsers();
+      cy.wait(1000);
+
+      // Click on e.hopper's profile
+      cy.get('.user_card').contains('.userUsername', 'e.hopper').click();
+      cy.wait(1000);
+
+      // Verify career goals are visible
+      cy.contains('Career Goals:').parent().should('contain', 'data science, AI research');
+    });
+
+    it('Career goals display "Not specified" when empty', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      // Clear career goals if they exist
+      cy.contains('button', 'Edit Profile Info').click();
+      cy.wait(500);
+      cy.get('.profile-edit').within(() => {
+        cy.contains('strong', 'Career Goals:').parent().find('input').clear({ force: true });
+      });
+      cy.contains('button', 'Save').click();
+      cy.wait(1000);
+
+      // Verify "Not specified" is shown
+      cy.contains('Career Goals:').parent().should('contain', 'Not specified');
+    });
+
+    it('Technical interests display correctly on profile', () => {
+      loginUser('e.hopper');
+      goToMyProfile();
+      cy.wait(1000);
+
+      cy.contains('button', 'Edit Profile Info').click();
+      cy.wait(500);
+      cy.get('.profile-edit').within(() => {
+        cy.contains('strong', 'Technical Interests:').parent().find('input').clear({ force: true }).type('react, node.js, mongodb');
+      });
+      cy.contains('button', 'Save').click();
+      cy.wait(1000);
+
+      // Verify technical interests are visible
+      cy.contains('Technical Interests:').parent().should('contain', 'react, node.js, mongodb');
+    });
   });
 });
 
