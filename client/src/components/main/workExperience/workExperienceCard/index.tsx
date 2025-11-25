@@ -118,11 +118,11 @@ const WorkExperienceCard = ({
         </div>
 
         <div className='actions'>
-          <button onClick={handleSave} className='button-primary'>
-            Save
-          </button>
           <button onClick={() => setEditMode(false)} className='button-primary cancel'>
             Cancel
+          </button>
+          <button onClick={handleSave} className='button-primary'>
+            Save
           </button>
         </div>
       </div>
