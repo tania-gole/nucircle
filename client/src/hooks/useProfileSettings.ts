@@ -29,10 +29,11 @@ const useProfileSettings = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [editBioMode, setEditBioMode] = useState(false);
   const [newBio, setNewBio] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [newCareerGoals, setNewCareerGoals] = useState('');
+  const [newTechnicalInterests, setNewTechnicalInterests] = useState('');
 
   // User stats
   const [userStats, setUserStats] = useState<UserStats | null>(null);
@@ -183,12 +184,22 @@ const useProfileSettings = () => {
     }
 
     try {
-      const updates: { major?: string; graduationYear?: number; coopInterests?: string; firstName?: string; lastName?: string } = {};
+      const updates: {
+        major?: string;
+        graduationYear?: number;
+        coopInterests?: string;
+        firstName?: string;
+        lastName?: string;
+        careerGoals?: string;
+        technicalInterests?: string;
+      } = {};
       if (newMajor.trim()) updates.major = newMajor;
       if (newGradYear) updates.graduationYear = parseInt(newGradYear.toString());
       if (newCoopInterests && newCoopInterests.trim()) updates.coopInterests = newCoopInterests.trim();
       if (newFirstName.trim()) updates.firstName = newFirstName;
       if (newLastName.trim()) updates.lastName = newLastName;
+      if (newCareerGoals !== undefined) updates.careerGoals = newCareerGoals;
+      if (newTechnicalInterests !== undefined) updates.technicalInterests = newTechnicalInterests;
 
       // Log the updates for debugging
       console.log('Updating profile with:', updates);
@@ -263,11 +274,8 @@ const useProfileSettings = () => {
       // Ensure state updates occur sequentially after the API call completes
       await new Promise(resolve => {
         setUserData(updatedUser); // Update the user data
-        setEditBioMode(false); // Exit edit mode
         resolve(null); // Resolve the promise
       });
-
-      setSuccessMessage('Biography updated!');
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage('Failed to update biography.');
@@ -326,8 +334,6 @@ const useProfileSettings = () => {
     setNewPassword,
     setConfirmNewPassword,
     loading,
-    editBioMode,
-    setEditBioMode,
     newBio,
     setNewBio,
     successMessage,
@@ -370,6 +376,10 @@ const useProfileSettings = () => {
     handleUpdateExternalLinks,
     linkValidationError,
     setLinkValidationError,
+    newCareerGoals,
+    setNewCareerGoals,
+    newTechnicalInterests,
+    setNewTechnicalInterests,
   };
 };
 

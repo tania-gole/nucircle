@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { app } from '../../app';
 import * as util from '../../services/message.service';
 import { DatabaseMessage, Message } from '../../types/types';
+import MessageModel from '../../models/messages.model';
 
 // mock jwt auth to always authenticate successfully
 jest.mock('../../middleware/auth', () => ({
@@ -12,6 +13,8 @@ jest.mock('../../middleware/auth', () => ({
     next();
   },
 }));
+
+jest.mock('../../models/messages.model');
 
 const saveMessageSpy = jest.spyOn(util, 'saveMessage');
 const getMessagesSpy = jest.spyOn(util, 'getMessages');
@@ -219,5 +222,138 @@ describe('GET /getMessages', () => {
         msgDateTime: dbMessage2.msgDateTime.toISOString(),
       },
     ]);
+  });
+});
+
+describe('POST /toggleReaction', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return 400 for invalid reaction type', async () => {
+    const response = await supertest(app).post('/api/message/toggleReaction').send({
+      messageId: '507f1f77bcf86cd799439011',
+      reactionType: 'invalid',
+      username: 'testuser',
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Invalid reaction type');
+  });
+
+  it('should return 404 when message not found', async () => {
+    (MessageModel.findById as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app).post('/api/message/toggleReaction').send({
+      messageId: '507f1f77bcf86cd799439011',
+      reactionType: 'love',
+      username: 'testuser',
+    });
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Message not found');
+  });
+
+  it('should add reaction when user has not reacted', async () => {
+    const mockMessage = {
+      _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439011'),
+      reactions: {
+        love: { users: [], count: 0 },
+        like: { users: [], count: 0 },
+      },
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    (MessageModel.findById as jest.Mock).mockResolvedValue(mockMessage);
+
+    const response = await supertest(app).post('/api/message/toggleReaction').send({
+      messageId: '507f1f77bcf86cd799439011',
+      reactionType: 'love',
+      username: 'testuser',
+    });
+
+    expect(response.status).toBe(200);
+    expect(mockMessage.reactions.love.users).toContain('testuser');
+    expect(mockMessage.reactions.love.count).toBe(1);
+  });
+
+  it('should remove reaction when user has already reacted', async () => {
+    const mockMessage = {
+      _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439011'),
+      reactions: {
+        love: { users: ['testuser'], count: 1 },
+        like: { users: [], count: 0 },
+      },
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    (MessageModel.findById as jest.Mock).mockResolvedValue(mockMessage);
+
+    const response = await supertest(app).post('/api/message/toggleReaction').send({
+      messageId: '507f1f77bcf86cd799439011',
+      reactionType: 'love',
+      username: 'testuser',
+    });
+
+    expect(response.status).toBe(200);
+    expect(mockMessage.reactions.love.users).not.toContain('testuser');
+    expect(mockMessage.reactions.love.count).toBe(0);
+  });
+
+  it('should initialize reactions object if it does not exist', async () => {
+    const mockMessage: any = {
+      _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439011'),
+      reactions: undefined,
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    (MessageModel.findById as jest.Mock).mockResolvedValue(mockMessage);
+
+    const response = await supertest(app).post('/api/message/toggleReaction').send({
+      messageId: '507f1f77bcf86cd799439011',
+      reactionType: 'love',
+      username: 'testuser',
+    });
+
+    expect(response.status).toBe(200);
+    expect(mockMessage.reactions).toBeDefined();
+    expect(mockMessage.reactions.love.users).toContain('testuser');
+    expect(mockMessage.reactions.love.count).toBe(1);
+  });
+
+  it('should handle like reaction type', async () => {
+    const mockMessage = {
+      _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439011'),
+      reactions: {
+        love: { users: [], count: 0 },
+        like: { users: [], count: 0 },
+      },
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    (MessageModel.findById as jest.Mock).mockResolvedValue(mockMessage);
+
+    const response = await supertest(app).post('/api/message/toggleReaction').send({
+      messageId: '507f1f77bcf86cd799439011',
+      reactionType: 'like',
+      username: 'testuser',
+    });
+
+    expect(response.status).toBe(200);
+    expect(mockMessage.reactions.like.users).toContain('testuser');
+    expect(mockMessage.reactions.like.count).toBe(1);
+  });
+
+  it('should return 500 when database error occurs', async () => {
+    (MessageModel.findById as jest.Mock).mockRejectedValue(new Error('DB Error'));
+
+    const response = await supertest(app).post('/api/message/toggleReaction').send({
+      messageId: '507f1f77bcf86cd799439011',
+      reactionType: 'love',
+      username: 'testuser',
+    });
+
+    expect(response.status).toBe(500);
+    expect(response.body.error).toBe('Failed to toggle reaction');
   });
 });

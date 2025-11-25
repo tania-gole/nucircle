@@ -5,10 +5,14 @@ import { saveAnswer, addAnswerToQuestion } from '../../services/answer.service';
 import { DatabaseAnswer, DatabaseQuestion } from '../../types/types';
 import { QUESTIONS, ans1, ans4 } from '../mockData.models';
 import * as badgeService from '../../services/badge.service';
+import * as pointService from '../../services/point.service';
 
 jest.mock('../../services/badge.service', () => ({
   countUserAnswers: jest.fn(),
   checkAndAwardMilestoneBadge: jest.fn(),
+}));
+jest.mock('../../services/point.service', () => ({
+  awardPointsToUser: jest.fn(),
 }));
 
 describe('Answer model', () => {
@@ -41,6 +45,29 @@ describe('Answer model', () => {
       expect(result.text).toEqual(mockAnswer.text);
       expect(result.ansBy).toEqual(mockAnswer.ansBy);
       expect(result.ansDateTime).toEqual(mockAnswer.ansDateTime);
+    });
+
+    test('saveAnswer should award 15 points to user', async () => {
+      const mockAnswer = {
+        text: 'This is a test answer',
+        ansBy: 'dummyUserId',
+        ansDateTime: new Date('2024-06-06'),
+        comments: [],
+      };
+      const mockDBAnswer = {
+        ...mockAnswer,
+        _id: new mongoose.Types.ObjectId(),
+      };
+
+      jest
+        .spyOn(AnswerModel, 'create')
+        .mockResolvedValueOnce(mockDBAnswer as unknown as ReturnType<typeof AnswerModel.create>);
+      (badgeService.countUserAnswers as jest.Mock).mockResolvedValue(1);
+      (badgeService.checkAndAwardMilestoneBadge as jest.Mock).mockResolvedValue(false);
+
+      await saveAnswer(mockAnswer);
+
+      expect(pointService.awardPointsToUser).toHaveBeenCalledWith('dummyUserId', 15);
     });
 
     test('saveAnswer should return error with incorrect answer format', async () => {

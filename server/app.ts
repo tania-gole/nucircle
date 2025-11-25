@@ -45,9 +45,15 @@ const io: FakeSOSocket = new Server(server, {
       'http://localhost:4530',
       'http://localhost:3000',
       'http://localhost:5173',
+      'https://fall25-project-m-a-r-t-514.onrender.com',
     ],
     credentials: true,
+    methods: ['GET', 'POST'],
   },
+  transports: ['websocket', 'polling'], // Explicitly set transports
+  allowEIO3: true, // Allow Engine.IO v3 clients
+  pingTimeout: 60000, // Increase timeout for slower connections
+  pingInterval: 25000,
 });
 
 function connectDatabase() {

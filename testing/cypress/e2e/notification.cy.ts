@@ -53,4 +53,9 @@ describe("Cypress Tests for Notifications", () => {
         expectNotification("Hello to myself! This is my test me");
     });
 
+    // Admins of communities also recieve notifications when someone joined their community
+    // However, this cannot be tested with Cypress since we cannot log in as two different users
+    // in the same test to simulate one user creating a community and another user joining it.
+    // Thus, this test is omitted. However, the functionality has been manually tested and verified to work as intended
+
 });

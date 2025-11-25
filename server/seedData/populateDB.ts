@@ -23,6 +23,7 @@ import CollectionModel from '../models/collection.model';
 import collectionsResolver from './resolvers/collection';
 
 import WorkExperienceModel from '../models/workExperience.model';
+import messageResolver from './resolvers/message';
 
 // Compute the import order based on dependencies
 const IMPORT_ORDER = computeImportOrder(collectionDependencies);
@@ -50,7 +51,7 @@ const collectionMapping = {
   },
   message: {
     model: MessageModel,
-    resolver: identityResolver,
+    resolver: messageResolver,
   },
   community: {
     model: CommunityModel,
