@@ -70,11 +70,22 @@ const getUsers = async (): Promise<SafeDatabaseUser[]> => {
  * @throws Error if there is an issue fetching users.
  */
 const getUserByUsername = async (username: string): Promise<SafeDatabaseUser> => {
-  const res = await api.get(`${USER_API_URL}/getUser/${username}`);
-  if (res.status !== 200) {
-    throw new Error('Error when fetching user');
+  try {
+    const res = await api.get(`${USER_API_URL}/getUser/${username}`);
+    if (res.status !== 200) {
+      throw new Error('Error when fetching user');
+    }
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      // If the backend returns a string error message, extract it
+      const errorMessage = typeof error.response.data === 'string' 
+        ? error.response.data 
+        : error.response.data?.error || 'Error when fetching user';
+      throw new Error(errorMessage);
+    }
+    throw error;
   }
-  return res.data;
 };
 
 /**

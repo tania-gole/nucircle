@@ -41,7 +41,6 @@ const AllGamesPage = () => {
           <div className='game-modal'>
             <div className='modal-content'>
               <h2>Select Game Type</h2>
-              <button onClick={() => handleSelectGameType('Nim')}>Nim</button>
               <button onClick={() => handleSelectGameType('Trivia')}>Trivia Quiz</button>
               <button onClick={handleToggleModal}>Cancel</button>
             </div>

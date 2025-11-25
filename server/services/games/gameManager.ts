@@ -1,4 +1,3 @@
-import NimModel from '../../models/nim.model';
 import GameModel from '../../models/games.model';
 import {
   BaseMove,
@@ -7,11 +6,9 @@ import {
   GameMove,
   GameState,
   GameType,
-  NimGameState,
   TriviaGameState,
 } from '../../types/types';
 import Game from './game';
-import NimGame from './nim';
 import TriviaGame from './trivia';
 
 interface GameWithStartMethod {
@@ -53,12 +50,6 @@ class GameManager {
     createdBy: string,
   ): Promise<Game<GameState, BaseMove>> {
     switch (gameType) {
-      case 'Nim': {
-        const newGame = new NimGame(createdBy);
-        await NimModel.create(newGame.toModel());
-
-        return newGame;
-      }
       case 'Trivia': {
         const newGame = new TriviaGame(createdBy);
 
@@ -142,22 +133,7 @@ class GameManager {
       if (state?.player1) activePlayers.push(state.player1);
       if (state?.player2) activePlayers.push(state.player2);
 
-      if (gameData.gameType === 'Nim') {
-        const nimGame = new NimGame(createdBy);
-        // Override the ID and restore state
-        Object.defineProperty(nimGame, 'id', { value: gameID, writable: false });
-        Object.defineProperty(nimGame, '_state', {
-          value: gameData.state as NimGameState,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(nimGame, '_players', {
-          value: activePlayers,
-          writable: true,
-          configurable: true,
-        });
-        game = nimGame;
-      } else if (gameData.gameType === 'Trivia') {
+      if (gameData.gameType === 'Trivia') {
         const triviaGame = new TriviaGame(createdBy);
         // Override the ID and restore state
         Object.defineProperty(triviaGame, 'id', { value: gameID, writable: false });

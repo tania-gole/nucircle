@@ -51,7 +51,20 @@ const io: FakeSOSocket = new Server(server, {
 });
 
 function connectDatabase() {
-  return mongoose.connect(MONGO_URL).catch(err => console.log('MongoDB connection error: ', err));
+  const options = {
+    serverSelectionTimeoutMS: 10000, // 10 second timeout
+    socketTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  };
+  
+  return mongoose.connect(MONGO_URL, options)
+    .then(() => {
+      console.log('Successfully connected to MongoDB');
+    })
+    .catch(err => {
+      console.error('MongoDB connection error: ', err);
+      throw err;
+    });
 }
 
 function startServer() {
