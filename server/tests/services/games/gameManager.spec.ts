@@ -72,6 +72,16 @@ describe('GameManager', () => {
       expect(mapSetSpy).not.toHaveBeenCalled();
       expect(error).toHaveProperty('error');
     });
+
+    it('should handle non-Error exceptions in addGame', async () => {
+      jest.spyOn(GameModel, 'create').mockRejectedValueOnce('String error');
+
+      const gameManager = GameManager.getInstance();
+      const error = await gameManager.addGame('Trivia', 'testUser');
+
+      expect(error).toHaveProperty('error');
+      expect((error as { error: string }).error).toBe('String error');
+    });
   });
 
   describe('removeGame', () => {
@@ -352,6 +362,79 @@ describe('GameManager', () => {
       const result = await gameManager.startGame('testID');
 
       expect('error' in result).toBe(true);
+    });
+
+    it('should handle sync startGame method', async () => {
+      jest
+        .spyOn(GameModel, 'create')
+        .mockResolvedValue(
+          new TriviaGame('creator').toModel() as unknown as ReturnType<typeof GameModel.create>,
+        );
+      jest.spyOn(TriviaQuestionModel, 'aggregate').mockResolvedValue([]);
+
+      const gameID = await gameManager.addGame('Trivia', 'creator');
+      if (typeof gameID === 'string') {
+        await gameManager.joinGame(gameID, 'player1');
+        await gameManager.joinGame(gameID, 'player2');
+
+        // Mock startGame to return void (sync)
+        const game = gameManager.getGame(gameID);
+        if (game) {
+          const originalStartGame = (game as any).startGame;
+          jest.spyOn(game as any, 'startGame').mockImplementation(() => {
+            // Sync implementation
+            originalStartGame.call(game);
+          });
+
+          const result = await gameManager.startGame(gameID);
+          expect('error' in result).toBe(false);
+        }
+      }
+    });
+
+    it('should return error if game does not support starting', async () => {
+      const gameID = 'testGameID';
+      const mockGameData = {
+        gameID,
+        gameType: 'Trivia' as const,
+        createdBy: 'creator',
+        state: {
+          status: 'WAITING_TO_START' as const,
+          currentQuestionIndex: 0,
+          questions: [],
+          player1Answers: [],
+          player2Answers: [],
+          player1Score: 0,
+          player2Score: 0,
+          player1: 'player1',
+          player2: 'player2',
+        },
+        players: ['player1', 'player2'],
+      };
+
+      jest.spyOn(GameModel, 'findOne').mockReturnValue({
+        lean: jest.fn().mockResolvedValueOnce(mockGameData),
+      } as any);
+
+      // Create a mock game without startGame method
+      const mockGame = {
+        id: gameID,
+        state: mockGameData.state,
+        toModel: () => mockGameData,
+        saveGameState: jest.fn().mockResolvedValue(undefined),
+      };
+
+      // Override getGame to return mock game without startGame
+      const getGameSpy = jest.spyOn(gameManager, 'getGame').mockReturnValue(mockGame as any);
+
+      const result = await gameManager.startGame(gameID);
+
+      expect('error' in result).toBe(true);
+      if ('error' in result) {
+        expect(result.error).toBe('Game type does not support starting');
+      }
+
+      getGameSpy.mockRestore();
     });
   });
 
@@ -646,7 +729,7 @@ describe('GameManager', () => {
     });
   });
 
-  describe('_loadGameFromDatabase', () => {
+  describe('_loadGameFromDatabase error handling', () => {
     it('should return undefined for unsupported game type', async () => {
       const gameID = 'testGameID';
       const mockGameData = {
@@ -677,6 +760,22 @@ describe('GameManager', () => {
       const result = await gameManager.joinGame('testID', 'player1');
 
       expect('error' in result).toBe(true);
+    });
+
+    it('should handle exceptions in _loadGameFromDatabase catch block', async () => {
+      // Mock findOne to throw an error directly (not through lean())
+      jest.spyOn(GameModel, 'findOne').mockImplementation(() => {
+        throw new Error('Unexpected error');
+      });
+
+      const gameManager = GameManager.getInstance();
+      const result = await gameManager.joinGame('testID', 'player1');
+
+      // _loadGameFromDatabase catch block returns undefined silently
+      expect('error' in result).toBe(true);
+      if ('error' in result) {
+        expect(result.error).toBe('Game requested does not exist.');
+      }
     });
 
     it('should handle old games without createdBy', async () => {
