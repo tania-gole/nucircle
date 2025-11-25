@@ -106,10 +106,6 @@ const userSchema: Schema = new Schema(
         default: '',
       },
     },
-    coopInterests: {
-      type: String,
-      default: '',
-    },
     careerGoals: {
       type: String,
       default: '',
