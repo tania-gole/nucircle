@@ -6,17 +6,36 @@ import * as databaseUtil from '../../utils/database.util';
 import { DatabaseCollection, PopulatedDatabaseCollection } from '../../types/types';
 
 // mock jwt auth to always authenticate successfully
+// jest.mock('../../middleware/auth', () => ({
+//   __esModule: true,
+//   default: (req: any, res: any, next: any) => {
+//     // Prioritize params.username, then body.username, then query.username or currentUsername
+//     const username =
+//       req.params?.username ||
+//       req.body?.username ||
+//       req.query?.username ||
+//       req.query?.currentUsername || // This might be overriding
+//       'test_user';
+//     req.user = { userId: 'test-user-id', username: username };
+//     next();
+//   },
+// }));
+
+// jest.mock('../../middleware/auth', () => ({
+//   __esModule: true,
+//   default: (req: any, res: any, next: any) => {
+//     req.user = { userId: 'test-user-id', username: 'test_user' };
+//     next();
+//   },
+// }));
+
 jest.mock('../../middleware/auth', () => ({
   __esModule: true,
   default: (req: any, res: any, next: any) => {
-    // Prioritize params.username, then body.username, then query.username or currentUsername
-    const username =
-      req.params?.username ||
-      req.body?.username ||
-      req.query?.username ||
-      req.query?.currentUsername || // This might be overriding
-      'test_user';
-    req.user = { userId: 'test-user-id', username: username };
+    // If test sets currentUsername in query, treat it as authenticated user
+    const username = req.query?.currentUsername || 'test_user'; // used by GET /getCollectionsByUsername // default for all other tests
+
+    req.user = { userId: 'test-user-id', username };
     next();
   },
 }));
@@ -147,6 +166,21 @@ describe('Collection Controller', () => {
 
       expect(response.status).toBe(400);
       expect(openApiError.errors[0].path).toBe('/body/username');
+    });
+
+    test('should return 401 when username does not match authenticated user', async () => {
+      const mockReqBody = {
+        name: 'New Collection',
+        description: 'Desc',
+        questions: [],
+        username: 'wrong_user',
+        isPrivate: false,
+      };
+
+      const response = await supertest(app).post('/api/collection/create').send(mockReqBody);
+
+      expect(response.status).toBe(401);
+      expect(response.text).toContain('Invalid username parameter');
     });
 
     test('should return 500 when service returns error', async () => {
@@ -290,6 +324,23 @@ describe('Collection Controller', () => {
       expect(response.status).toBe(404);
     });
 
+    test('should return 404 for delete when collectionId param is empty but username provided', async () => {
+      const response = await supertest(app)
+        .delete('/api/collection/delete/')
+        .query({ username: 'test_user' });
+
+      expect(response.status).toBe(404);
+    });
+
+    test('should return 401 when deleting collection with mismatched username', async () => {
+      const response = await supertest(app)
+        .delete('/api/collection/delete/65e9b58910afe6e94fc6e6dd')
+        .query({ username: 'wrong_user' });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toContain('Invalid username parameter');
+    });
+
     test('should return 500 when service throws error', async () => {
       deleteCollectionSpy.mockRejectedValueOnce(new Error('Database error'));
 
@@ -406,6 +457,17 @@ describe('Collection Controller', () => {
       expect(response.text).toContain(
         'Error when adding question to collection: Collection not found',
       );
+    });
+
+    test('should return 400 from controller when username is an empty string (internal 400 branch)', async () => {
+      const response = await supertest(app).patch('/api/collection/toggleSaveQuestion').send({
+        collectionId: '65e9b58910afe6e94fc6e6dd',
+        questionId: mockQuestionId1.toString(),
+        username: '',
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.text).toContain('Invalid request body');
     });
 
     test('should return 500 when populate fails', async () => {
