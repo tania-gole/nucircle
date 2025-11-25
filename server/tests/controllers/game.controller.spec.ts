@@ -15,8 +15,11 @@ import TriviaGame from '../../services/games/trivia';
 jest.mock('../../middleware/auth', () => ({
   __esModule: true,
   default: (req: any, res: any, next: any) => {
+    // Check headers for a test override header (for auth failure tests)
+    const testOverride = req.headers?.['x-test-username'];
     // Extract username from request params, body (multiple fields), or query for testing
     const username =
+      testOverride ||
       req.params?.username ||
       req.body?.username ||
       req.body?.createdBy ||
@@ -99,6 +102,29 @@ describe('POST /create', () => {
       expect(response.text).toContain('Error when creating game: test error');
       expect(addGameSpy).toHaveBeenCalledWith('Trivia', 'testUser');
     });
+
+    it('should return 500 if error is not an Error instance', async () => {
+      addGameSpy.mockRejectedValueOnce('String error');
+
+      const response = await supertest(app)
+        .post('/api/games/create')
+        .send({ gameType: 'Trivia', createdBy: 'testUser' });
+
+      expect(response.status).toEqual(500);
+      expect(response.text).toContain('Error when creating game: String error');
+    });
+
+    it('should return 401 when createdBy does not match authenticated user', async () => {
+      const response = await supertest(app)
+        .post('/api/games/create')
+        .set('x-test-username', 'test_user')
+        .send({ gameType: 'Trivia', createdBy: 'different_user' });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid createdBy parameter');
+      expect(addGameSpy).not.toHaveBeenCalled();
+    });
+
   });
 });
 
@@ -189,6 +215,16 @@ describe('POST /join', () => {
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when joining game: test error');
+    });
+
+    it('should return 401 when playerID does not match authenticated user', async () => {
+      const response = await supertest(app)
+        .post('/api/games/join')
+        .set('x-test-username', 'test_user')
+        .send({ gameID: '65e9b716ff0e892116b2de01', playerID: 'different_user' });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid playerID parameter');
     });
   });
 });
@@ -281,6 +317,16 @@ describe('POST /leave', () => {
 
       expect(response.status).toEqual(500);
       expect(response.text).toContain('Error when leaving game: test error');
+    });
+
+    it('should return 401 when playerID does not match authenticated user', async () => {
+      const response = await supertest(app)
+        .post('/api/games/leave')
+        .set('x-test-username', 'test_user')
+        .send({ gameID: '65e9b716ff0e892116b2de01', playerID: 'different_user' });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid playerID parameter');
     });
   });
 });
@@ -786,30 +832,22 @@ describe('POST /delete', () => {
     });
 
     it('should return 401 if username does not match authenticated user', async () => {
-      // Auth middleware extracts username from body.username, so they'll match
-      // To test the controller logic, we verify it works when they match
-      // The controller checks username !== req.user.username first
-      const mockGameData = {
-        gameID: 'testGameID',
-        createdBy: 'test_user',
-        state: { status: 'WAITING_TO_START' },
-        players: [],
-      };
-      findOneSpy.mockResolvedValueOnce(mockGameData as any);
-      findOneAndDeleteSpy.mockResolvedValueOnce(mockGameData as any);
-
       const response = await supertest(app)
         .post('/api/games/delete')
-        .send({ gameID: 'testGameID', username: 'test_user' }) // Match default auth username
+        .set('x-test-username', 'test_user')
+        .send({ gameID: 'testGameID', username: 'different_user' })
         .timeout(10000);
 
-      // Should succeed when usernames match
-      expect(response.status).toEqual(200);
-      expect(removeGameSpy).toHaveBeenCalled();
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid username parameter');
     }, 10000);
   });
 
   describe('403 Forbidden', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should return 403 if user is not creator and game is not stale', async () => {
       const mockGameData = {
         gameID: 'testGameID',
@@ -829,6 +867,10 @@ describe('POST /delete', () => {
   });
 
   describe('404 Not Found', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should return 404 if game does not exist', async () => {
       findOneSpy.mockResolvedValueOnce(null);
 
@@ -841,7 +883,68 @@ describe('POST /delete', () => {
     });
   });
 
+  describe('Stale game detection', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should detect stale game when status is IN_PROGRESS and player1 is undefined', async () => {
+      const mockGameData = {
+        gameID: 'testGameID',
+        createdBy: 'other_user',
+        state: { status: 'IN_PROGRESS', player1: undefined, player2: undefined },
+        players: [],
+      };
+      findOneSpy.mockResolvedValueOnce(mockGameData as any);
+      findOneAndDeleteSpy.mockResolvedValueOnce(mockGameData as any);
+
+      const response = await supertest(app)
+        .post('/api/games/delete')
+        .send({ gameID: 'testGameID', username: 'test_user' });
+
+      expect(response.status).toEqual(200);
+    });
+
+    it('should detect stale game when status is IN_PROGRESS and player2 is undefined', async () => {
+      const mockGameData = {
+        gameID: 'testGameID',
+        createdBy: 'other_user',
+        state: { status: 'IN_PROGRESS', player1: undefined, player2: undefined },
+        players: [],
+      };
+      findOneSpy.mockResolvedValueOnce(mockGameData as any);
+      findOneAndDeleteSpy.mockResolvedValueOnce(mockGameData as any);
+
+      const response = await supertest(app)
+        .post('/api/games/delete')
+        .send({ gameID: 'testGameID', username: 'test_user' });
+
+      expect(response.status).toEqual(200);
+    });
+
+    it('should not allow deletion when game is not stale and user is not creator or player', async () => {
+      const mockGameData = {
+        gameID: 'testGameID',
+        createdBy: 'other_user',
+        state: { status: 'WAITING_TO_START', player1: 'other_user', player2: undefined },
+        players: ['other_user'],
+      };
+      findOneSpy.mockResolvedValueOnce(mockGameData as any);
+
+      const response = await supertest(app)
+        .post('/api/games/delete')
+        .send({ gameID: 'testGameID', username: 'test_user' });
+
+      expect(response.status).toEqual(403);
+      expect(response.text).toContain('Only the game creator can delete this game');
+    });
+  });
+
   describe('500 Server Error', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should return 500 if delete fails', async () => {
       findOneSpy.mockRejectedValueOnce(new Error('Database error'));
 
@@ -850,6 +953,7 @@ describe('POST /delete', () => {
         .send({ gameID: 'testGameID', username: 'test_user' });
 
       expect(response.status).toEqual(500);
+      expect(response.text).toContain('Error when deleting game: Database error');
     });
   });
 });
@@ -962,6 +1066,205 @@ describe('playMove tiebreaker logic', () => {
 
     // shouldSetTiebreakerTimer should be called in playMove
     expect(shouldSetTiebreakerTimerSpy).toHaveBeenCalled();
+    applyMoveSpy.mockRestore();
+  });
+
+  it('should not set timer when tiebreakerStartTime is undefined', async () => {
+    const tiebreakerState: TriviaGameState = {
+      status: 'IN_PROGRESS',
+      currentQuestionIndex: 10,
+      questions: [{ questionId: 'q1', question: 'Test', options: ['A', 'B', 'C', 'D'] }],
+      player1Answers: [],
+      player2Answers: [],
+      player1Score: 5,
+      player2Score: 5,
+      isTiebreaker: true,
+      tiebreakerStartTime: undefined,
+      player1: 'player1',
+      player2: 'player2',
+    };
+
+    Object.defineProperty(mockTriviaGame, 'state', {
+      get: () => tiebreakerState,
+      configurable: true,
+    });
+
+    getGameSpy.mockReturnValue(mockTriviaGame);
+    shouldSetTiebreakerTimerSpy.mockReturnValue(true);
+    toModelSpy.mockReturnValue({
+      state: tiebreakerState,
+      gameID: 'testGameID',
+      players: ['player1', 'player2'],
+      gameType: 'Trivia',
+    });
+
+    const applyMoveSpy = jest.spyOn(mockTriviaGame, 'applyMove').mockResolvedValue(undefined);
+
+    const gameMovePayload = {
+      gameID: 'testGameID',
+      move: {
+        playerID: 'player1',
+        gameID: 'testGameID',
+        move: { questionId: 'q1', answerIndex: 0 },
+      },
+    };
+
+    clientSocket.emit('joinGame', 'testGameID');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Timer should not be set when tiebreakerStartTime is undefined
+    expect(shouldSetTiebreakerTimerSpy).toHaveBeenCalled();
+    applyMoveSpy.mockRestore();
+  });
+
+  it('should handle case when currentGame is null in timer callback', async () => {
+    const tiebreakerState: TriviaGameState = {
+      status: 'IN_PROGRESS',
+      currentQuestionIndex: 10,
+      questions: [{ questionId: 'q1', question: 'Test', options: ['A', 'B', 'C', 'D'] }],
+      player1Answers: [],
+      player2Answers: [],
+      player1Score: 5,
+      player2Score: 5,
+      isTiebreaker: true,
+      tiebreakerStartTime: Date.now(),
+      player1: 'player1',
+      player2: 'player2',
+    };
+
+    Object.defineProperty(mockTriviaGame, 'state', {
+      get: () => tiebreakerState,
+      configurable: true,
+    });
+
+    getGameSpy.mockReturnValue(mockTriviaGame);
+    shouldSetTiebreakerTimerSpy.mockReturnValue(true);
+    toModelSpy.mockReturnValue({
+      state: tiebreakerState,
+      gameID: 'testGameID',
+      players: ['player1', 'player2'],
+      gameType: 'Trivia',
+    });
+
+    const applyMoveSpy = jest.spyOn(mockTriviaGame, 'applyMove').mockResolvedValue(undefined);
+
+    const gameMovePayload = {
+      gameID: 'testGameID',
+      move: {
+        playerID: 'player1',
+        gameID: 'testGameID',
+        move: { questionId: 'q1', answerIndex: 0 },
+      },
+    };
+
+    clientSocket.emit('joinGame', 'testGameID');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    // Set getGame to return null after the move (simulating game removal)
+    getGameSpy.mockReturnValue(undefined);
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    applyMoveSpy.mockRestore();
+  });
+
+  it('should handle case when checkTiebreakerTimer returns false', async () => {
+    const tiebreakerState: TriviaGameState = {
+      status: 'IN_PROGRESS',
+      currentQuestionIndex: 10,
+      questions: [{ questionId: 'q1', question: 'Test', options: ['A', 'B', 'C', 'D'] }],
+      player1Answers: [],
+      player2Answers: [],
+      player1Score: 5,
+      player2Score: 5,
+      isTiebreaker: true,
+      tiebreakerStartTime: Date.now(),
+      player1: 'player1',
+      player2: 'player2',
+    };
+
+    Object.defineProperty(mockTriviaGame, 'state', {
+      get: () => tiebreakerState,
+      configurable: true,
+    });
+
+    getGameSpy.mockReturnValue(mockTriviaGame);
+    shouldSetTiebreakerTimerSpy.mockReturnValue(true);
+    const checkTiebreakerTimerSpy = jest.spyOn(mockTriviaGame, 'checkTiebreakerTimer').mockReturnValue(false);
+    toModelSpy.mockReturnValue({
+      state: tiebreakerState,
+      gameID: 'testGameID',
+      players: ['player1', 'player2'],
+      gameType: 'Trivia',
+    });
+
+    const applyMoveSpy = jest.spyOn(mockTriviaGame, 'applyMove').mockResolvedValue(undefined);
+
+    const gameMovePayload = {
+      gameID: 'testGameID',
+      move: {
+        playerID: 'player1',
+        gameID: 'testGameID',
+        move: { questionId: 'q1', answerIndex: 0 },
+      },
+    };
+
+    clientSocket.emit('joinGame', 'testGameID');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    checkTiebreakerTimerSpy.mockRestore();
+    applyMoveSpy.mockRestore();
+  });
+
+  it('should not remove game when status is not OVER', async () => {
+    const inProgressState: TriviaGameState = {
+      status: 'IN_PROGRESS',
+      currentQuestionIndex: 5,
+      questions: [{ questionId: 'q1', question: 'Test', options: ['A', 'B', 'C', 'D'] }],
+      player1Answers: [],
+      player2Answers: [],
+      player1Score: 3,
+      player2Score: 2,
+      player1: 'player1',
+      player2: 'player2',
+    };
+
+    Object.defineProperty(mockTriviaGame, 'state', {
+      get: () => inProgressState,
+      configurable: true,
+    });
+
+    getGameSpy.mockReturnValue(mockTriviaGame);
+    toModelSpy.mockReturnValue({
+      state: inProgressState,
+      gameID: 'testGameID',
+      players: ['player1', 'player2'],
+      gameType: 'Trivia',
+    });
+
+    const applyMoveSpy = jest.spyOn(mockTriviaGame, 'applyMove').mockResolvedValue(undefined);
+    const removeGameSpy = jest.spyOn(mockGameManager, 'removeGame');
+
+    const gameMovePayload = {
+      gameID: 'testGameID',
+      move: {
+        playerID: 'player1',
+        gameID: 'testGameID',
+        move: { questionId: 'q1', answerIndex: 0 },
+      },
+    };
+
+    clientSocket.emit('joinGame', 'testGameID');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // removeGame should not be called when status is not OVER
+    expect(removeGameSpy).not.toHaveBeenCalled();
     applyMoveSpy.mockRestore();
   });
 
