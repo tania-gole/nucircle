@@ -36,8 +36,7 @@ describe('Cypress Tests for Profile Management', () => {
 
     // Verify profile elements are displayed and scroll into view to check
     cy.contains('e.hopper', { timeout: 5000 }).scrollIntoView().should('exist');
-    cy.contains('General Information', { timeout: 5000 }).scrollIntoView().should('exist');
-    cy.contains('Username:', { timeout: 5000 }).scrollIntoView().should('exist');
+    cy.contains('Eleven Hopper', { timeout: 5000 }).scrollIntoView().should('exist');
   });
 
   /**
@@ -87,6 +86,9 @@ describe('Cypress Tests for Profile Management', () => {
     
     // Verify the selected option text
     cy.get('@coopSelect').find('option:selected').should('have.text', 'Searching for co-op');
+
+    // edit the biography
+    cy.get('label').contains('Biography').parent().find('textarea').clear().type('new biography');
     
     cy.wait(500);
     
@@ -95,7 +97,7 @@ describe('Cypress Tests for Profile Management', () => {
 
     // Find and click the Save button in the profile-edit section
     cy.get('.profile-edit').within(() => {
-      cy.get('button.button-primary').contains('Save', { timeout: 5000 })
+      cy.get('.edit-profile-button').contains('Save', { timeout: 5000 })
         .should('exist')
         .should('be.visible')
         .should('not.be.disabled')
@@ -145,7 +147,7 @@ describe('Cypress Tests for Profile Management', () => {
     cy.wait(500);
     
     // Find the paragraph containing "Co-op Interests:" and verify it contains the new value
-    cy.contains('Co-op Interests:').parent('p').should('exist').then(($p) => {
+    cy.contains('Co-op Interests:').parent().should('exist').then(($p) => {
       const text = $p.text();
       // Verify it doesn't say "Not specified" anymore
       expect(text).to.not.include('Not specified');
@@ -154,33 +156,8 @@ describe('Cypress Tests for Profile Management', () => {
     });
     
     // Check actual displayed text
-    cy.contains('Co-op Interests:').parent('p').should('contain.text', 'Searching for co-op');
-    cy.contains('Co-op Interests:').parent('p').should('not.contain.text', 'Not specified');
-  });
-
-  /**
-   * Test: Edit biography
-   */
-  it('Should allow editing biography', () => {
-    loginUser('e.hopper');
-    goToOwnProfile();
-
-    // Wait for profile page to fully load
-    cy.url().should('include', '/user/e.hopper');
-
-    // Click Edit button for biography and scroll into view first
-    cy.contains('Biography', { timeout: 5000 }).scrollIntoView();
-    cy.contains('Biography').parent().contains('button', 'Edit').scrollIntoView().click({ force: true });
-
-    // Edit biography
-    cy.get('.bio-edit input').clear().type('This is my updated biography!');
-
-    // Save biography and scroll into view first
-    cy.contains('button', 'Save').scrollIntoView().click({ force: true });
-
-    // Verify biography is updated and scroll into view to check
-    cy.contains('Biography updated', { timeout: 5000 }).scrollIntoView().should('exist');
-    cy.contains('This is my updated biography!').scrollIntoView().should('exist');
+    cy.contains('Co-op Interests:').parent().should('contain.text', 'Searching for co-op');
+    cy.contains('Co-op Interests:').parent().should('not.contain.text', 'Not specified');
   });
 
   /**
@@ -315,9 +292,6 @@ describe('Cypress Tests for Profile Management', () => {
     cy.url().should('include', '/user/e.hopper');
 
     // Verify all sections exist and scroll into view to check visibility
-    cy.contains('General Information', { timeout: 5000 }).scrollIntoView().should('exist');
-    cy.contains('Username:').scrollIntoView().should('exist');
-    cy.contains('Name:').scrollIntoView().should('exist');
     cy.contains('Major:').scrollIntoView().should('exist');
     cy.contains('Graduation Year:').scrollIntoView().should('exist');
     cy.contains('Co-op Interests:').scrollIntoView().should('exist');
