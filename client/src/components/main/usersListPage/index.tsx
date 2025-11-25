@@ -58,7 +58,7 @@ const UsersListPage = (props: UserListPageProps) => {
         graduationYears={graduationYears}
         communities={communities}
       />
-      <div style={{ display: 'flex', gap: '20px' }}>
+      <div style={{ display: 'flex' }}>
         {/* Left column: All users with search/filter */}
         <div style={{ flex: 1 }}>
           <div id='users_list' className='users_list'>
@@ -78,8 +78,8 @@ const UsersListPage = (props: UserListPageProps) => {
         </div>
         {showLeaderboard && (
           /* Right column: Global leaderboard */
-          <div style={{ width: '280px', marginRight: '20px' }}>
-            <h3>🏆 Leaderboard</h3>
+          <div style={{ width: '250px', marginRight: '30px' }}>
+            <h3 className='leaderboard-title'>🏆 Leaderboard</h3>
             <div className='users_list'>
               {leaderboard.map((user, index) => (
                 <div
@@ -100,7 +100,7 @@ const UsersListPage = (props: UserListPageProps) => {
                         {index === 2 && '🥉'}
                         {index > 2 && `#${index + 1}`}
                       </span>
-                      <strong>{user.username}</strong>
+                      <span>{user.username}</span>
                     </div>
                     <div style={{ color: '#82c0ff', fontWeight: 'bold' }}>
                       {user.points || 0} pts

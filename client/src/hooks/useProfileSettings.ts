@@ -29,7 +29,6 @@ const useProfileSettings = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [editBioMode, setEditBioMode] = useState(false);
   const [newBio, setNewBio] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -99,7 +98,8 @@ const useProfileSettings = () => {
           setBadges([]);
         }
       } catch (error) {
-        setErrorMessage('Error fetching user profile');
+        const errorMsg = error instanceof Error ? error.message : 'Error fetching user profile';
+        setErrorMessage(`Error fetching user profile: ${errorMsg}`);
         setUserData(null);
         setBadges([]);
       } finally {
@@ -172,7 +172,16 @@ const useProfileSettings = () => {
   };
 
   const handleUpdateProfile = async () => {
-    if (!username) return;
+    console.log('handleUpdateProfile called');
+    console.log('username:', username);
+    console.log('newCoopInterests:', newCoopInterests);
+    
+    if (!username) {
+      setErrorMessage('Username is required to update profile');
+      setSuccessMessage(null);
+      console.error('handleUpdateProfile: username is undefined');
+      return;
+    }
 
     try {
       const updates: {
@@ -186,20 +195,27 @@ const useProfileSettings = () => {
       } = {};
       if (newMajor.trim()) updates.major = newMajor;
       if (newGradYear) updates.graduationYear = parseInt(newGradYear.toString());
-      if (newCoopInterests !== undefined) updates.coopInterests = newCoopInterests;
+      if (newCoopInterests && newCoopInterests.trim()) updates.coopInterests = newCoopInterests.trim();
       if (newFirstName.trim()) updates.firstName = newFirstName;
       if (newLastName.trim()) updates.lastName = newLastName;
       if (newCareerGoals !== undefined) updates.careerGoals = newCareerGoals;
       if (newTechnicalInterests !== undefined) updates.technicalInterests = newTechnicalInterests;
 
+      // Log the updates for debugging
+      console.log('Updating profile with:', updates);
+      console.log('Username:', username);
+
       const updatedUser = await updateUserProfile(username, updates);
+      console.log('Profile updated successfully:', updatedUser);
       setUserData(updatedUser);
       setEditProfileMode(false);
       setSuccessMessage('Profile updated successfully!');
       setErrorMessage(null);
     } catch (error) {
-      setErrorMessage('Failed to update profile');
+      const errorMsg = error instanceof Error ? error.message : 'Failed to update profile';
+      setErrorMessage(`Failed to update profile: ${errorMsg}`);
       setSuccessMessage(null);
+      console.error('Error updating profile:', error);
     }
   };
 
@@ -258,11 +274,8 @@ const useProfileSettings = () => {
       // Ensure state updates occur sequentially after the API call completes
       await new Promise(resolve => {
         setUserData(updatedUser); // Update the user data
-        setEditBioMode(false); // Exit edit mode
         resolve(null); // Resolve the promise
       });
-
-      setSuccessMessage('Biography updated!');
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage('Failed to update biography.');
@@ -321,8 +334,6 @@ const useProfileSettings = () => {
     setNewPassword,
     setConfirmNewPassword,
     loading,
-    editBioMode,
-    setEditBioMode,
     newBio,
     setNewBio,
     successMessage,

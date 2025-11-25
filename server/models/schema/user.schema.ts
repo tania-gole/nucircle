@@ -84,6 +84,10 @@ const userSchema: Schema = new Schema(
       type: Number,
       default: null,
     },
+    coopInterests: {
+      type: String,
+      default: '',
+    },
     showStats: {
       type: Boolean,
       default: true,

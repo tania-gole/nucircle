@@ -15,7 +15,7 @@ interface GameDocument extends GameInstance<GameState> {
 
 /**
  * Retrieves games from the database based on the specified game type and status.
- * @param {GameType | undefined} gameType - The type of the game to filter by (e.g., 'Nim').
+ * @param {GameType | undefined} gameType - The type of the game to filter by (e.g., 'Trivia').
  * @param {GameStatus | undefined} status - The status of the game to filter by (e.g., 'IN_PROGRESS').
  * @returns {Promise<GamesResponse>} - A promise resolving to a list of games matching the query.
  */

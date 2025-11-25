@@ -7,7 +7,9 @@
     "dateJoined": "2024-07-15T08:24:13Z",
     "biography": "Has telekinetic powers and a mysterious past. Loves Eggo waffles and protecting her friends from the Upside Down.", 
     "major": "Psychology",
-    "graduationYear": 2026
+    "graduationYear": 2026,
+    "careerGoals": " data science, finance",
+    "technicalInterests": " machine learning, react"
   },
   "will": {
     "firstName": "Will",
@@ -23,7 +25,7 @@
     "firstName": "Mike",
     "lastName": "Wheeler",
     "username": "m.wheeler",
-    "password": "$2y$10$S5Qu1M/a1q3fYwnwu6cukO2Mzsb5ehIYvXRRKQ2ivPvwFukLRAyOK",
+    "password": "$2y$10$DrtQWiSkqj2I8eGOGIVSg.frCEVPI3ZfWWSIPP3oJ3MFAVGDOKYOO",
     "dateJoined": "2024-09-10T09:12:55Z",
     "biography": "Loyal friend and leader of the group. Always ready to face supernatural dangers to protect his friends.",
     "major": "Political Science",

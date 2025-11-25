@@ -1,27 +1,51 @@
 import GameModel from '../../models/games.model';
 import findGames from '../../services/game.service';
-import { MAX_NIM_OBJECTS } from '../../types/constants';
-import { FindGameQuery, GameInstance, NimGameState } from '../../types/types';
+import { FindGameQuery, GameInstance, TriviaGameState } from '../../types/types';
 
-const gameState1: GameInstance<NimGameState> = {
-  state: { moves: [], status: 'WAITING_TO_START', remainingObjects: MAX_NIM_OBJECTS },
+const gameState1: GameInstance<TriviaGameState> = {
+  state: {
+    status: 'WAITING_TO_START',
+    currentQuestionIndex: 0,
+    questions: [],
+    player1Answers: [],
+    player2Answers: [],
+    player1Score: 0,
+    player2Score: 0,
+  },
   gameID: 'testGameID1',
   players: ['user1'],
-  gameType: 'Nim',
+  gameType: 'Trivia',
 };
 
-const gameState2: GameInstance<NimGameState> = {
-  state: { moves: [], status: 'IN_PROGRESS', remainingObjects: MAX_NIM_OBJECTS },
+const gameState2: GameInstance<TriviaGameState> = {
+  state: {
+    status: 'IN_PROGRESS',
+    currentQuestionIndex: 0,
+    questions: [],
+    player1Answers: [],
+    player2Answers: [],
+    player1Score: 0,
+    player2Score: 0,
+  },
   gameID: 'testGameID2',
   players: ['user1', 'user2'],
-  gameType: 'Nim',
+  gameType: 'Trivia',
 };
 
-const gameState3: GameInstance<NimGameState> = {
-  state: { moves: [], status: 'OVER', winners: ['user1'], remainingObjects: MAX_NIM_OBJECTS },
+const gameState3: GameInstance<TriviaGameState> = {
+  state: {
+    status: 'OVER',
+    winners: ['user1'],
+    currentQuestionIndex: 0,
+    questions: [],
+    player1Answers: [],
+    player2Answers: [],
+    player1Score: 0,
+    player2Score: 0,
+  },
   gameID: 'testGameID3',
   players: ['user1', 'user2'],
-  gameType: 'Nim',
+  gameType: 'Trivia',
 };
 
 describe('findGames', () => {
@@ -42,12 +66,12 @@ describe('findGames', () => {
 
   it('should return games with the matching gameType', async () => {
     jest.spyOn(GameModel, 'find').mockImplementation((filter?: FindGameQuery) => {
-      expect(filter).toEqual({ 'gameType': 'Nim', 'state.status': undefined });
+      expect(filter).toEqual({ 'gameType': 'Trivia', 'state.status': undefined });
       const query: any = {};
       query.lean = jest.fn().mockReturnValue(Promise.resolve([gameState1, gameState2, gameState3]));
       return query;
     });
-    const games = await findGames('Nim', undefined);
+    const games = await findGames('Trivia', undefined);
 
     expect(games).toEqual([gameState3, gameState2, gameState1]);
   });
@@ -67,13 +91,13 @@ describe('findGames', () => {
 
   it('should return games with the matching gameType and status', async () => {
     jest.spyOn(GameModel, 'find').mockImplementation((filter?: FindGameQuery) => {
-      expect(filter).toEqual({ 'gameType': 'Nim', 'state.status': 'OVER' });
+      expect(filter).toEqual({ 'gameType': 'Trivia', 'state.status': 'OVER' });
       const query: any = {};
       query.lean = jest.fn().mockReturnValue(Promise.resolve([gameState3]));
       return query;
     });
 
-    const games = await findGames('Nim', 'OVER');
+    const games = await findGames('Trivia', 'OVER');
 
     expect(games).toEqual([gameState3]);
   });
