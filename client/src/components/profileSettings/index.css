@@ -22,13 +22,11 @@
   gap: 30px;
 }
 
-.profile-left-column {
-  flex: 1;
-  min-width: 320px;
-  max-width: 400px;
-  background-color: white;
-  border-radius: 20px;
-  padding: 30px;
+.full-name {
+  font-size: 35px;
+  margin: 0;
+  color: #323b48;
+  font-weight: bold;
 }
 
 .edit-profile-button {
@@ -43,14 +41,57 @@
   transition: all 0.3s ease;
 }
 
+.cancel-profile-button {
+  padding: 10px 20px;
+  background-color: #cfcfcf;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
 .edit-profile-button:hover {
-  background-color: var(--color-primary-hover);}
+  background-color: var(--color-primary-hover);
+}
+.cancel-profile-button:hover {
+  background-color: #b3b3b3;
+}
 
 .profile-card {
   display: flex;
   flex-direction: column;
   align-items: left;
   gap: 6px;
+  background-color: white;
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.profile-left-column {
+  flex: 1;
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.password-reset-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  padding: 30px;
+  background: white;
+  border-radius: 20px;
+  gap: 12px;
+}
+
+#delete-btn {
+  background-color: #121010;
+}
+
+#delete-btn:hover {
+  background-color: #3d0000;
 }
 
 .profile-right-column {
@@ -59,14 +100,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.profile-settings h2 {
-  font-size: 32px;
-  margin: 0;
-  margin-bottom: 1.5rem;
-  color: #484848;
-  font-weight: bold;
 }
 
 .profile-settings h4 {
@@ -111,6 +144,17 @@
   flex-direction: column;
   gap: 0.75rem;
   margin: 1rem 0;
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.profile-edit-actions .edit-profile-button,
+.profile-edit-actions .cancel-profile-button {
+  min-width: 100px; 
 }
 
 .profile-settings .button {
@@ -246,8 +290,7 @@
 
 .profile-settings .password-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  justify-content: space-between;
 }
 
 .profile-settings .modal {
@@ -300,10 +343,8 @@
   transition: all 0.3s ease;
 }
 
-#badges-profile-title {
-  font-size: 25px;
-  margin-bottom: -10px;
-  color: #323b48;
+.badges-section {
+  padding: 0 0 0 10px;
 }
 
 .profile-settings .stats-section {
@@ -311,12 +352,14 @@
   border-radius: 20px; 
   padding: 25px; 
   margin-top: 20px; 
-  max-width: 600px;
+  flex: 1;
+  min-width: 200px;
 }
 
 .profile-settings h2 {
-  font-size: 25px; 
+  font-size: 30px; 
   margin-bottom: 20px; 
+  margin-top: 0;
   color: #323b48; 
   font-weight: bold;
 }
@@ -401,6 +444,10 @@
 .profile-settings .stats-section .edit-profile-button {
   margin-top: 20px;
   width: 40%; 
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 160px;
 }
 
 .profile-info-display {
@@ -421,4 +468,22 @@
 .profile-info-display strong {
   font-weight: 600;
   color: #484848;
+}
+
+.profile-right-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.profile-right-bottom > div:last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+#badges-profile-title {
+  margin-top: 20px;
+  font-size: 30px;
+  color: #323b48;
 }

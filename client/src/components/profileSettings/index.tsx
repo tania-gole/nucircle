@@ -239,17 +239,21 @@ const ProfileSettings: React.FC = () => {
                     placeholder='Write your biography here...'
                   />
                 </label>
-                <button
-                  className='edit-profile-button'
-                  onClick={async () => {
-                    await handleUpdateProfile();
-                    await handleUpdateBiography();
-                  }}>
-                  Save
-                </button>
-                <button className='edit-profile-button' onClick={() => setEditProfileMode(false)}>
-                  Cancel
-                </button>
+                <div className='profile-edit-actions'>
+                  <button
+                    className='cancel-profile-button'
+                    onClick={() => setEditProfileMode(false)}>
+                    Cancel
+                  </button>
+                  <button
+                    className='edit-profile-button'
+                    onClick={async () => {
+                      await handleUpdateProfile();
+                      await handleUpdateBiography();
+                    }}>
+                    Save
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -357,17 +361,19 @@ const ProfileSettings: React.FC = () => {
                     placeholder='https://yourportfolio.com'
                   />
                 </label>
-                <button className='edit-profile-button' onClick={handleUpdateExternalLinks}>
-                  Save
-                </button>
-                <button
-                  className='edit-profile-button'
-                  onClick={() => {
-                    setEditLinksMode(false);
-                    setLinkValidationError(null);
-                  }}>
-                  Cancel
-                </button>
+                <div className='profile-edit-actions'>
+                  <button
+                    className='cancel-profile-button'
+                    onClick={() => {
+                      setEditLinksMode(false);
+                      setLinkValidationError(null);
+                    }}>
+                    Cancel
+                  </button>
+                  <button className='edit-profile-button' onClick={handleUpdateExternalLinks}>
+                    Save
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -375,140 +381,147 @@ const ProfileSettings: React.FC = () => {
           <button className='view-collections-btn' onClick={handleViewCollectionsPage}>
             View Collections
           </button>
+        </div>
 
-          {canEditProfile && (
-            <>
-              <h4>Reset Password</h4>
-              <input
-                className='input-text'
-                type={showPassword ? 'text' : 'password'}
-                placeholder='New Password'
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
-              />
-              <input
-                className='input-text'
-                type={showPassword ? 'text' : 'password'}
-                placeholder='Confirm New Password'
-                value={confirmNewPassword}
-                onChange={e => setConfirmNewPassword(e.target.value)}
-              />
-              <div className='password-actions'>
-                <button className='button button-secondary' onClick={togglePasswordVisibility}>
-                  {showPassword ? 'Hide Passwords' : 'Show Passwords'}
-                </button>
-                <button className='button button-primary' onClick={handleResetPassword}>
-                  Reset
-                </button>
-              </div>
-            </>
-          )}
-
-          {canEditProfile && (
-            <>
-              <h4>Danger Zone</h4>
-              <button className='button button-danger' onClick={handleDeleteUser}>
-                Delete This User
+        {canEditProfile && (
+          <div className='password-reset-section'>
+            <h4>Reset Password</h4>
+            <input
+              className='input-text'
+              type={showPassword ? 'text' : 'password'}
+              placeholder='New Password'
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+            />
+            <input
+              className='input-text'
+              type={showPassword ? 'text' : 'password'}
+              placeholder='Confirm New Password'
+              value={confirmNewPassword}
+              onChange={e => setConfirmNewPassword(e.target.value)}
+            />
+            <div className='password-actions'>
+              <button className='cancel-profile-button' onClick={togglePasswordVisibility}>
+                {showPassword ? 'Hide Passwords' : 'Show Passwords'}
               </button>
-            </>
-          )}
+              <button className='edit-profile-button' onClick={handleResetPassword}>
+                Reset
+              </button>
+            </div>
 
-          {showConfirmation && (
-            <div className='modal'>
-              <div className='modal-content'>
-                <p>
-                  Are you sure you want to delete user <strong>{userData?.username}</strong>? This
-                  action cannot be undone.
-                </p>
-                <div className='modal-actions'>
-                  <button className='button button-danger' onClick={() => pendingAction?.()}>
-                    Confirm
-                  </button>
-                  <button
-                    className='button button-secondary'
-                    onClick={() => setShowConfirmation(false)}>
-                    Cancel
-                  </button>
-                </div>
+            <h4>Danger Zone</h4>
+            <button
+              id='delete-btn'
+              className='edit-profile-button danger'
+              onClick={handleDeleteUser}>
+              Delete This User
+            </button>
+          </div>
+        )}
+
+        {showConfirmation && (
+          <div className='modal'>
+            <div className='modal-content'>
+              <p>
+                Are you sure you want to delete user <strong>{userData?.username}</strong>? This
+                action cannot be undone.
+              </p>
+              <div className='modal-actions'>
+                <button className='button button-danger' onClick={() => pendingAction?.()}>
+                  Confirm
+                </button>
+                <button
+                  className='button button-secondary'
+                  onClick={() => setShowConfirmation(false)}>
+                  Cancel
+                </button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className='profile-right-column'>
         <WorkExperienceList username={userData.username} />
 
-        <div className='stats-section'>
-          <h2>User Stats</h2>
+        <div className='profile-right-bottom'>
+          <div className='stats-section'>
+            <h2 style={{ marginTop: '0px' }}>User Stats</h2>
 
-          <div className='stats-grid'>
-            {/* Date Joined Stat Box */}
-            <div className='stat-box'>
-              <div className='stat-label'>Date Joined</div>
-              <div className='stat-value'>
-                {userData.dateJoined
-                  ? new Date(userData.dateJoined).toLocaleDateString('en-US', {
-                      month: 'short',
-                      year: 'numeric',
-                    })
-                  : 'N/A'}
-              </div>
-            </div>
-
-            {/* Points Stat Box */}
-            {(showStats || canEditProfile) && (
+            <div className='stats-grid'>
+              {/* Date Joined Stat Box */}
               <div className='stat-box'>
-                <div className='stat-label'>Points</div>
-                <div className='stat-value'>{userData.points || 0}</div>
-              </div>
-            )}
-
-            {/* Questions Stat Box */}
-            {(showStats || canEditProfile) && (
-              <div className='stat-box'>
-                <div className='stat-label'>Questions</div>
-                <div className='stat-value'>{userStats?.questionsPosted || 0}</div>
-              </div>
-            )}
-
-            {/* Answers Stat Box */}
-            {(showStats || canEditProfile) && (
-              <div className='stat-box'>
-                <div className='stat-label'>Answers</div>
-                <div className='stat-value'>{userStats?.answersPosted || 0}</div>
-              </div>
-            )}
-
-            {/* Communities Stat Box */}
-            {(showStats || canEditProfile) && (
-              <div className='stat-box'>
-                <div className='stat-label'>Communities</div>
-                <div className='stat-value'>{userStats?.communitiesJoined || 0}</div>
-              </div>
-            )}
-
-            {/* Quizzes Stat Box */}
-            {(showStats || canEditProfile) && (
-              <div className='stat-box'>
-                <div className='stat-label'>Quizzes Won</div>
+                <div className='stat-label'>Date Joined</div>
                 <div className='stat-value'>
-                  {userStats?.quizzesWon || 0} / {userStats?.quizzesPlayed || 0}
+                  {userData.dateJoined
+                    ? new Date(userData.dateJoined).toLocaleDateString('en-US', {
+                        month: 'short',
+                        year: 'numeric',
+                      })
+                    : 'N/A'}
                 </div>
               </div>
+
+              {/* Points Stat Box */}
+              {(showStats || canEditProfile) && (
+                <div className='stat-box'>
+                  <div className='stat-label'>Points</div>
+                  <div className='stat-value'>{userData.points || 0}</div>
+                </div>
+              )}
+
+              {/* Questions Stat Box */}
+              {(showStats || canEditProfile) && (
+                <div className='stat-box'>
+                  <div className='stat-label'>Questions</div>
+                  <div className='stat-value'>{userStats?.questionsPosted || 0}</div>
+                </div>
+              )}
+
+              {/* Answers Stat Box */}
+              {(showStats || canEditProfile) && (
+                <div className='stat-box'>
+                  <div className='stat-label'>Answers</div>
+                  <div className='stat-value'>{userStats?.answersPosted || 0}</div>
+                </div>
+              )}
+
+              {/* Communities Stat Box */}
+              {(showStats || canEditProfile) && (
+                <div className='stat-box'>
+                  <div className='stat-label'>Communities</div>
+                  <div className='stat-value'>{userStats?.communitiesJoined || 0}</div>
+                </div>
+              )}
+
+              {/* Quizzes Stat Box */}
+              {(showStats || canEditProfile) && (
+                <div className='stat-box'>
+                  <div className='stat-label'>Quizzes Won</div>
+                  <div className='stat-value'>
+                    {userStats?.quizzesWon || 0} / {userStats?.quizzesPlayed || 0}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Publish/Unpublish Stats Button */}
+            {canEditProfile && (
+              <button
+                className='edit-profile-button'
+                onClick={toggleStatsVisibility}
+                style={{
+                  backgroundColor: showStats ? '#939da6ff' : '#FF6F61',
+                }}>
+                {showStats ? 'Unpublish Stats' : 'Publish Stats'}
+              </button>
             )}
           </div>
-
-          {/* Publish/Unpublish Stats Button */}
-          {canEditProfile && (
-            <button className='edit-profile-button' onClick={toggleStatsVisibility}>
-              {showStats ? 'Unpublish Stats' : 'Publish Stats'}
-            </button>
-          )}
+          <div className='badges-section'>
+            <h2 id='badges-profile-title'>Badges</h2>
+            <Badges badges={badges} />
+          </div>
         </div>
-
-        <h2 id='badges-profile-title'>Badges</h2>
-        <Badges badges={badges} />
       </div>
     </div>
   );

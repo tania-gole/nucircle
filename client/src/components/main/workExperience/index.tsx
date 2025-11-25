@@ -27,7 +27,7 @@ const WorkExperienceList = ({ username }: WorkExperienceListProps) => {
   return (
     <div className='work-experience-section'>
       <div className='work-experience-header'>
-        <h2>Work Experience</h2>
+        <h2 style={{ fontSize: '30px' }}>Work Experience</h2>
         {canEdit && (
           <button className='add-work-button' onClick={() => setShowForm(prev => !prev)}>
             {showForm ? 'Cancel' : '+ Add'}
