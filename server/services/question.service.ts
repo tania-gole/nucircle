@@ -282,20 +282,23 @@ export const addVoteToQuestion = async (
 
     let msg = '';
 
+    const upVotes = result.upVotes || [];
+    const downVotes = result.downVotes || [];
+
     if (voteType === 'upvote') {
-      msg = result.upVotes.includes(username)
+      msg = upVotes.includes(username)
         ? 'Question upvoted successfully'
         : 'Upvote cancelled successfully';
     } else {
-      msg = result.downVotes.includes(username)
+      msg = downVotes.includes(username)
         ? 'Question downvoted successfully'
         : 'Downvote cancelled successfully';
     }
 
     return {
       msg,
-      upVotes: result.upVotes || [],
-      downVotes: result.downVotes || [],
+      upVotes,
+      downVotes,
     };
   } catch (err) {
     return {

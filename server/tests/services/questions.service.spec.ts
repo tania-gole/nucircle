@@ -636,6 +636,60 @@ describe('Question model', () => {
 
       expect(result).toEqual({ error: 'Error when adding downvote to question' });
     });
+
+    test('should handle result with null upVotes', async () => {
+      const mockQuestion = {
+        _id: 'someQuestionId',
+        upVotes: null as any,
+        downVotes: ['testUser'],
+      };
+
+      jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValue(mockQuestion);
+
+      const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+      expect(result).toEqual({
+        msg: expect.any(String),
+        upVotes: [], // Should default to empty array
+        downVotes: ['testUser'],
+      });
+    });
+
+    test('should handle result with null downVotes', async () => {
+      const mockQuestion = {
+        _id: 'someQuestionId',
+        upVotes: ['testUser'],
+        downVotes: null as any,
+      };
+
+      jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValue(mockQuestion);
+
+      const result = await addVoteToQuestion('someQuestionId', 'testUser', 'downvote');
+
+      expect(result).toEqual({
+        msg: expect.any(String),
+        upVotes: ['testUser'],
+        downVotes: [], // Should default to empty array
+      });
+    });
+
+    test('should handle result with undefined upVotes and downVotes', async () => {
+      const mockQuestion = {
+        _id: 'someQuestionId',
+        upVotes: undefined as any,
+        downVotes: undefined as any,
+      };
+
+      jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValue(mockQuestion);
+
+      const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+      expect(result).toEqual({
+        msg: expect.any(String),
+        upVotes: [], // Should default to empty array
+        downVotes: [], // Should default to empty array
+      });
+    });
   });
 
   describe('getCommunityQuestions', () => {

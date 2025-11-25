@@ -3,6 +3,8 @@ import QuestionModel from '../../models/questions.model';
 import AnswerModel from '../../models/answers.model';
 import ChatModel from '../../models/chat.model';
 import UserModel from '../../models/users.model';
+import CollectionModel from '../../models/collection.model';
+import { ObjectId } from 'mongodb';
 
 jest.mock('../../models/questions.model');
 jest.mock('../../models/answers.model');
@@ -11,6 +13,7 @@ jest.mock('../../models/messages.model');
 jest.mock('../../models/users.model');
 jest.mock('../../models/tags.model');
 jest.mock('../../models/comments.model');
+jest.mock('../../models/collection.model');
 
 describe('populateDocument', () => {
   afterEach(() => {
@@ -183,10 +186,163 @@ describe('populateDocument', () => {
   });
 
   it('should return an error message if type is invalid', async () => {
-    const invalidType = 'invalidType' as 'question' | 'answer' | 'chat';
+    const invalidType = 'invalidType' as 'question' | 'answer' | 'chat' | 'collection';
     const result = await populateDocument('someId', invalidType);
     expect(result).toEqual({
       error: 'Error when fetching and populating a document: Invalid type provided.',
+    });
+  });
+
+  it('should return an error message if id is undefined', async () => {
+    const result = await populateDocument(undefined as any, 'question');
+    expect(result).toEqual({
+      error: 'Error when fetching and populating a document: Provided ID is undefined.',
+    });
+  });
+
+  it('should fetch and populate a collection document', async () => {
+    const mockQuestionId = new ObjectId();
+    const mockQuestion = {
+      _id: 'questionId',
+      tags: ['tagId'],
+      answers: ['answerId'],
+      comments: ['commentId'],
+    };
+    const mockCollection = {
+      _id: 'collectionId',
+      questions: [mockQuestionId],
+      toObject: jest.fn().mockReturnValue({
+        _id: 'collectionId',
+        questions: [mockQuestionId],
+      }),
+    };
+
+    (CollectionModel.findOne as jest.Mock).mockResolvedValue(mockCollection);
+    (QuestionModel.findOne as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockQuestion),
+    });
+
+    const result = await populateDocument('collectionId', 'collection');
+
+    expect(CollectionModel.findOne).toHaveBeenCalledWith({ _id: 'collectionId' });
+    expect(result).toEqual({
+      ...mockCollection.toObject(),
+      questions: [mockQuestion],
+    });
+  });
+
+  it('should return an error message if collection document is not found', async () => {
+    (CollectionModel.findOne as jest.Mock).mockResolvedValue(null);
+
+    const collectionID = 'invalidCollectionId';
+    const result = await populateDocument(collectionID, 'collection');
+
+    expect(result).toEqual({
+      error: `Error when fetching and populating a document: Failed to fetch and populate collection with ID: ${collectionID}`,
+    });
+  });
+
+  it('should return an error message if question in collection is not found', async () => {
+    const mockQuestionId = new ObjectId();
+    const mockCollection = {
+      _id: 'collectionId',
+      questions: [mockQuestionId],
+      toObject: jest.fn().mockReturnValue({
+        _id: 'collectionId',
+        questions: [mockQuestionId],
+      }),
+    };
+
+    (CollectionModel.findOne as jest.Mock).mockResolvedValue(mockCollection);
+    (QuestionModel.findOne as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(null),
+    });
+
+    const result = await populateDocument('collectionId', 'collection');
+
+    expect(result).toEqual({
+      error: 'Error when fetching and populating a document: Question not found',
+    });
+  });
+
+  it('should return an error message if fetching a collection document throws an error', async () => {
+    (CollectionModel.findOne as jest.Mock).mockImplementation(() => {
+      throw new Error('Database error');
+    });
+
+    const result = await populateDocument('collectionId', 'collection');
+
+    expect(result).toEqual({
+      error: 'Error when fetching and populating a document: Database error',
+    });
+  });
+
+  it('should handle chat with message without msgFrom', async () => {
+    const mockChat = {
+      _id: 'chatId',
+      messages: [
+        {
+          _id: 'messageId',
+          msg: 'Hello',
+          msgFrom: null,
+          msgDateTime: new Date(),
+          type: 'text',
+        },
+      ],
+      toObject: jest.fn().mockReturnValue({
+        _id: 'chatId',
+        messages: [
+          {
+            _id: 'messageId',
+            msg: 'Hello',
+            msgFrom: null,
+            msgDateTime: new Date(),
+            type: 'text',
+          },
+        ],
+      }),
+    };
+
+    (ChatModel.findOne as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockChat),
+    });
+
+    const result = await populateDocument('chatId', 'chat');
+
+    expect(result).toEqual({
+      ...mockChat.toObject(),
+      messages: [
+        {
+          _id: 'messageId',
+          msg: 'Hello',
+          msgFrom: null,
+          msgDateTime: mockChat.messages[0].msgDateTime,
+          type: 'text',
+          user: null,
+        },
+      ],
+    });
+  });
+
+  it('should handle chat with null message', async () => {
+    const mockChat = {
+      _id: 'chatId',
+      messages: [null],
+      toObject: jest.fn().mockReturnValue({
+        _id: 'chatId',
+        messages: [],
+      }),
+    };
+
+    (ChatModel.findOne as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockChat),
+    });
+
+    const result = await populateDocument('chatId', 'chat');
+
+    expect(result).toEqual({
+      ...mockChat.toObject(),
+      messages: [],
     });
   });
 });

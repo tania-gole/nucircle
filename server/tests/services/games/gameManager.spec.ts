@@ -1,4 +1,5 @@
 import GameModel from '../../../models/games.model';
+import TriviaQuestionModel from '../../../models/triviaQuestion.model';
 import GameManager from '../../../services/games/gameManager';
 import TriviaGame from '../../../services/games/trivia';
 import { GameType } from '../../../types/types';

@@ -81,6 +81,7 @@ const messageController = (socket: FakeSOSocket) => {
         group.users = users.filter((u: string) => u !== username);
         group.count = Math.max(0, group.count - 1);
       } else {
+        group.users = users; // Ensure users array is assigned to group
         group.users.push(username);
         group.count = group.count + 1;
       }

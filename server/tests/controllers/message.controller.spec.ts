@@ -356,4 +356,27 @@ describe('POST /toggleReaction', () => {
     expect(response.status).toBe(500);
     expect(response.body.error).toBe('Failed to toggle reaction');
   });
+
+  it('should handle reaction group without users property', async () => {
+    const mockMessage: any = {
+      _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439011'),
+      reactions: {
+        love: { count: 0 }, // users property is missing
+        like: { users: [], count: 0 },
+      },
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    (MessageModel.findById as jest.Mock).mockResolvedValue(mockMessage);
+
+    const response = await supertest(app).post('/api/message/toggleReaction').send({
+      messageId: '507f1f77bcf86cd799439011',
+      reactionType: 'love',
+      username: 'testuser',
+    });
+
+    expect(response.status).toBe(200);
+    expect(mockMessage.reactions.love.users).toContain('testuser');
+    expect(mockMessage.reactions.love.count).toBe(1);
+  });
 });

@@ -10,7 +10,12 @@ jest.mock('../../middleware/auth', () => ({
   __esModule: true,
   default: (req: any, res: any, next: any) => {
     // Extract username from request params, body (username or admin), or query for testing
+    // Use query.currentUsername to override for auth failure tests (must check first)
+    // Check headers for a test override header
+    const testOverride = req.headers?.['x-test-username'];
     const username =
+      testOverride ||
+      req.query?.currentUsername ||
       req.params?.username ||
       req.body?.username ||
       req.body?.admin ||
@@ -87,6 +92,16 @@ describe('Community Controller', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual([]);
+    });
+
+    test('should return 401 when username does not match authenticated user', async () => {
+      // Use query param to set authenticated user to 'test_user', but params.username = 'different_user'
+      const response = await supertest(app)
+        .get('/api/community/getUserCommunities/different_user')
+        .query({ currentUsername: 'test_user' });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid username parameter');
     });
   });
 
@@ -312,6 +327,38 @@ describe('Community Controller', () => {
 
       expect(response.status).toBe(500);
     });
+
+    test('should return 401 when username does not match authenticated user', async () => {
+      const mockReqBody = {
+        communityId: '65e9b58910afe6e94fc6e6dc',
+        username: 'different_user',
+      };
+
+      // Use header to set authenticated user to 'test_user', but body.username = 'different_user'
+      const response = await supertest(app)
+        .post('/api/community/toggleMembership')
+        .set('x-test-username', 'test_user')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid username parameter');
+    });
+
+    test('should return 500 when service throws error', async () => {
+      const mockReqBody = {
+        communityId: '65e9b58910afe6e94fc6e6dc',
+        username: 'user3',
+      };
+
+      toggleCommunityMembershipSpy.mockRejectedValueOnce(new Error('Unexpected error'));
+
+      const response = await supertest(app)
+        .post('/api/community/toggleMembership')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toContain('Error toggling community membership: Unexpected error');
+    });
   });
 
   describe('POST /create', () => {
@@ -432,6 +479,23 @@ describe('Community Controller', () => {
       expect(response.status).toBe(500);
       expect(response.text).toContain('Error creating a community: Database error');
     });
+
+    test('should return 401 when admin does not match authenticated user', async () => {
+      const mockReqBody = {
+        name: 'New Community',
+        description: 'New Description',
+        admin: 'different_admin',
+      };
+
+      // Use header to set authenticated user to 'test_user', but body.admin = 'different_admin'
+      const response = await supertest(app)
+        .post('/api/community/create')
+        .set('x-test-username', 'test_user')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid admin parameter');
+    });
   });
 
   describe('DELETE /delete/:communityId', () => {
@@ -526,6 +590,36 @@ describe('Community Controller', () => {
 
       expect(response.status).toBe(500);
     });
+
+    test('should return 401 when username does not match authenticated user', async () => {
+      const mockReqBody = {
+        username: 'different_user',
+      };
+
+      // Use header to set authenticated user to 'test_user', but body.username = 'different_user'
+      const response = await supertest(app)
+        .delete('/api/community/delete/65e9b58910afe6e94fc6e6dc')
+        .set('x-test-username', 'test_user')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid username parameter');
+    });
+
+    test('should return 500 when service throws error', async () => {
+      const mockReqBody = {
+        username: 'admin_user',
+      };
+
+      deleteCommunitySpy.mockRejectedValueOnce(new Error('Unexpected error'));
+
+      const response = await supertest(app)
+        .delete('/api/community/delete/65e9b58910afe6e94fc6e6dc')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toContain('Error deleting community: Unexpected error');
+    });
   });
   describe('POST /:communityId/visit', () => {
     test('should record visit successfully', async () => {
@@ -544,19 +638,34 @@ describe('Community Controller', () => {
       expect(recordCommunityVisitSpy).toHaveBeenCalledWith('65e9b58910afe6e94fc6e6dc', 'test_user');
     });
 
-    //   test('should return 500 when service throws error', async () => {
-    //     const mockReqBody = {
-    //       username: 'test_user',
-    //     };
+    test('should return 500 when service throws error', async () => {
+      const mockReqBody = {
+        username: 'test_user',
+      };
 
-    //     recordCommunityVisitSpy.mockRejectedValueOnce(new Error('Database error'));
+      recordCommunityVisitSpy.mockRejectedValueOnce(new Error('Database error'));
 
-    //     const response = await supertest(app)
-    //       .post('/api/community/65e9b58910afe6e94fc6e6dc/visit')
-    //       .send(mockReqBody);
+      const response = await supertest(app)
+        .post('/api/community/65e9b58910afe6e94fc6e6dc/visit')
+        .send(mockReqBody);
 
-    //     expect(response.status).toBe(500);
-    //     expect(response.text).toContain('Error recording visit: Database error');
-    //   });
+      expect(response.status).toBe(500);
+      expect(response.text).toContain('Error recording visit: Database error');
+    });
+
+    test('should return 401 when username does not match authenticated user', async () => {
+      const mockReqBody = {
+        username: 'different_user',
+      };
+
+      // Use header to set authenticated user to 'test_user', but body.username = 'different_user'
+      const response = await supertest(app)
+        .post('/api/community/65e9b58910afe6e94fc6e6dc/visit')
+        .set('x-test-username', 'test_user')
+        .send(mockReqBody);
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe('Invalid username parameter');
+    });
   });
 });
