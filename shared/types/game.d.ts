@@ -4,7 +4,7 @@ import { Request } from 'express';
  * Type representing the possible game types as a literal.
  * This is derived from the GAME_TYPES constant.
  */
-export type GameType = 'Nim' | 'Trivia';
+export type GameType = 'Trivia';
 
 /**
  * Type representing the unique identifier for a game instance.
@@ -33,7 +33,7 @@ export interface GameState {
  * state: The current state of the game, defined by GameState.
  * gameID: The unique identifier for the game instance.
  * players: An array of player IDs participating in the game.
- * gameType: The type of game (e.g., 'Nim').
+ * gameType: The type of game (e.g., 'Trivia').
  * createdBy: The username of the user who created the game.
  */
 export interface GameInstance<T extends GameState> {
@@ -68,28 +68,6 @@ export interface GameMove<MoveType> {
  * Base interface for moves. Other game-specific move types should extend this.
  */
 export type BaseMove = object;
-
-/**
- * Interface representing a move in a Nim game.
- *  numObjects: The number of objects the player wants to remove from the game.
- */
-export interface NimMove extends BaseMove {
-  numObjects: number;
-}
-
-/**
- * Interface representing the state of a Nim game, which includes:
- * moves: A list of moves made in the game.
- * player1: The ID of the first player.
- * player2: The ID of the second player.
- * remainingObjects: The number of objects remaining in the game.
- */
-export interface NimGameState extends WinnableGameState {
-  moves: ReadonlyArray<NimMove>;
-  player1?: string;
-  player2?: string;
-  remainingObjects: number;
-}
 
 /**
  * Interface representing a trivia question in the game
@@ -140,7 +118,7 @@ export interface TriviaGameState extends WinnableGameState {
 
 /**
  * Interface extending the request body when creating a game, which contains:
- * gameType: The type of game to be created (e.g., 'Nim').
+ * gameType: The type of game to be created (e.g., 'Trivia').
  * createdBy: The username of the user creating the game.
  */
 export interface CreateGameRequest extends Request {
@@ -179,7 +157,7 @@ export interface GameRequest extends Request {
 
 /**
  * Interface for querying games based on game type and status.
- * gameType: The type of game to query (e.g., 'Nim').
+ * gameType: The type of game to query (e.g., 'Trivia').
  * state.status: The status of the game (e.g., 'IN_PROGRESS').
  */
 export interface FindGameQuery {

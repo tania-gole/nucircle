@@ -121,3 +121,9 @@ shared/package-lock.json
 client/build
 server/reports
 .DS_Store
+
+# Cypress test artifacts
+testing/cypress/screenshots/
+testing/cypress/videos/
+cypress/screenshots/
+cypress/videos/

@@ -128,6 +128,32 @@ const UsersListHeader = ({
               </select>
             </div>
           </div>
+
+          <div className='filter-row'>
+            <div className='filter-column'>
+              <label>Career Goals:</label>
+              <input
+                type='text'
+                value={filters.careerGoals || ''}
+                onChange={e => updateFilter('careerGoals', e.target.value)}
+              />
+              <small style={{ color: '#888', fontSize: '0.85em' }}>
+                Comma-separated (e.g., "data science, finance")
+              </small>
+            </div>
+
+            <div className='filter-column'>
+              <label>Technical Interests:</label>
+              <input
+                type='text'
+                value={filters.technicalInterests || ''}
+                onChange={e => updateFilter('technicalInterests', e.target.value)}
+              />
+              <small style={{ color: '#888', fontSize: '0.85em' }}>
+                Comma-separated (e.g., "machine learning, react")
+              </small>
+            </div>
+          </div>
         </div>
       )}
 

@@ -9,7 +9,6 @@ import { FakeSOSocket, GameInstance, TriviaGameState } from '../../types/types';
 import * as util from '../../services/game.service';
 import gameController from '../../controllers/game.controller';
 import TriviaGame from '../../services/games/trivia';
-import GameModel from '../../models/games.model';
 
 // mock jwt auth to always authenticate successfully
 jest.mock('../../middleware/auth', () => ({

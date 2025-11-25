@@ -49,6 +49,8 @@ export interface UserSearchFilters {
   major?: string;
   graduationYear?: number;
   communityId?: string;
+  careerGoals?: string;
+  technicalInterests?: string;
 }
 
 /**
@@ -70,11 +72,22 @@ const getUsers = async (): Promise<SafeDatabaseUser[]> => {
  * @throws Error if there is an issue fetching users.
  */
 const getUserByUsername = async (username: string): Promise<SafeDatabaseUser> => {
-  const res = await api.get(`${USER_API_URL}/getUser/${username}`);
-  if (res.status !== 200) {
-    throw new Error('Error when fetching user');
+  try {
+    const res = await api.get(`${USER_API_URL}/getUser/${username}`);
+    if (res.status !== 200) {
+      throw new Error('Error when fetching user');
+    }
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      // If the backend returns a string error message, extract it
+      const errorMessage = typeof error.response.data === 'string' 
+        ? error.response.data 
+        : error.response.data?.error || 'Error when fetching user';
+      throw new Error(errorMessage);
+    }
+    throw error;
   }
-  return res.data;
 };
 
 /**
@@ -221,6 +234,9 @@ const searchUsers = async (
     if (filters?.major) params.append('major', filters.major);
     if (filters?.graduationYear) params.append('graduationYear', filters.graduationYear.toString());
     if (filters?.communityId) params.append('communityId', filters.communityId);
+    if (filters?.careerGoals) params.append('careerGoals', filters.careerGoals);
+    if (filters?.technicalInterests)
+      params.append('technicalInterests', filters.technicalInterests);
 
     const res = await api.get(`${USER_API_URL}/search?${params.toString()}`);
 
@@ -258,7 +274,15 @@ const getFilterOptions = async (): Promise<{
 
 const updateUserProfile = async (
   username: string,
-  updates: { major?: string; graduationYear?: number; coopInterests?: string; firstName?: string; lastName?: string },
+  updates: {
+    major?: string;
+    graduationYear?: number;
+    coopInterests?: string;
+    firstName?: string;
+    lastName?: string;
+    careerGoals?: string;
+    technicalInterests?: string;
+  },
 ): Promise<SafeDatabaseUser> => {
   const res = await api.patch(`${USER_API_URL}/updateProfile`, {
     username,
