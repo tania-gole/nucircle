@@ -81,9 +81,10 @@ const getUserByUsername = async (username: string): Promise<SafeDatabaseUser> =>
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       // If the backend returns a string error message, extract it
-      const errorMessage = typeof error.response.data === 'string' 
-        ? error.response.data 
-        : error.response.data?.error || 'Error when fetching user';
+      const errorMessage =
+        typeof error.response.data === 'string'
+          ? error.response.data
+          : error.response.data?.error || 'Error when fetching user';
       throw new Error(errorMessage);
     }
     throw error;

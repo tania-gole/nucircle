@@ -110,6 +110,13 @@ const useProfileSettings = () => {
     fetchUserData();
   }, [username]);
 
+  useEffect(() => {
+    // Initialize showStats from userData when it loads
+    if (userData) {
+      setShowStats(userData.showStats ?? true);
+    }
+  }, [userData]);
+
   /**
    * Fetch user statistics such as questions posted, answers posted, etc.
    */
@@ -172,14 +179,9 @@ const useProfileSettings = () => {
   };
 
   const handleUpdateProfile = async () => {
-    console.log('handleUpdateProfile called');
-    console.log('username:', username);
-    console.log('newCoopInterests:', newCoopInterests);
-    
     if (!username) {
       setErrorMessage('Username is required to update profile');
       setSuccessMessage(null);
-      console.error('handleUpdateProfile: username is undefined');
       return;
     }
 
@@ -195,18 +197,15 @@ const useProfileSettings = () => {
       } = {};
       if (newMajor.trim()) updates.major = newMajor;
       if (newGradYear) updates.graduationYear = parseInt(newGradYear.toString());
-      if (newCoopInterests && newCoopInterests.trim()) updates.coopInterests = newCoopInterests.trim();
+      if (newCoopInterests && newCoopInterests.trim())
+        updates.coopInterests = newCoopInterests.trim();
       if (newFirstName.trim()) updates.firstName = newFirstName;
       if (newLastName.trim()) updates.lastName = newLastName;
       if (newCareerGoals !== undefined) updates.careerGoals = newCareerGoals;
       if (newTechnicalInterests !== undefined) updates.technicalInterests = newTechnicalInterests;
 
       // Log the updates for debugging
-      console.log('Updating profile with:', updates);
-      console.log('Username:', username);
-
       const updatedUser = await updateUserProfile(username, updates);
-      console.log('Profile updated successfully:', updatedUser);
       setUserData(updatedUser);
       setEditProfileMode(false);
       setSuccessMessage('Profile updated successfully!');
@@ -215,7 +214,6 @@ const useProfileSettings = () => {
       const errorMsg = error instanceof Error ? error.message : 'Failed to update profile';
       setErrorMessage(`Failed to update profile: ${errorMsg}`);
       setSuccessMessage(null);
-      console.error('Error updating profile:', error);
     }
   };
 
