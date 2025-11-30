@@ -189,7 +189,6 @@
   border-color: #7ce181;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .search-and-filters-row {
     flex-direction: column;

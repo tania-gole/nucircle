@@ -44,7 +44,6 @@
   }
 }
 
-/* Header */
 .quiz-invite-header {
   text-align: center;
   margin-bottom: 20px;
@@ -57,7 +56,6 @@
   font-weight: 700;
 }
 
-/* Body */
 .quiz-invite-body {
   text-align: center;
   margin-bottom: 30px;
@@ -81,7 +79,6 @@
   margin: 0;
 }
 
-/* Action buttons */
 .quiz-invite-actions {
   display: flex;
   gap: 15px;

@@ -36,7 +36,6 @@ const MessageCard = ({ message, currentUser }: MessageCardProps) => {
 
   const handleReaction = async (reactionType: 'love' | 'like') => {
     try {
-      // Optimistic update
       setReactions(prev => {
         const hasReacted = prev[reactionType].users.includes(currentUser);
         const updatedUsers = hasReacted
@@ -70,8 +69,6 @@ const MessageCard = ({ message, currentUser }: MessageCardProps) => {
       <div className='message-body'>
         <Markdown remarkPlugins={[remarkGfm]}>{message.msg}</Markdown>
       </div>
-
-      {/* Reactions are now right under the timestamp (aligned left) */}
       <div className='message-footer'>
         <div className='message-reactions'>
           <button
