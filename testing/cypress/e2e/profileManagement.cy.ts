@@ -883,7 +883,7 @@ describe('Cypress Tests for Profile Management', () => {
       cy.get('.stat-box').contains('.stat-label', 'Questions').should('be.visible');
       cy.get('.stat-box').contains('.stat-label', 'Answers').should('be.visible');
       cy.get('.stat-box').contains('.stat-label', 'Communities').should('be.visible');
-      cy.get('.stat-box').contains('.stat-label', 'Quizzes Won').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Quizzes Won').scrollIntoView().should('be.visible');
     });
 
     it('User can unpublish their statistics', () => {
@@ -941,7 +941,7 @@ describe('Cypress Tests for Profile Management', () => {
       cy.wait(1000);
 
       // Verify stats are published (Unpublish button visible)
-      cy.contains('button', 'Unpublish Stats').should('be.visible');
+      cy.contains('button', 'Unpublish Stats').scrollIntoView().should('be.visible');
 
       // Logout
       cy.get('.logout-button').click();
@@ -964,7 +964,7 @@ describe('Cypress Tests for Profile Management', () => {
       cy.get('.stat-box').contains('.stat-label', 'Questions').should('be.visible');
       cy.get('.stat-box').contains('.stat-label', 'Answers').should('be.visible');
       cy.get('.stat-box').contains('.stat-label', 'Communities').should('be.visible');
-      cy.get('.stat-box').contains('.stat-label', 'Quizzes Won').should('be.visible');
+      cy.get('.stat-box').contains('.stat-label', 'Quizzes Won').scrollIntoView().should('be.visible');
 
       // Verify publish/unpublish button is not visible to other users
       cy.contains('button', 'Publish Stats').should('not.exist');

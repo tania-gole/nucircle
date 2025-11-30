@@ -108,7 +108,6 @@ export const subsequentLoginUser = (username: string, password: string = 'secure
   cy.get('#password-input').clear().type(password);
   cy.contains('Log in').click();
   cy.url().should('include', '/home', { timeout: 10000 }); 
-  cy.get('.welcome-popup-button', { timeout: 10000 }).click();
   // Wait for redirect to home page
   cy.url().should('include', '/home');
 };
