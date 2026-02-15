@@ -27,8 +27,8 @@ const useMessagingPage = () => {
   }, []);
 
   useEffect(() => {
-    const handleMessageUpdate = async (data: MessageUpdatePayload) => {
-      setMessages([...messages, data.msg]);
+    const handleMessageUpdate = (data: MessageUpdatePayload) => {
+      setMessages(prev => [...prev, data.msg]);
     };
 
     socket.on('messageUpdate', handleMessageUpdate);
@@ -36,7 +36,7 @@ const useMessagingPage = () => {
     return () => {
       socket.off('messageUpdate', handleMessageUpdate);
     };
-  }, [socket, messages]);
+  }, [socket]);
 
   /**
    * Handles sending a new message.

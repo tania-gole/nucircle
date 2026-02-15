@@ -147,6 +147,8 @@ class GameManager {
           writable: true,
           configurable: true,
         });
+        // Restore correct answers from DB (lost on server restart)
+        await triviaGame.restoreCorrectAnswers();
         game = triviaGame;
       } else {
         return undefined;

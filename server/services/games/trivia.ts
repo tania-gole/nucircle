@@ -21,6 +21,20 @@ class TriviaGame extends Game<TriviaGameState, TriviaAnswer> {
   private _tiebreakerTimerSet: boolean = false;
 
   /**
+   * Restores correct answers from the database when loading a game from persistence.
+   * This is needed because _correctAnswers is in-memory only and lost on server restart.
+   */
+  public async restoreCorrectAnswers(): Promise<void> {
+    const questionIds = this.state.questions.map(q => q.questionId);
+    if (questionIds.length === 0) return;
+
+    const questions = await TriviaQuestionModel.find({ _id: { $in: questionIds } }).lean();
+    // Map in the same order as the state questions
+    const questionMap = new Map(questions.map(q => [q._id.toString(), q.correctAnswer as number]));
+    this._correctAnswers = questionIds.map(id => questionMap.get(id) ?? -1);
+  }
+
+  /**
    * Constructor for the TriviaGame class which initializes the game state and type.
    * @param createdBy The username of the user creating the game.
    */

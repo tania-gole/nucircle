@@ -151,7 +151,7 @@ const useDirectMessage = () => {
     return () => {
       socket.off('reactionUpdated', handleReactionUpdated);
     };
-  }, [socket, selectedChat]);
+  }, [socket, selectedChat?._id]);
 
   return {
     selectedChat,
