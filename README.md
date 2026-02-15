@@ -1,158 +1,190 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Uq-6GvbM)
+# NuCircle
+
+A full-stack Q&A platform inspired by Stack Overflow, built with real-time collaboration features including multiplayer trivia games, community spaces, direct messaging, and a gamified points and badge system.
+
+## About the Project
+
+NuCircle was developed as a team project for **CS4530 - Software Engineering** at **Northeastern University** during **Fall 2025**. Over the course of ~5 weeks (October - November 2025), our team of four designed, built, and deployed a production-ready web application following agile development practices.
+
+### Motivation
+
+We wanted to go beyond a basic Q&A clone and build a platform that fosters genuine community engagement among students. The core idea was: what if Stack Overflow also had real-time trivia games, community spaces with streaks, and a points-based leaderboard to keep users coming back?
+
+### Team
+
+| Name | GitHub | Role |
+|------|--------|------|
+| **Tania Gole** | [@tania1308](https://github.com/tania1308) | Full-stack development |
+| **Maya Robie** | [@mrobie8](https://github.com/mrobie8) | Full-stack development |
+| **Angelina Zhang** | [@ayz122004](https://github.com/ayz122004) | Full-stack development |
+| **Rae** | [@y-ra](https://github.com/y-ra) | Full-stack development |
+
+## Features
+
+### Q&A Platform
+- Ask and answer questions with full-text search and tag-based filtering
+- Sort by newest, unanswered, active, or most viewed
+- Upvote/downvote system for questions and answers
+- Threaded comments on questions and answers
+
+### Real-Time Trivia Games
+- Create or join multiplayer trivia quizzes (2 players)
+- 10 randomized questions per round with live scoring
+- Tiebreaker system for close matches
+- Challenge other online users with quiz invitations (30-second accept window)
+- Real-time game state sync via WebSocket
+
+### Communities
+- Create public or private community spaces
+- Community-specific question feeds and messaging channels
+- Visit streak tracking (current and longest)
+- Member count and online status
+
+### Collections
+- Organize questions into public or private collections
+- Save/unsave questions across the platform
+- Browse and discover other users' collections
+
+### Messaging
+- Direct messages between users
+- Community group messaging
+- Message reactions (love, like)
+- Online/offline presence indicators
+
+### User Profiles & Gamification
+- Customizable profiles with bio, career info, and external links (GitHub, LinkedIn, portfolio)
+- Points system earned through platform activity
+- Badge milestones (50/100 questions, 50/100 answers, community member, leaderboard placement)
+- Global leaderboard with top-3 badges
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 19, TypeScript, Vite, React Router v7 |
+| **Backend** | Node.js, Express.js, TypeScript |
+| **Database** | MongoDB with Mongoose ODM |
+| **Real-Time** | Socket.IO (WebSocket) |
+| **Auth** | JWT (JSON Web Tokens) + bcrypt |
+| **API Docs** | OpenAPI 3.0 + Swagger UI |
+| **Testing** | Jest (unit/integration), Cypress (E2E) |
+| **Deployment** | Render |
+
+## Architecture
+
+```
+Client (React + Vite)
+    |
+    |--- HTTP (REST API) ---> Express.js Server
+    |--- WebSocket ----------> Socket.IO Server
+                                    |
+                                    v
+                              MongoDB Database
+```
+
+**Key architectural decisions:**
+- **Controller -> Service -> Model** pattern for clean separation of concerns
+- **Shared types package** between client and server for type safety across the stack
+- **Socket.IO rooms** for scoped real-time broadcasts (game rooms, chat rooms, community channels)
+- **OpenAPI validation middleware** that validates every request/response against the API spec
+- **JWT authentication middleware** protecting all authenticated routes
+
+## Project Structure
+
+```
+nucircle/
+├── client/          # React frontend (Vite)
+│   ├── src/
+│   │   ├── components/   # UI components (auth, Q&A, games, communities, etc.)
+│   │   ├── services/     # API client functions
+│   │   ├── hooks/        # Custom React hooks
+│   │   └── contexts/     # React context providers
+├── server/          # Express backend
+│   ├── controllers/      # Route handlers
+│   ├── services/         # Business logic
+│   ├── models/           # Mongoose schemas
+│   ├── middleware/        # Auth, validation
+│   ├── socket/           # Socket.IO event handlers
+│   ├── games/            # Game engine (trivia logic, game manager)
+│   └── tests/            # Jest unit & integration tests
+├── shared/          # Shared TypeScript type definitions
+│   └── types/
+└── testing/         # Cypress E2E test suite
+    └── cypress/
+```
 
 ## Getting Started
 
-Run `npm install` in the root directory to install all dependencies for the `client`, `server`, and `shared` folders.
-- Optional: Create a `.env` file in the `server/` directory and set the `JWT_SECRET` variable. 
+### Prerequisites
+- Node.js (v18+)
+- MongoDB (local or Atlas)
 
-> [!NOTE]
-> Refer to [IP1](https://neu-se.github.io/CS4530-Spring-2025/assignments/ip1) and [IP2](https://neu-se.github.io/CS4530-Spring-2025/assignments/ip2) for further instructions related to setting up MongoDB, setting environment variables, and running the client and server.
+### Installation
 
-## Codebase Folder Structure
+```bash
+# Clone the repo
+git clone https://github.com/tania-gole/nucircle.git
+cd nucircle
 
-- `client`: Contains the frontend application code, responsible for the user interface and interacting with the backend. This directory includes all React components and related assets.
-- `server`: Contains the backend application code, handling the logic, APIs, and database interactions. It serves requests from the client and processes data accordingly.
-- `shared`: Contains all shared type definitions that are used by both the client and server. This helps maintain consistency and reduces duplication of code between the two folders. The type definitions are imported and shared within each folder's `types/types.ts` file.
+# Install all dependencies (client, server, shared)
+npm install
+```
 
-## Database Architecture
+### Environment Setup
 
-The schemas for the database are documented in the directory `server/models/schema`.
-A class diagram for the schema definition is shown below:
+Create a `.env` file in the `server/` directory:
 
-![Class Diagram](class-diagram.png)
+```env
+MONGODB_URI=mongodb://127.0.0.1:27017/nucircle
+JWT_SECRET=your_secret_key
+PORT=8000
+CLIENT_URL=http://localhost:5173
+```
 
-## API Routes
+### Running the App
 
-### `/answer`
+```bash
+# Terminal 1 - Start the server
+cd server && npm run dev
 
-| Endpoint   | Method | Description      |
-| ---------- | ------ | ---------------- |
-| `/addAnswer` | POST   | Add a new answer |
+# Terminal 2 - Start the client
+cd client && npm run dev
+```
 
-### `/comment`
+The client runs at `http://localhost:5173` and the server at `http://localhost:8000`.
 
-| Endpoint    | Method | Description       |
-| ----------- | ------ | ----------------- |
-| `/addComment` | POST   | Add a new comment |
+### API Documentation
 
-### `/messaging`
+With the server running, visit `http://localhost:8000/api/docs` for the interactive Swagger UI.
 
-| Endpoint     | Method | Description           |
-| ------------ | ------ | --------------------- |
-| `/addMessage`  | POST   | Add a new message     |
-| `/getMessages` | GET    | Retrieve all messages |
+## Testing
 
-### `/question`
+### Unit & Integration Tests (Jest)
 
-| Endpoint          | Method | Description                     |
-| ----------------- | ------ | ------------------------------- |
-| `/getQuestion`      | GET    | Fetch questions by filter       |
-| `/getQuestionById/` | GET    | Fetch a specific question by ID |
-| `/addQuestion`      | POST   | Add a new question              |
-| `/upvoteQuestion`   | POST   | Upvote a question               |
-| `/downvoteQuestion` | POST   | Downvote a question             |
+```bash
+cd server && npm test
+```
 
-### `/tag`
+### End-to-End Tests (Cypress)
 
-| Endpoint                   | Method | Description                                   |
-| -------------------------- | ------ | --------------------------------------------- |
-| `/getTagsWithQuestionNumber` | GET    | Fetch tags along with the number of questions |
-| `/getTagByName/`             | GET    | Fetch a specific tag by name                  |
+```bash
+cd testing
+npm install
+npx cypress open
+```
 
-### `/user`
+> Requires both client and server to be running.
 
-| Endpoint         | Method | Description                    |
-| ---------------- | ------ | ------------------------------ |
-| `/signup`          | POST   | Create a new user account      |
-| `/login`           | POST   | Log in as a user               |
-| `/resetPassword`   | PATCH  | Reset user password            |
-| `/getUser/`        | GET    | Fetch user details by username |
-| `/getUsers`        | GET    | Fetch all users                |
-| `/deleteUser/`     | DELETE | Delete a user by username      |
-| `/updateBiography` | PATCH  | Update user biography          |
+## Timeline
 
-### `/chat`
+| Week | Milestone |
+|------|-----------|
+| 1 | Project setup, authentication (signup/login/JWT), base Q&A functionality |
+| 2 | Voting, comments, tags, search/filter, user profiles |
+| 3 | Communities, collections, direct messaging, chat system |
+| 4 | Trivia game engine, real-time multiplayer, quiz invitations, leaderboard & badges |
+| 5 | Points system, UI polish, E2E testing, deployment to Render |
 
-| Endpoint                    | Method | Description                                                                 |
-| --------------------------- | ------ | --------------------------------------------------------------------------- |
-| `/createChat`               | POST   | Create a new chat.                                                          |
-| `/:chatId/addMessage`       | POST   | Add a new message to an existing chat.                                      |
-| `/:chatId`                  | GET    | Retrieve a chat by its ID, optionally populating participants and messages. |
-| `/:chatId/addParticipant`   | POST   | Add a new participant to an existing chat.                                  |
-| `/getChatsByUser/:username` | GET    | Retrieve all chats for a specific user based on their username.             |
+## License
 
-### `/games`
-
-| Endpoint | Method | Description           |
-| -------- | ------ | --------------------- |
-| `/create`  | POST   | Create a new game     |
-| `/join`    | POST   | Join an existing game |
-| `/leave`   | POST   | Leave a game          |
-| `/games`   | GET    | Retrieve all games    |
-
-### `/api/collection`
-
-| Endpoint                            | Method | Description                         |
-| ----------------------------------- | ------ | ----------------------------------- |
-| `/create`                             | POST   | Create a new collection             |
-| `/delete/:collectionId`               | DELETE | Delete a collection                 |
-| `/toggleSaveQuestion`                 | PATCH  | Add/remove question from collection |
-| `/getCollectionsByUsername/:username` | GET    | Get collections by username         |
-| `/getCollectionById/:collectionId`    | GET    | Get collection by ID                |
-
-### `/api/community`
-
-| Endpoint                    | Method | Description                      |
-| --------------------------- | ------ | -------------------------------- |
-| `/getCommunity/:communityId`  | GET    | Get a specific community         |
-| `/getAllCommunities`          | GET    | Get all communities              |
-| `/toggleMembership`           | POST   | Join/leave a community           |
-| `/create`                     | POST   | Create a new community           |
-| `/delete/:communityId`        | DELETE | Delete a community          |
-
-## OpenAPI specification
-
-OpenAPI specifications as given in the [`server/openapi.yaml`](./server/openapi.yaml) file should give you an idea about the overall structure of the API endpoints, the request format and the various path/query parameters required as well as the expected response formats. To see a detailed explanation of the schemas and to test the endpoint in a sandboxed environment, you can use the Swagger UI page as follows:
-
-- Start the server as specified earlier (`cd server && npm run dev`).
-- Visit `http://localhost:8000/api/docs` to see the complete API specification in a user friendly manner.
-- You should be able to see and test out individual endpoints using the *Try it out* button associated with each endpoint.
-
-The specification itself is coupled with an OpenAPI validator (present as a middleware) that validates every request and response against the provided spec document.
-
-## Cypress Tests
-
-Cypress tests are end-to-end tests that can help verify your implementation.
-
-### Setup Instructions
-
-1. Navigate to the `testing` directory:
-   ```sh
-   cd testing
-   ```
-
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-
-3. Create a `.env` file in the `testing/` directory with the following content:
-   ```
-   MONGODB_URI=mongodb://127.0.0.1:27017
-   ```
-
-4. Make sure that both the server and client are already running
-
-5. Run Cypress tests:
-   ```sh
-   npx cypress open
-   ```
-
-6. In the Cypress UI that opens:
-   - Select *E2E Testing*
-   - Choose your browser (Chrome is preferred)
-   - Click on any of the test files to run it
-   - If any of the tests fail, you should be able to see the exact sequence of steps that led to the failure.
-
-> [!NOTE]
-> Running Cypress tests is optional. Cypress tests require significant system resources, and without them, the tests may be flaky. We will use these tests for grading.
+This project is licensed under the BSD 3-Clause License. See [LICENSE](LICENSE) for details.
