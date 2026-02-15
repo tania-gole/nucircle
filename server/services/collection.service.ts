@@ -145,7 +145,7 @@ export const addQuestionToCollection = async (
       throw new Error('Failed to add question to collection');
     }
 
-    return collection;
+    return updatedCollection;
   } catch (error) {
     return { error: (error as Error).message };
   }

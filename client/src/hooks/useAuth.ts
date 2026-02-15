@@ -49,22 +49,24 @@ const useAuth = (authType: 'login' | 'signup') => {
     e: ChangeEvent<HTMLInputElement>,
     field: 'firstName' | 'lastName' | 'username' | 'password' | 'confirmPassword',
   ) => {
-    const fieldText = e.target.value.trim();
+    const rawValue = e.target.value;
     switch (field) {
       case 'firstName':
-        setFirstName(fieldText);
+        setFirstName(rawValue);
         break;
       case 'lastName':
-        setLastName(fieldText);
+        setLastName(rawValue);
         break;
       case 'username':
-        setUsername(fieldText);
+        // Trim username (no spaces allowed in email-style usernames)
+        setUsername(rawValue.trim());
         break;
       case 'password':
-        setPassword(fieldText);
+        // Don't trim passwords — spaces are valid password characters
+        setPassword(rawValue);
         break;
       case 'confirmPassword':
-        setPasswordConfirmation(fieldText);
+        setPasswordConfirmation(rawValue);
         break;
     }
   };
@@ -148,8 +150,8 @@ const useAuth = (authType: 'login' | 'signup') => {
       if (authType === 'signup') {
         cleanUsername = username.split('@')[0];
         const response = await createUser({
-          firstName,
-          lastName,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
           username: cleanUsername,
           password,
         });

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useUserContext from './useUserContext';
 import { GameErrorPayload, GameInstance, GameState, GameUpdatePayload } from '../types/types';
 import { joinGame, startGame, leaveGame } from '../services/gamesService';
@@ -33,10 +33,16 @@ const useGamePage = () => {
   const [joinedGameID, setJoinedGameID] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
+  // Use refs to avoid stale closures and prevent effect re-runs
+  const joinedGameIDRef = useRef(joinedGameID);
+  const gameInstanceRef = useRef(gameInstance);
+  joinedGameIDRef.current = joinedGameID;
+  gameInstanceRef.current = gameInstance;
+
   const handleStartGame = async () => {
-    if (!joinedGameID) return;
+    if (!joinedGameIDRef.current) return;
     try {
-      const updatedGame = await startGame(joinedGameID);
+      const updatedGame = await startGame(joinedGameIDRef.current);
       setGameInstance(updatedGame);
       setError(null);
     } catch (startError) {
@@ -46,25 +52,26 @@ const useGamePage = () => {
   };
 
   const handleLeaveGame = async () => {
-    if (joinedGameID && gameInstance?.state.status !== 'OVER') {
+    if (joinedGameIDRef.current && gameInstanceRef.current?.state.status !== 'OVER') {
       try {
-        await leaveGame(joinedGameID, user.username);
-      } catch (error) {
+        await leaveGame(joinedGameIDRef.current, user.username);
+      } catch {
         // silent leave error
       }
       setGameInstance(null);
       setJoinedGameID('');
     }
 
-    socket.emit('leaveGame', joinedGameID);
+    socket.emit('leaveGame', joinedGameIDRef.current);
     navigate('/games');
   };
 
+  // Effect for joining the game — runs only when gameID changes
   useEffect(() => {
     const handleJoinGame = async (id: string) => {
       // Check if already joined this game
-      if (joinedGameID === id && gameInstance) {
-        const state = gameInstance.state as GameWithPlayerState;
+      if (joinedGameIDRef.current === id && gameInstanceRef.current) {
+        const state = gameInstanceRef.current.state as GameWithPlayerState;
         if (state?.player1 === user.username || state?.player2 === user.username) {
           return; // Already in this game
         }
@@ -77,8 +84,8 @@ const useGamePage = () => {
         setGameInstance(joinedGame);
         setJoinedGameID(joinedGame.gameID);
         setError(null);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Error joining game';
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error joining game';
         // Don't show error if user is already in game
         if (!errorMessage.includes('already in game')) {
           setError(errorMessage);
@@ -86,10 +93,13 @@ const useGamePage = () => {
       }
     };
 
-    if (gameID && gameID !== joinedGameID) {
+    if (gameID) {
       handleJoinGame(gameID);
     }
+  }, [gameID, socket, user.username]);
 
+  // Effect for socket listeners — stable deps, no re-subscription on game updates
+  useEffect(() => {
     /**
      * TRIVIA FEATURE: Real-time Updates via Socket.IO
      * When the server emits 'gameUpdate' (after join, start, or answer submission), this handler updates the gameInstance state, causing the UI to re-render.
@@ -127,7 +137,7 @@ const useGamePage = () => {
       socket.off('gameError', handleGameError);
       socket.off('opponentDisconnected', handleOpponentDisconnect);
     };
-  }, [gameID, socket, user.username, gameInstance, joinedGameID, navigate]);
+  }, [socket, user.username, navigate]);
 
   return {
     gameInstance,
