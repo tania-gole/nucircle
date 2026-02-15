@@ -166,6 +166,12 @@ const userController = (socket: FakeSOSocket) => {
     try {
       const { username } = req.params;
 
+      // Authorization: users can only delete their own account
+      if (username !== req.user!.username) {
+        res.status(403).send('You can only delete your own account');
+        return;
+      }
+
       const deletedUser = await deleteUserByUsername(username);
 
       if ('error' in deletedUser) {
@@ -190,7 +196,23 @@ const userController = (socket: FakeSOSocket) => {
    */
   const resetPassword = async (req: UserRequest, res: Response): Promise<void> => {
     try {
-      const updatedUser = await updateUser(req.body.username, { password: req.body.password });
+      // Authorization: users can only reset their own password
+      if (req.body.username !== req.user!.username) {
+        res.status(403).send('You can only reset your own password');
+        return;
+      }
+
+      // Validate password meets security requirements
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+      if (!regex.test(req.body.password)) {
+        res.status(400).send('Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character');
+        return;
+      }
+
+      // Hash the new password before storing
+      const bcryptjs = await import('bcryptjs');
+      const hashedPassword = bcryptjs.default.hashSync(req.body.password, 10);
+      const updatedUser = await updateUser(req.body.username, { password: hashedPassword });
 
       if ('error' in updatedUser) {
         throw Error(updatedUser.error);
@@ -210,10 +232,14 @@ const userController = (socket: FakeSOSocket) => {
    */
   const updateBiography = async (req: UpdateBiographyRequest, res: Response): Promise<void> => {
     try {
-      // Validate that request has username and biography
       const { username, biography } = req.body;
 
-      // Call the same updateUser(...) service used by resetPassword
+      // Authorization: users can only update their own biography
+      if (username !== req.user!.username) {
+        res.status(403).send('You can only update your own biography');
+        return;
+      }
+
       const updatedUser = await updateUser(username, { biography });
 
       if ('error' in updatedUser) {
@@ -359,6 +385,12 @@ const userController = (socket: FakeSOSocket) => {
         technicalInterests,
       } = req.body;
 
+      // Authorization: users can only update their own profile
+      if (username !== req.user!.username) {
+        res.status(403).send('You can only update your own profile');
+        return;
+      }
+
       const updates: Partial<User> = {};
       if (major !== undefined) updates.major = major;
       if (graduationYear !== undefined) updates.graduationYear = graduationYear;
@@ -388,6 +420,12 @@ const userController = (socket: FakeSOSocket) => {
   const updateExternalLinks = async (req: Request, res: Response): Promise<void> => {
     try {
       const { username, externalLinks } = req.body;
+
+      // Authorization: users can only update their own links
+      if (username !== req.user!.username) {
+        res.status(403).send('You can only update your own external links');
+        return;
+      }
 
       const updates: Partial<User> = {
         externalLinks: externalLinks || {},
@@ -462,23 +500,25 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
-  // Define routes for the user-related operations.
+  // Public routes (no auth required)
   router.post('/signup', createUser);
   router.post('/login', userLogin);
-  router.patch('/resetPassword', resetPassword);
-  router.get('/getUser/:username', getUser);
-  router.get('/getUsers', getUsers);
-  router.delete('/deleteUser/:username', deleteUser);
-  router.patch('/updateBiography', updateBiography);
+
+  // Protected routes (auth required)
+  router.patch('/resetPassword', authMiddleware, resetPassword);
+  router.get('/getUser/:username', authMiddleware, getUser);
+  router.get('/getUsers', authMiddleware, getUsers);
+  router.delete('/deleteUser/:username', authMiddleware, deleteUser);
+  router.patch('/updateBiography', authMiddleware, updateBiography);
   router.get('/me', authMiddleware, getCurrentUser);
   router.patch('/markWelcomeSeen', authMiddleware, markWelcomeMessageSeen);
-  router.get('/stats/:username', getUserStats);
-  router.get('/search', searchUsersRoute);
-  router.get('/filter-options', getFilterOptionsRoute);
-  router.patch('/updateProfile', updateProfile);
+  router.get('/stats/:username', authMiddleware, getUserStats);
+  router.get('/search', authMiddleware, searchUsersRoute);
+  router.get('/filter-options', authMiddleware, getFilterOptionsRoute);
+  router.patch('/updateProfile', authMiddleware, updateProfile);
   router.patch('/updateStatVisibility', authMiddleware, updateStatVisibility);
-  router.patch('/updateExternalLinks', updateExternalLinks);
-  router.get('/leaderboard', getLeaderboardRoute);
+  router.patch('/updateExternalLinks', authMiddleware, updateExternalLinks);
+  router.get('/leaderboard', authMiddleware, getLeaderboardRoute);
   return router;
 };
 

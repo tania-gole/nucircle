@@ -28,6 +28,8 @@ export const useSocket = (username: string | null): void => {
       socketRef.current = socket;
     } else if (!socketRef.current || !socketRef.current.connected) {
       console.log('[useSocket] Creating new socket connection for:', username);
+      // Include auth token for Socket.IO authentication
+      const token = localStorage.getItem('authToken');
       socket = io(socketUrl, {
         path: '/socket.io',
         transports: ['websocket', 'polling'],
@@ -36,6 +38,9 @@ export const useSocket = (username: string | null): void => {
         reconnectionDelayMax: 5000,
         reconnectionAttempts: 5,
         timeout: 20000,
+        auth: {
+          token,
+        },
       });
 
       socketRef.current = socket;

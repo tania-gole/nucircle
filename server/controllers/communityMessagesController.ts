@@ -23,6 +23,13 @@ const communityMessagesController = (socket: FakeSOSocket) => {
     res: Response,
   ): Promise<void> => {
     const { messageToAdd: msg, communityID } = req.body;
+
+    // Authorization: ensure the message is sent by the authenticated user
+    if (msg.msgFrom !== req.user!.username) {
+      res.status(403).send('You can only send messages as yourself');
+      return;
+    }
+
     if (!communityID) {
       res.status(400).send('Community ID is required');
       return;

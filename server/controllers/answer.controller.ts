@@ -22,6 +22,12 @@ const answerController = (socket: FakeSOSocket) => {
     const { qid } = req.body;
     const ansInfo: Answer = req.body.ans;
 
+    // Authorization: ensure the answer is posted by the authenticated user
+    if (ansInfo.ansBy !== req.user!.username) {
+      res.status(403).send('You can only post answers as yourself');
+      return;
+    }
+
     try {
       const ansFromDb = await saveAnswer(ansInfo);
 

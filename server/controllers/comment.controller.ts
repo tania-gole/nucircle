@@ -32,6 +32,12 @@ const commentController = (socket: FakeSOSocket) => {
 
     const { comment, type } = req.body;
 
+    // Authorization: ensure the comment is posted by the authenticated user
+    if (comment.commentBy !== req.user!.username) {
+      res.status(403).send('You can only post comments as yourself');
+      return;
+    }
+
     try {
       const comFromDb = await saveComment(comment);
 
