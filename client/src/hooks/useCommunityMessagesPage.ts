@@ -58,9 +58,15 @@ const useCommunityMessagesPage = (initialCommunityID?: string) => {
   useEffect(() => {
     if (!socket) return;
 
-    // handle new message
+    // handle new message — only append if it belongs to the selected community
     const handleMessageUpdate = (data: MessageUpdatePayload) => {
-      setMessages(prev => [...prev, data.msg]);
+      if (
+        data.msg.type === 'community' &&
+        selectedCommunity &&
+        data.msg.communityId === selectedCommunity._id.toString()
+      ) {
+        setMessages(prev => [...prev, data.msg]);
+      }
     };
 
     // handle reaction updates
