@@ -47,7 +47,6 @@ const io: FakeSOSocket = new Server(server, {
   path: '/socket.io',
   cors: {
     origin: allowedOrigins,
-    credentials: true,
     methods: ['GET', 'POST'],
   },
   transports: ['websocket', 'polling'], // Explicitly set transports
@@ -326,12 +325,7 @@ app.use(express.json());
 
 // CORS middleware for HTTP routes
 app.use(cors({
-  origin: process.env.CLIENT_URL || [
-    'http://localhost:4530',
-    'http://localhost:3000',
-    'http://localhost:5173',
-  ],
-  credentials: true,
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
 }));
 
