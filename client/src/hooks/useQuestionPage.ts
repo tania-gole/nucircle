@@ -47,9 +47,8 @@ const useQuestionPage = () => {
       try {
         const res = await getQuestionsByFilter(questionOrder, search);
         setQlist(res || []);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error);
+      } catch {
+        // Question fetch failed — list will remain empty
       }
     };
 
