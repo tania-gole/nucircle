@@ -72,7 +72,7 @@ const SideBarNav = () => {
               to={
                 firstCommunityId
                   ? `/messaging/community-messages/${firstCommunityId}`
-                  : '/messaging/community-messages'
+                  : '/messaging'
               }
               className={`message-option ${
                 location.pathname.startsWith('/messaging/community-messages')
