@@ -10,7 +10,6 @@ import { useParams } from 'react-router-dom';
  */
 const CommunityMessages = () => {
   const { communityID } = useParams();
-  // return <div>Community Messages Page - Under Construction</div>;
   const {
     communities,
     selectedCommunity,
