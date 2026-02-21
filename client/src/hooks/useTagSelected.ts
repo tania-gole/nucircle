@@ -21,9 +21,8 @@ const useTagSelected = (t: TagData) => {
       try {
         const res = await getTagByName(t.name);
         setTag(res || { name: 'Error', description: 'Error' });
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log(e);
+      } catch {
+        setTag({ name: 'Error', description: 'Failed to load tag' });
       }
     };
     fetchData();

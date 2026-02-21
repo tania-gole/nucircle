@@ -61,9 +61,8 @@ const useAnswerPage = () => {
       }
 
       await addComment(targetId, targetType, comment);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error adding comment:', error);
+    } catch {
+      // Comment submission failed silently — server will not persist it
     }
   };
 
@@ -75,14 +74,12 @@ const useAnswerPage = () => {
       try {
         const res = await getQuestionById(questionID, user.username);
         setQuestion(res || null);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching question:', error);
+      } catch {
+        setQuestion(null);
       }
     };
 
-    // eslint-disable-next-line no-console
-    fetchData().catch(e => console.log(e));
+    fetchData();
   }, [questionID, user.username]);
 
   useEffect(() => {

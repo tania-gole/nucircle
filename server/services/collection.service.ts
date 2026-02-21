@@ -60,7 +60,7 @@ export const getCollectionsByUsername = async (
   currentUsername: string,
 ): Promise<DatabaseCollection[] | { error: string }> => {
   try {
-    const collections = await CollectionModel.find({ username: usernameToView });
+    const collections = await CollectionModel.find({ username: usernameToView }).lean();
 
     if (collections === null) {
       throw new Error('Failed to get collections');
