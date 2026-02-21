@@ -5,7 +5,10 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'ax
  */
 const handleRes = (res: AxiosResponse) => res;
 
-const api = axios.create({ withCredentials: true });
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '',
+  withCredentials: true,
+});
 
 /**
  * Add a request interceptor to the Axios instance.

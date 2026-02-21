@@ -38,16 +38,15 @@ const PORT = parseInt(process.env.PORT || '8000');
 
 const app = express();
 const server = http.createServer(app);
-// allow requests from the local dev client or the production client only
+// Parse CLIENT_URL env var (comma-separated) or fall back to local dev origins
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map(url => url.trim())
+  : ['http://localhost:4530', 'http://localhost:3000', 'http://localhost:5173'];
+
 const io: FakeSOSocket = new Server(server, {
   path: '/socket.io',
   cors: {
-    origin: process.env.CLIENT_URL || [
-      'http://localhost:4530',
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://fall25-project-m-a-r-t-514.onrender.com',
-    ],
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST'],
   },
