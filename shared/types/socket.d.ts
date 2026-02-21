@@ -1,8 +1,10 @@
+import { ObjectId } from 'mongodb';
 import { PopulatedDatabaseAnswer } from './answer';
 import { PopulatedDatabaseChat } from './chat';
 import { DatabaseMessage } from './message';
 import { PopulatedDatabaseQuestion } from './question';
 import { SafeDatabaseUser } from './user';
+import { DatabaseWorkExperience } from './workExperience';
 import { BaseMove, GameInstance, GameInstanceID, GameMove, GameState } from './game';
 import { DatabaseCommunity } from './community';
 import { PopulatedDatabaseCollection } from './collection';
@@ -132,7 +134,7 @@ export interface CollectionUpdatePayload {
  */
 export interface NotificationPayload {
   type: 'dm' | 'answer' | 'communityNewMember';
-  from: msgFrom;
+  from: string;
   message: string;
 }
 
