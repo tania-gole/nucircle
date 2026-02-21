@@ -148,10 +148,14 @@ const leaveGame = async (gameID: string, playerID: string): Promise<GameInstance
 
     return res.data;
   } catch (error) {
-    // Silent leave errors
-    if (axios.isAxiosError(error)) {
-      // Return a dummy game instance for make return type happy GAHH
-      return {} as GameInstance<GameState>;
+    if (axios.isAxiosError(error) && error.response) {
+      const errorMessage =
+        typeof error.response.data === 'string'
+          ? error.response.data
+          : error.response.data?.message ||
+            error.response.data?.error ||
+            'Error while leaving a game';
+      throw new Error(errorMessage);
     }
     throw error;
   }

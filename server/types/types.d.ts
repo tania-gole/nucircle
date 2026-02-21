@@ -1,7 +1,6 @@
 import { Server } from 'socket.io';
 import { ClientToServerEvents, ServerToClientEvents } from '@fake-stack-overflow/shared';
 
-// export * from '../../shared/src/types/types';
 export * from '@fake-stack-overflow/shared';
 
 /**

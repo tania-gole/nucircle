@@ -1,4 +1,3 @@
-//server/services/user.service.ts
 import CommunityModel from '../models/community.model';
 import UserModel from '../models/users.model';
 import WorkExperienceModel from '../models/workExperience.model';
