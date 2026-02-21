@@ -90,7 +90,7 @@ const collectionController = (socket: FakeSOSocket) => {
 
       socket.emit('collectionUpdate', {
         type: 'deleted',
-        collection: collection as PopulatedDatabaseCollection,
+        collection: collection as unknown as PopulatedDatabaseCollection,
       });
       res.status(200).json(collection);
     } catch (err: unknown) {

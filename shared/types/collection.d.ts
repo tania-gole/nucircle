@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { ObjectId } from 'mongodb';
-import { Question } from './question';
+import { Question, PopulatedDatabaseQuestion } from './question';
 
 /**
  * Represents a collection.
@@ -32,7 +32,7 @@ export interface DatabaseCollection extends Omit<Collection, 'questions'> {
  */
 export type CollectionResponse = DatabaseCollection | { error: string };
 
-export interface PopulatedDatabaseCollection extends Omit<DatabaseCollection, 'questionId'> {
+export interface PopulatedDatabaseCollection extends Omit<DatabaseCollection, 'questions'> {
   questions: PopulatedDatabaseQuestion[];
 }
 
