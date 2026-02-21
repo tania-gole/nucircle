@@ -26,8 +26,8 @@ import communityController from './controllers/community.controller';
 import { updateUserOnlineStatus, getUserByUsername } from './services/user.service';
 import communityMessagesController from './controllers/communityMessagesController';
 import badgeController from './controllers/badge.controller';
-// import authMiddleware from './middleware/auth';
 import authMiddleware from './middleware/auth';
+import cors from 'cors';
 import QuizInvitationManager from './services/invitationManager.service';
 import GameManager from './services/games/gameManager';
 import workExperienceController from './controllers/workExperience.controller';
@@ -37,16 +37,15 @@ const PORT = parseInt(process.env.PORT || '8000');
 
 const app = express();
 const server = http.createServer(app);
-// allow requests from the local dev client or the production client only
+// Parse CLIENT_URL env var (comma-separated) or fall back to local dev origins
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map(url => url.trim())
+  : ['http://localhost:4530', 'http://localhost:3000', 'http://localhost:5173'];
+
 const io: FakeSOSocket = new Server(server, {
   path: '/socket.io',
   cors: {
-    origin: process.env.CLIENT_URL || [
-      'http://localhost:4530',
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://fall25-project-m-a-r-t-514.onrender.com',
-    ],
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST'],
   },
@@ -284,6 +283,13 @@ process.on('SIGINT', async () => {
 });
 
 app.use(express.json());
+
+// CORS middleware for HTTP routes
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+}));
 
 try {
   app.use(
