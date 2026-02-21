@@ -142,159 +142,173 @@ io.on('connection', socket => {
    * Sends quiz invitation to recipient if they are online
    */
   socket.on('sendQuizInvite', async (recipientUsername: string) => {
-    const challengerUsername = socket.data.username;
+    try {
+      const challengerUsername = socket.data.username;
 
-    if (!challengerUsername) {
-      socket.emit('error', { message: 'Recipient not found' });
-      return;
+      if (!challengerUsername) {
+        socket.emit('error', { message: 'Recipient not found' });
+        return;
+      }
+
+      // Check if user is online
+      const recipientUser = await getUserByUsername(recipientUsername);
+      if ('error' in recipientUser) {
+        socket.emit('error', { message: 'Recipient not found' });
+        return;
+      }
+
+      if (!recipientUser.isOnline || !recipientUser.socketId) {
+        socket.emit('error', { message: 'Recipient is not online' });
+        return;
+      }
+
+      const invitationManager = QuizInvitationManager.getInstance();
+
+      // Prevent duplicate invitations
+      if (invitationManager.hasPendingInvitation(recipientUsername, challengerUsername)) {
+        socket.emit('error', { message: 'Invitation already sent' });
+        return;
+      }
+
+      // Create invitation
+      const invite = invitationManager.createInvitation(
+        challengerUsername,
+        socket.id,
+        recipientUsername,
+        recipientUser.socketId,
+      );
+
+      // Send invitation to recipient via their socket
+      socket.to(recipientUser.socketId).emit('quizInviteReceived', invite);
+    } catch (err) {
+      console.error('Error in sendQuizInvite:', err);
+      socket.emit('error', { message: 'Failed to send quiz invite' });
     }
-
-    // Check if user is online
-    const recipientUser = await getUserByUsername(recipientUsername);
-    if ('error' in recipientUser) {
-      socket.emit('error', { message: 'Recipient not found' });
-      return;
-    }
-
-    if (!recipientUser.isOnline || !recipientUser.socketId) {
-      socket.emit('error', { message: 'Recipient is not online' });
-      return;
-    }
-
-    const invitationManager = QuizInvitationManager.getInstance();
-
-    // Prevent duplicate invitations
-    if (invitationManager.hasPendingInvitation(recipientUsername, challengerUsername)) {
-      socket.emit('error', { message: 'Invitation already sent' });
-      return;
-    }
-
-    // Create invitation
-    const invite = invitationManager.createInvitation(
-      challengerUsername,
-      socket.id,
-      recipientUsername,
-      recipientUser.socketId,
-    );
-
-    // Send invitation to recipient via their socket
-    socket.to(recipientUser.socketId).emit('quizInviteReceived', invite);
   });
 
   // Respond to Invitation
   socket.on('respondToQuizInvite', async (inviteId: string, accepted: boolean) => {
-    const invitationManager = QuizInvitationManager.getInstance();
-    const invite = invitationManager.getInvitation(inviteId);
+    try {
+      const invitationManager = QuizInvitationManager.getInstance();
+      const invite = invitationManager.getInvitation(inviteId);
 
-    if (!invite) {
-      socket.emit('error', { message: 'Invitation not found or expired' });
-      return;
-    }
-
-    // Response object to send to both players
-    const result: {
-      inviteId: string;
-      challengerUsername: string;
-      recipientUsername: string;
-      accepted: boolean;
-      gameId?: string;
-    } = {
-      inviteId: invite.id,
-      challengerUsername: invite.challengerUsername,
-      recipientUsername: invite.recipientUsername,
-      accepted,
-    };
-
-    if (accepted) {
-      // Create a new trivia game
-      const gameManager = GameManager.getInstance();
-      const gameIdResult = await gameManager.addGame('Trivia', invite.challengerUsername);
-
-      if (typeof gameIdResult === 'string') {
-        // Game created successfully
-        const gameId = gameIdResult;
-
-        // Join both players to the game
-        await gameManager.joinGame(gameId, invite.challengerUsername);
-        await gameManager.joinGame(gameId, invite.recipientUsername);
-
-        // Start the game
-        await gameManager.startGame(gameId);
-
-        result.gameId = gameId;
-
-        // Update invitation status
-        invitationManager.updateInvitationStatus(inviteId, 'accepted');
-
-        // Notify both players with gameId
-        io.to(invite.challengerSocketId).emit('quizInviteAccepted', result);
-        io.to(invite.recipientSocketId).emit('quizInviteAccepted', result);
-      } else {
-        socket.emit('error', { message: 'Failed to create game' });
+      if (!invite) {
+        socket.emit('error', { message: 'Invitation not found or expired' });
         return;
       }
-    } else {
-      // Invitation declined
-      invitationManager.updateInvitationStatus(inviteId, 'declined');
 
-      // Notify both users
-      io.to(invite.challengerSocketId).emit('quizInviteDeclined', result);
-      io.to(invite.recipientSocketId).emit('quizInviteDeclined', result);
+      // Response object to send to both players
+      const result: {
+        inviteId: string;
+        challengerUsername: string;
+        recipientUsername: string;
+        accepted: boolean;
+        gameId?: string;
+      } = {
+        inviteId: invite.id,
+        challengerUsername: invite.challengerUsername,
+        recipientUsername: invite.recipientUsername,
+        accepted,
+      };
+
+      if (accepted) {
+        // Create a new trivia game
+        const gameManager = GameManager.getInstance();
+        const gameIdResult = await gameManager.addGame('Trivia', invite.challengerUsername);
+
+        if (typeof gameIdResult === 'string') {
+          // Game created successfully
+          const gameId = gameIdResult;
+
+          // Join both players to the game
+          await gameManager.joinGame(gameId, invite.challengerUsername);
+          await gameManager.joinGame(gameId, invite.recipientUsername);
+
+          // Start the game
+          await gameManager.startGame(gameId);
+
+          result.gameId = gameId;
+
+          // Update invitation status
+          invitationManager.updateInvitationStatus(inviteId, 'accepted');
+
+          // Notify both players with gameId
+          io.to(invite.challengerSocketId).emit('quizInviteAccepted', result);
+          io.to(invite.recipientSocketId).emit('quizInviteAccepted', result);
+        } else {
+          socket.emit('error', { message: 'Failed to create game' });
+          return;
+        }
+      } else {
+        // Invitation declined
+        invitationManager.updateInvitationStatus(inviteId, 'declined');
+
+        // Notify both users
+        io.to(invite.challengerSocketId).emit('quizInviteDeclined', result);
+        io.to(invite.recipientSocketId).emit('quizInviteDeclined', result);
+      }
+
+      // Clean up invitation from memory
+      invitationManager.removeInvitation(inviteId);
+    } catch (err) {
+      console.error('Error in respondToQuizInvite:', err);
+      socket.emit('error', { message: 'Failed to process quiz invite response' });
     }
-
-    // Clean up invitation from memory
-    invitationManager.removeInvitation(inviteId);
   });
 
   // Listen for disconnect event: when user logs out, closes browser, or loses connection
   socket.on('disconnect', async () => {
-    const username = socket.data.username;
+    try {
+      const username = socket.data.username;
 
-    if (username) {
-      const gameManager = GameManager.getInstance();
-      const userGames = await gameManager.getGamesByPlayer(username);
+      if (username) {
+        const gameManager = GameManager.getInstance();
+        const userGames = await gameManager.getGamesByPlayer(username);
 
-      for (const game of userGames) {
-        if (game.state.status === 'IN_PROGRESS' || game.state.status === 'WAITING_TO_START') {
-          const otherPlayer = game.players.find(p => p !== username);
+        for (const game of userGames) {
+          if (game.state.status === 'IN_PROGRESS' || game.state.status === 'WAITING_TO_START') {
+            const otherPlayer = game.players.find(p => p !== username);
 
-          if (otherPlayer) {
-            await gameManager.endGameByDisconnect(game.gameID, username, otherPlayer);
+            if (otherPlayer) {
+              await gameManager.endGameByDisconnect(game.gameID, username, otherPlayer);
 
-            const otherUser = await getUserByUsername(otherPlayer);
-            if (!('error' in otherUser) && otherUser.socketId) {
-              // Get updated game state
-              const updatedGame = gameManager.getGame(game.gameID);
+              const otherUser = await getUserByUsername(otherPlayer);
+              if (!('error' in otherUser) && otherUser.socketId) {
+                // Get updated game state
+                const updatedGame = gameManager.getGame(game.gameID);
 
-              // Emit game update to show game over screen
-              if (updatedGame) {
-                io.to(otherUser.socketId).emit('gameUpdate', {
-                  gameInstance: updatedGame.toModel(),
+                // Emit game update to show game over screen
+                if (updatedGame) {
+                  io.to(otherUser.socketId).emit('gameUpdate', {
+                    gameInstance: updatedGame.toModel(),
+                  });
+                }
+
+                // Also send disconnect notification (optional - for additional context)
+                io.to(otherUser.socketId).emit('opponentDisconnected', {
+                  gameId: game.gameID,
+                  disconnectedPlayer: username,
+                  winner: otherPlayer,
+                  message: `${username} disconnected. You win by default!`,
                 });
               }
-
-              // Also send disconnect notification (optional - for additional context)
-              io.to(otherUser.socketId).emit('opponentDisconnected', {
-                gameId: game.gameID,
-                disconnectedPlayer: username,
-                winner: otherPlayer,
-                message: `${username} disconnected. You win by default!`,
-              });
             }
           }
         }
-      }
 
-      const result = await updateUserOnlineStatus(username, false, null);
-      if ('error' in result) {
-        return;
-      }
+        const result = await updateUserOnlineStatus(username, false, null);
+        if ('error' in result) {
+          return;
+        }
 
-      socket.broadcast.emit('userStatusUpdate', {
-        username,
-        isOnline: false,
-        lastSeen: new Date(),
-      });
+        socket.broadcast.emit('userStatusUpdate', {
+          username,
+          isOnline: false,
+          lastSeen: new Date(),
+        });
+      }
+    } catch (err) {
+      console.error('Error in disconnect handler:', err);
     }
   });
 });

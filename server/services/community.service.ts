@@ -17,7 +17,7 @@ export const getCommunitiesByUser = async (
   username: string,
 ): Promise<DatabaseCommunity[] | { error: string }> => {
   try {
-    const communities = await CommunityModel.find({ participants: username });
+    const communities = await CommunityModel.find({ participants: username }).lean();
     return communities;
   } catch (err) {
     return { error: (err as Error).message };
@@ -49,7 +49,7 @@ export const getCommunity = async (communityId: string): Promise<CommunityRespon
  */
 export const getAllCommunities = async (): Promise<DatabaseCommunity[] | { error: string }> => {
   try {
-    const communities = await CommunityModel.find({});
+    const communities = await CommunityModel.find({}).lean();
     return communities;
   } catch (err) {
     return { error: (err as Error).message };
@@ -108,7 +108,7 @@ export const toggleCommunityMembership = async (
 
       // Award community badge, points when user joins
       if (updatedCommunity) {
-        awardPointsToUser(username, 5);
+        await awardPointsToUser(username, 5);
         await checkAndAwardCommunityBadge(username, communityId);
       }
     }

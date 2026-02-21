@@ -30,9 +30,8 @@ const useTagPage = () => {
       try {
         const res = await getTagsWithQuestionNumber();
         setTlist(res || []);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log(e);
+      } catch {
+        // Tag fetch failed — list will remain empty
       }
     };
 
