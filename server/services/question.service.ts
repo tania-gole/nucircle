@@ -201,7 +201,7 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
     // Check and award milestone badges, points for questions
     if (result && question.askedBy) {
       const questionCount = await countUserQuestions(question.askedBy);
-      awardPointsToUser(question.askedBy, 10);
+      await awardPointsToUser(question.askedBy, 10);
       await checkAndAwardMilestoneBadge(question.askedBy, 'question', questionCount);
     }
 

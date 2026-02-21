@@ -17,6 +17,12 @@ const messageController = (socket: FakeSOSocket) => {
   const addMessageRoute = async (req: AddMessageRequest, res: Response): Promise<void> => {
     const { messageToAdd: msg } = req.body;
 
+    // Authorization: ensure the message is sent by the authenticated user
+    if (msg.msgFrom !== req.user!.username) {
+      res.status(403).send('You can only send messages as yourself');
+      return;
+    }
+
     try {
       const msgFromDb = await saveMessage({ ...msg, type: 'global' });
 
@@ -52,6 +58,12 @@ const messageController = (socket: FakeSOSocket) => {
   const toggleReactionRoute = async (req: Request, res: Response): Promise<void> => {
     try {
       const { messageId, reactionType, username } = req.body;
+
+      // Authorization: ensure the reaction is from the authenticated user
+      if (username !== req.user!.username) {
+        res.status(403).json({ error: 'You can only toggle reactions as yourself' });
+        return;
+      }
 
       if (!['love', 'like'].includes(reactionType)) {
         res.status(400).json({ error: 'Invalid reaction type' });

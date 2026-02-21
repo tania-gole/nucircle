@@ -37,23 +37,23 @@ export interface DatabaseWorkExperience extends WorkExperience {
  */
 export type WorkExperienceResponse = DatabaseWorkExperience | { error: string };
 
-interface CreateWorkExperienceRequest extends Request {
+export interface CreateWorkExperienceRequest extends Request {
   body: WorkExperience;
 }
 
-interface UpdateWorkExperienceRequest extends Request {
+export interface UpdateWorkExperienceRequest extends Request {
   params: { experienceId: string };
   body: WorkExperienceUpdate;
 }
 
-interface DeleteWorkExperienceRequest extends Request {
+export interface DeleteWorkExperienceRequest extends Request {
   params: { experienceId: string };
 }
 
-interface GetWorkExperiencesRequest extends Request {
+export interface GetWorkExperiencesRequest extends Request {
   params: { username: string };
 }
 
-interface GetWorkExperienceByIdRequest extends Request {
+export interface GetWorkExperienceByIdRequest extends Request {
   params: { experienceId: string };
 }

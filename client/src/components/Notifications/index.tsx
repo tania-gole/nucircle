@@ -30,13 +30,6 @@ const Notifications = () => {
     }
   };
 
-  // const fakenotification: NotificationItem = {
-  //   id: 'fake1',
-  //   type: 'answer',
-  //   from: 'user123',
-  //   messagePreview: 'This is a preview of the answer you received...',
-  // };
-
   return (
     <div className='notifications-wrapper'>
       {notifications.map(n => (
@@ -45,10 +38,6 @@ const Notifications = () => {
           <p>{n.message}</p>
         </div>
       ))}
-      {/* <div key={fakenotification.id} className='notification-card'>
-        {notifTitle(fakenotification)}
-        <p>{fakenotification.messagePreview}</p>
-      </div> */}
     </div>
   );
 };

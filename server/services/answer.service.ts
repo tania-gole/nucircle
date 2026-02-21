@@ -43,7 +43,7 @@ export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
     // Check and award milestone badges, points for answers
     if (result && answer.ansBy) {
       const answerCount = await countUserAnswers(answer.ansBy);
-      awardPointsToUser(answer.ansBy, 15);
+      await awardPointsToUser(answer.ansBy, 15);
       await checkAndAwardMilestoneBadge(answer.ansBy, 'answer', answerCount);
     }
 

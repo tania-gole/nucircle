@@ -60,7 +60,7 @@ export const getCollectionsByUsername = async (
   currentUsername: string,
 ): Promise<DatabaseCollection[] | { error: string }> => {
   try {
-    const collections = await CollectionModel.find({ username: usernameToView });
+    const collections = await CollectionModel.find({ username: usernameToView }).lean();
 
     if (collections === null) {
       throw new Error('Failed to get collections');
@@ -145,7 +145,7 @@ export const addQuestionToCollection = async (
       throw new Error('Failed to add question to collection');
     }
 
-    return collection;
+    return updatedCollection;
   } catch (error) {
     return { error: (error as Error).message };
   }

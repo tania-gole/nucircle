@@ -5,30 +5,6 @@ import * as collectionService from '../../services/collection.service';
 import * as databaseUtil from '../../utils/database.util';
 import { DatabaseCollection, PopulatedDatabaseCollection } from '../../types/types';
 
-// mock jwt auth to always authenticate successfully
-// jest.mock('../../middleware/auth', () => ({
-//   __esModule: true,
-//   default: (req: any, res: any, next: any) => {
-//     // Prioritize params.username, then body.username, then query.username or currentUsername
-//     const username =
-//       req.params?.username ||
-//       req.body?.username ||
-//       req.query?.username ||
-//       req.query?.currentUsername || // This might be overriding
-//       'test_user';
-//     req.user = { userId: 'test-user-id', username: username };
-//     next();
-//   },
-// }));
-
-// jest.mock('../../middleware/auth', () => ({
-//   __esModule: true,
-//   default: (req: any, res: any, next: any) => {
-//     req.user = { userId: 'test-user-id', username: 'test_user' };
-//     next();
-//   },
-// }));
-
 jest.mock('../../middleware/auth', () => ({
   __esModule: true,
   default: (req: any, res: any, next: any) => {

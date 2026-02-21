@@ -29,17 +29,21 @@ const useDirectMessage = () => {
 
   const handleSendMessage = async () => {
     if (newMessage.trim() && selectedChat?._id) {
-      const message: Omit<Message, 'type'> = {
-        msg: newMessage,
-        msgFrom: user.username,
-        msgDateTime: new Date(),
-      };
+      try {
+        const message: Omit<Message, 'type'> = {
+          msg: newMessage,
+          msgFrom: user.username,
+          msgDateTime: new Date(),
+        };
 
-      const chat = await sendMessage(message, selectedChat._id);
+        const chat = await sendMessage(message, selectedChat._id);
 
-      setSelectedChat(chat);
-      setError(null);
-      setNewMessage('');
+        setSelectedChat(chat);
+        setError(null);
+        setNewMessage('');
+      } catch {
+        setError('Failed to send message');
+      }
     } else {
       setError('Message cannot be empty');
     }
@@ -51,9 +55,13 @@ const useDirectMessage = () => {
       return;
     }
 
-    const chat = await getChatById(chatID);
-    setSelectedChat(chat);
-    handleJoinChat(chatID);
+    try {
+      const chat = await getChatById(chatID);
+      setSelectedChat(chat);
+      handleJoinChat(chatID);
+    } catch {
+      setError('Failed to load chat');
+    }
   };
 
   const handleUserSelect = (selectedUser: SafeDatabaseUser) => {
@@ -66,10 +74,14 @@ const useDirectMessage = () => {
       return;
     }
 
-    const chat = await createChat([user.username, chatToCreate]);
-    setSelectedChat(chat);
-    handleJoinChat(chat._id);
-    setShowCreatePanel(false);
+    try {
+      const chat = await createChat([user.username, chatToCreate]);
+      setSelectedChat(chat);
+      handleJoinChat(chat._id);
+      setShowCreatePanel(false);
+    } catch {
+      setError('Failed to create chat');
+    }
   };
 
   useEffect(() => {
@@ -151,7 +163,7 @@ const useDirectMessage = () => {
     return () => {
       socket.off('reactionUpdated', handleReactionUpdated);
     };
-  }, [socket, selectedChat]);
+  }, [socket, selectedChat?._id]);
 
   return {
     selectedChat,

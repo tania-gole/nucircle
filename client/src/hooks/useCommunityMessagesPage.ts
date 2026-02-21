@@ -58,9 +58,15 @@ const useCommunityMessagesPage = (initialCommunityID?: string) => {
   useEffect(() => {
     if (!socket) return;
 
-    // handle new message
+    // handle new message — only append if it belongs to the selected community
     const handleMessageUpdate = (data: MessageUpdatePayload) => {
-      setMessages(prev => [...prev, data.msg]);
+      if (
+        data.msg.type === 'community' &&
+        selectedCommunity &&
+        data.msg.communityId === selectedCommunity._id.toString()
+      ) {
+        setMessages(prev => [...prev, data.msg]);
+      }
     };
 
     // handle reaction updates
@@ -71,8 +77,6 @@ const useCommunityMessagesPage = (initialCommunityID?: string) => {
       messageId: string;
       reactions: DatabaseMessage['reactions'];
     }) => {
-      // eslint-disable-next-line no-console
-      console.log('[DEBUG] Reaction update received:', { messageId, reactions });
       setMessages(prev =>
         prev.map(msg => (msg._id.toString() === messageId ? { ...msg, reactions } : msg)),
       );

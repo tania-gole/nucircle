@@ -19,16 +19,20 @@ const useMessagingPage = () => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      const msgs = await getMessages();
-      setMessages(msgs);
+      try {
+        const msgs = await getMessages();
+        setMessages(msgs);
+      } catch {
+        setError('Failed to load messages');
+      }
     };
 
     fetchMessages();
   }, []);
 
   useEffect(() => {
-    const handleMessageUpdate = async (data: MessageUpdatePayload) => {
-      setMessages([...messages, data.msg]);
+    const handleMessageUpdate = (data: MessageUpdatePayload) => {
+      setMessages(prev => [...prev, data.msg]);
     };
 
     socket.on('messageUpdate', handleMessageUpdate);
@@ -36,7 +40,7 @@ const useMessagingPage = () => {
     return () => {
       socket.off('messageUpdate', handleMessageUpdate);
     };
-  }, [socket, messages]);
+  }, [socket]);
 
   /**
    * Handles sending a new message.
@@ -57,9 +61,12 @@ const useMessagingPage = () => {
       msgDateTime: new Date(),
     };
 
-    await addMessage(newMsg);
-
-    setNewMessage('');
+    try {
+      await addMessage(newMsg);
+      setNewMessage('');
+    } catch {
+      setError('Failed to send message');
+    }
   };
 
   return { messages, newMessage, setNewMessage, handleSendMessage, error };
