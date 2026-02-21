@@ -106,6 +106,6 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
   "include": ["./**/*"],
-  "exclude": ["node_modules", "dist", "tests"],
+  "exclude": ["node_modules", "dist", "tests", "jest.setup.ts"],
   "references": [{ "path": "../shared" }]
 }
